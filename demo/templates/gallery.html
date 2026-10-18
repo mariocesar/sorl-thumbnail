@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}{{ engine.label }} examples · sorl-thumbnail{% endblock %}
+{% block style %}
+  .engines { margin: .75rem 0 1rem; }
+  .engines a[aria-current], .compare a[aria-current] { color: #222; font-weight: 600; text-decoration: none; }
+  .notice { border: 1px solid #ddd; background: #fafafa; padding: .6rem .8rem; }
+  .notice, .skipped { overflow-wrap: anywhere; }
+  .wrap { max-width: 80rem; }
+  .examples { display: grid; gap: 1.75rem 1.25rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 30rem), 1fr)); margin-top: 1.25rem; }
+  .example { margin: 0; display: flex; flex-direction: column; gap: .4rem; }
+  .example .details { margin: 0; }
+  .example .skipped { min-height: 5rem; display: flex; align-items: center; justify-content: center; text-align: center; border: 1px dashed #ccc; padding: .75rem; color: #555; }
+  .sources img { width: auto; height: auto; max-width: 6rem; max-height: 4.5rem; display: block; }
+  .sources td { vertical-align: middle; }
+{% endblock %}
+{% block content %}
+<h1>{{ engine.label }} examples</h1>
+<p>Every result below is made by sorl-thumbnail with the {{ engine.label }} engine,
+  from the template shown with it.{% if engine_version %} Built with {{ engine_version }}.{% endif %}</p>
+
+<nav class="engines" aria-label="Engines">Engine:
+  {% for key, label in engines %}<a href="demo-{{ key }}.html"{% if key == engine.key %} aria-current="page"{% endif %}>{{ label }}</a>{% if not forloop.last %} · {% endif %}{% endfor %}
+</nav>
+
+{% if reason %}
+<p class="notice">{{ reason|urlize }}. The templates are still shown below.</p>
+{% endif %}
+
+{% for section in sections %}
+<section>
+  <h2 id="{{ section.id }}">{{ section.title }}</h2>
+  <p>{{ section.intro }}</p>
+  <p class="compare">Compare:
+    {% for key, label in engines %}<a href="demo-{{ key }}.html#{{ section.id }}"{% if key == engine.key %} aria-current="true"{% endif %}>{{ label }}</a>{% if not forloop.last %} · {% endif %}{% endfor %}</p>
+  <div class="examples">
+  {% for example in section.examples %}
+  <figure class="example" id="{{ example.id }}">
+    <h3>{{ example.title }}</h3>
+    {% if example.html %}
+    <div class="result">{{ example.html }}</div>
+    <p class="details">{% for d in example.details %}{{ d }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</p>
+    {% elif example.skipped %}
+    <div class="skipped">{{ example.skipped|urlize }}</div>
+    {% else %}
+    <div class="skipped">Not built.</div>
+    {% endif %}
+    <pre><code>{% for indent, line in example.lines %}<span class="line" style="--indent: {{ indent }}ch">{{ line }}</span>
+{% endfor %}</code></pre>
+  </figure>
+  {% endfor %}
+  </div>
+</section>
+{% endfor %}
+
+<h2 id="not-shown">Not shown here</h2>
+<p>Alternative resolutions for high-density screens, dummy images, remote URLs as sources,
+  and the <code>density</code> and <code>authenticate</code> options for PDF and other vector
+  sources. See the <a href="https://sorl-thumbnail.readthedocs.io/en/latest/reference/settings.html">settings</a>
+  and <a href="https://sorl-thumbnail.readthedocs.io/en/latest/template.html">template</a> references.</p>
+
+<h2 id="sources">Sources</h2>
+<p>The original files the examples start from.</p>
+<div class="scroll"><table class="sources">
+  <thead><tr><th>Image</th><th>Work</th><th>Author</th><th>License</th><th>File</th></tr></thead>
+  <tbody>
+  {% for s in sources %}
+  <tr>
+    <td><a href="{{ s.file }}"><img src="{{ s.file }}" width="{{ s.size.0 }}" height="{{ s.size.1 }}" alt="{{ s.title }}, original" loading="lazy"></a></td>
+    <td><a href="{{ s.url }}">{{ s.title }}</a></td>
+    <td>{{ s.author }}</td>
+    <td>{{ s.license }}</td>
+    <td class="small">{{ s.details }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% endblock %}

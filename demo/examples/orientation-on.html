@@ -1,0 +1,6 @@
+{% load thumbnail %}
+{% thumbnail "images/fixtures/aspect_test.jpg" "200x200" as im %}
+  <img src="{{ im.url }}" loading="lazy"
+       width="{{ im.width }}" height="{{ im.height }}"
+       alt="Test image rotated upright">
+{% endthumbnail %}

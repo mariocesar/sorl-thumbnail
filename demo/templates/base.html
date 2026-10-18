@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}sorl-thumbnail{% endblock %}</title>
+<link rel="icon" href="data:,">
+<meta name="description" content="sorl-thumbnail: thumbnails for Django, made in your templates.">
+<style>
+  body { margin: 0; background: #fff; color: #222; font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  a { color: #0645ad; }
+  a:visited { color: #0b0080; }
+  a:focus-visible { outline: 2px solid #0645ad; outline-offset: 2px; }
+  h1, h2, h3 { line-height: 1.25; }
+  h1 { font-size: 1.75rem; margin: 1.5rem 0 .5rem; }
+  h2 { font-size: 1.35rem; margin: 2.5rem 0 .5rem; padding-bottom: .25rem; border-bottom: 1px solid #ddd; }
+  h3 { font-size: 1rem; margin: 0 0 .4rem; }
+  code, pre { font-family: ui-monospace, Menlo, Consolas, "Liberation Mono", monospace; font-size: .875rem; }
+  pre { background: #f6f6f6; border: 1px solid #e3e3e3; padding: .6rem .8rem; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  pre .line { display: inline-block; padding-left: calc(var(--indent) + 4ch); text-indent: calc(-4ch - var(--indent)); }
+  p code, li code, td code { background: #f3f3f3; padding: 0 .2em; }
+  table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+  th, td { text-align: left; vertical-align: top; padding: .4rem .6rem .4rem 0; border-bottom: 1px solid #e3e3e3; }
+  th { border-bottom-color: #bbb; }
+  .scroll { overflow-x: auto; }
+  .wrap { max-width: 64rem; margin: 0 auto; padding: 0 16px; }
+  .muted, figcaption, .details { color: #555; }
+  .small, figcaption, .details { font-size: .85rem; }
+  header.site { border-bottom: 1px solid #ddd; }
+  header.site .wrap { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem 1.25rem; padding-top: .6rem; padding-bottom: .6rem; }
+  header.site strong a { color: #222; text-decoration: none; }
+  header.site nav { display: flex; flex-wrap: wrap; gap: .25rem 1rem; }
+  header.site nav a[aria-current] { color: #222; font-weight: 600; text-decoration: none; }
+  .result { background-color: #fff; background-image: conic-gradient(#eee 25%, #fff 0 50%, #eee 0 75%, #fff 0); background-size: 16px 16px; border: 1px solid #ddd; padding: .75rem; display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; justify-content: center; min-height: 5rem; }
+  .result img { max-width: 100%; height: auto; }
+  footer.site { margin-top: 3rem; border-top: 1px solid #ddd; padding: 1rem 0 2rem; }
+  footer.site p { margin: .3rem 0; }
+  {% block style %}{% endblock %}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <strong><a href="index.html">sorl-thumbnail</a></strong>
+    <nav aria-label="Main">
+      <a href="demo-pil.html"{% if page == "gallery" %} aria-current="page"{% endif %}>Examples</a>
+      <a href="https://sorl-thumbnail.readthedocs.io/en/latest/">Documentation</a>
+      <a href="https://github.com/mariocesar/sorl-thumbnail/blob/main/CHANGES.rst">Changelog</a>
+      <a href="https://github.com/mariocesar/sorl-thumbnail">Source</a>
+      <a href="https://pypi.org/project/sorl-thumbnail/">PyPI</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap">
+{% block content %}{% endblock %}
+</main>
+<footer class="site small muted">
+  <div class="wrap">
+    <p>sorl-thumbnail is free software under the
+      <a href="https://github.com/mariocesar/sorl-thumbnail/blob/main/LICENSE">BSD 3-Clause license</a>.
+      Started by Mikko Hellsing in 2010, maintained by Mario-César and
+      <a href="https://github.com/mariocesar/sorl-thumbnail/graphs/contributors">contributors</a>.</p>
+    <p>These pages were generated on {{ built }} with sorl-thumbnail {{ version }}{% if commit %}
+      (<a href="https://github.com/mariocesar/sorl-thumbnail/commit/{{ commit }}">{{ commit }}</a>){% endif %},
+      the development version, which can include unreleased changes.
+      Example images: <a href="demo-pil.html#sources">credits</a>.</p>
+  </div>
+</footer>
+</body>
+</html>
