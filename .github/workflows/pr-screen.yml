@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-26.04
     steps:
       # API calls only. Never check out the pull request here.
-      - uses: actions/github-script@v8
+      - uses: actions/github-script@v9
         with:
           script: |
             const { owner, repo } = context.repo;
@@ -140,7 +140,7 @@ jobs:
     if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.pr == '')
     runs-on: ubuntu-26.04
     steps:
-      - uses: actions/github-script@v8
+      - uses: actions/github-script@v9
         with:
           script: |
             const { owner, repo } = context.repo;

@@ -406,6 +406,29 @@ that regex replaces references to images with thumbnails.
 This value sets the timeout value in seconds when retrieving a source image from a URL. 
 If no timeout value is specified, it will wait indefinitely for a response.
 
+``THUMBNAIL_FORCE_OVERWRITE``
+=============================
+
+- Default: ``False``
+
+What to do when a thumbnail is missing from the key-value store. By default
+sorl-thumbnail asks the storage whether the file already exists. If it does,
+the file is kept and only its size is read back into the store; if it does not,
+the thumbnail is generated. With ``True`` the ``exists()`` call is skipped and
+the thumbnail is always generated and saved again.
+
+Thumbnails that are in the key-value store never touch the storage, so this
+setting only matters while the store is being filled or after it is cleared.
+
+Set it to ``True`` when ``exists()`` is slow or expensive in your storage, or
+when you want a cleared store to regenerate every file. Do not set it for
+Amazon S3 with django-storages: there ``exists()`` is one ``HEAD`` request,
+while regenerating means downloading the full-size source, resizing it and
+uploading the result. Also make sure your storage overwrites files. Django's
+``FileSystemStorage`` with its default ``allow_overwrite=False``, or S3 with
+``AWS_S3_FILE_OVERWRITE = False``, saves the regenerated thumbnail under a new
+name and leaves the old file behind.
+
 ``THUMBNAIL_REMOVE_URL_ARGS``
 =============================
 

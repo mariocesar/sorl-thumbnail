@@ -61,6 +61,19 @@ class SimpleTestCase(BaseTestCase):
         self.assertEqual(t.x, 400)
         self.assertEqual(t.y, 300)
 
+    @unittest.skipIf(
+        'pil_engine' not in settings.THUMBNAIL_ENGINE
+        and 'convert_engine' not in settings.THUMBNAIL_ENGINE,
+        'padding is only implemented in PIL and convert',
+    )
+    def test_padding(self):
+        item = Item.objects.get(image='200x100.jpg')
+
+        t = self.BACKEND.get_thumbnail(item.image, '300x300', padding=True)
+
+        self.assertEqual((t.x, t.y), (300, 300))
+        self.assertEqual(Image.open(t.storage.path(t.name)).size, (300, 300))
+
     @unittest.skipIf('pil_engine' not in settings.THUMBNAIL_ENGINE, 'blur is only supported in PIL')
     def test_crop_and_blur(self):
         item = Item.objects.get(image='200x100.jpg')
@@ -230,6 +243,18 @@ class SimpleTestCase(BaseTestCase):
         th = self.BACKEND.get_thumbnail(path, '11x11', format='JPEG')
         img = Image.open(th.storage.path(th.name))
         self.assertFalse(self.is_transparent(img))
+
+    @unittest.skipIf(
+        settings.THUMBNAIL_CONVERT.startswith('gm ')
+        or 'pgmagick_engine' in settings.THUMBNAIL_ENGINE,
+        'GraphicsMagick has no AVIF encoder',
+    )
+    def test_avif_output(self):
+        im = ImageFile(Item.objects.get(image='500x500.jpg').image)
+        th = self.BACKEND.get_thumbnail(im, '100x100', format='AVIF')
+        img = Image.open(th.storage.path(th.name))
+        self.assertEqual(img.format, 'AVIF')
+        self.assertEqual(img.size, (100, 100))
 
     @unittest.skipIf('pil_engine' not in settings.THUMBNAIL_ENGINE, 'animation is only kept in PIL')
     def test_animated_gif(self):

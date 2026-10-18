@@ -15,7 +15,8 @@ for those who want to run tests locally, read on.
 Since sorl-thumbnail supports a variety of image backends, python and
 Django versions, we provide an easy way to test locally across all of them.
 We use `Docker`_ for consistent test environments and `tox`_ for managing
-python virtual environments.
+python virtual environments. tox creates them with `uv`_, which also downloads
+any Python version missing from your machine.
 
 Prerequisites
 -------------
@@ -36,16 +37,30 @@ Run all tests (all tox environments)::
 
 Run tests for a specific configuration using the ``-e`` option with tox::
 
-    docker compose run --rm test sh -c "redis-server --daemonize yes && tox -e py312-django51-pil"
+    docker compose run --rm test tox -e py312-django52-pil
 
 The format is: ``py<version>-django<version>-<backend>``
 
 For example:
 - ``py312`` = Python 3.12
-- ``django51`` = Django 5.1
+- ``django52`` = Django 5.2
 - ``pil`` = Pillow image library backend
 
 For a full list of tox environments, see ``tox.ini``
+
+Running tests without Docker
+----------------------------
+
+The ``pil`` environments need no system packages, so with `uv`_ installed you
+can run them directly::
+
+    uvx --with tox-uv tox -e py312-django52-pil
+
+The ``redis`` environments need a server on ``localhost:6379``. The compose
+file publishes one::
+
+    docker compose up -d redis
+    uvx --with tox-uv tox -e py312-django52-redis
 
 Running specific tests
 ----------------------
@@ -54,7 +69,7 @@ To run specific tests, pass Django test labels after ``--``. Django uses dotted 
 not file paths::
 
     # Run a specific test module
-    docker compose run --rm test sh -c "redis-server --daemonize yes && tox -e py312-django51-pil -- tests.thumbnail_tests.test_engines"
+    docker compose run --rm test tox -e py312-django52-pil -- tests.thumbnail_tests.test_engines
 
 Running CI target tests
 -----------------------
@@ -84,6 +99,7 @@ Run all CI targets in sequence::
 .. _GitHub Actions: https://github.com/mariocesar/sorl-thumbnail/actions
 .. _Docker: https://www.docker.com/
 .. _tox: https://tox.wiki/
+.. _uv: https://docs.astral.sh/uv/
 .. _Install Docker: https://docs.docker.com/get-docker/
 
 Examples site
