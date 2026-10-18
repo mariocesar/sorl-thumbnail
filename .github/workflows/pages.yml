@@ -24,7 +24,7 @@ jobs:
     - name: Install image tools
       run: |
         sudo apt-get update
-        sudo apt-get install imagemagick graphicsmagick
+        sudo apt-get install imagemagick graphicsmagick libheif-plugin-aomenc
 
     - uses: astral-sh/setup-uv@v10.3.0
       with:
