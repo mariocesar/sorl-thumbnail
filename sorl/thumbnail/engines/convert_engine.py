@@ -244,6 +244,7 @@ class Engine(EngineBase):
         image['options']['background'] = options.get('padding_color')
         image['options']['gravity'] = 'center'
         image['options']['extent'] = '%sx%s' % (geometry[0], geometry[1])
+        image['size'] = (geometry[0], geometry[1])  # update image size
         return image
 
 

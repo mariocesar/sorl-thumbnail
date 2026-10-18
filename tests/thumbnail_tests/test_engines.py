@@ -61,6 +61,19 @@ class SimpleTestCase(BaseTestCase):
         self.assertEqual(t.x, 400)
         self.assertEqual(t.y, 300)
 
+    @unittest.skipIf(
+        'pil_engine' not in settings.THUMBNAIL_ENGINE
+        and 'convert_engine' not in settings.THUMBNAIL_ENGINE,
+        'padding is only implemented in PIL and convert',
+    )
+    def test_padding(self):
+        item = Item.objects.get(image='200x100.jpg')
+
+        t = self.BACKEND.get_thumbnail(item.image, '300x300', padding=True)
+
+        self.assertEqual((t.x, t.y), (300, 300))
+        self.assertEqual(Image.open(t.storage.path(t.name)).size, (300, 300))
+
     @unittest.skipIf('pil_engine' not in settings.THUMBNAIL_ENGINE, 'blur is only supported in PIL')
     def test_crop_and_blur(self):
         item = Item.objects.get(image='200x100.jpg')

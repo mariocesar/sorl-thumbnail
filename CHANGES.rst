@@ -5,6 +5,9 @@ Changes
 Unreleased
 ==========
 
+* The convert engine now reports the padded size when ``padding=True``, so
+  ``im.width`` and ``im.height`` match the file it wrote instead of the size
+  before padding (`#835 <https://github.com/mariocesar/sorl-thumbnail/issues/835>`__)
 * The PIL engine keeps animated GIFs animated when the thumbnail format is
   ``GIF``. Every frame is thumbnailed, keeping its duration and the loop
   count. Other formats still take the first frame (`#687 <https://github.com/mariocesar/sorl-thumbnail/issues/687>`__)
