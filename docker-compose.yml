@@ -40,7 +40,7 @@ services:
       - REDIS_HOST=redis
       # Test only the backends used in CI (excludes dynamodb, pgmagick, vipsthumbnail)
       - TARGET=${TARGET:-pil}
-      - DJANGO=${DJANGO:-5.1}
+      - DJANGO=${DJANGO:-5.2}
     command: tox -v
 
 volumes:
