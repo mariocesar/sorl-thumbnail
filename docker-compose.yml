@@ -1,35 +1,48 @@
 services:
+  redis:
+    image: redis:8-alpine
+    ports:
+      # Published so tox on the host can use it too: uvx --with tox-uv tox -e py312-django52-redis
+      - "127.0.0.1:6379:6379"
+
   test:
     build:
       context: .
       dockerfile: Dockerfile
+    depends_on:
+      - redis
     volumes:
       - .:/app
-      # Persist tox environments to speed up subsequent runs
+      # Persist tox environments and the uv cache to speed up subsequent runs
       - tox-cache:/app/.tox
+      - uv-cache:/root/.cache/uv
     environment:
       - LANG=en_US.UTF-8
       - LC_ALL=en_US.UTF-8
-    # Override command to run bash for interactive use
-    # Use: docker compose run --rm test
-    # Or run specific tests: docker compose run --rm test sh -c "redis-server --daemonize yes && tox -e py312-django51-pil"
-    command: sh -c "redis-server --daemonize yes && tox"
+      - REDIS_HOST=redis
+    # Run specific environments: docker compose run --rm test tox -e py312-django52-pil
+    command: tox
 
   # Replicate GitHub Actions CI environment
   ci:
     build:
       context: .
       dockerfile: Dockerfile
+    depends_on:
+      - redis
     volumes:
       - .:/app
       - tox-cache:/app/.tox
+      - uv-cache:/root/.cache/uv
     environment:
       - LANG=en_US.UTF-8
       - LC_ALL=en_US.UTF-8
+      - REDIS_HOST=redis
       # Test only the backends used in CI (excludes dynamodb, pgmagick, vipsthumbnail)
       - TARGET=${TARGET:-pil}
-      - DJANGO=${DJANGO:-5.1}
-    command: sh -c "redis-server --daemonize yes && tox -v"
+      - DJANGO=${DJANGO:-5.2}
+    command: tox -v
 
 volumes:
   tox-cache:
+  uv-cache:

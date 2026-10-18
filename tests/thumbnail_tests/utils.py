@@ -2,7 +2,6 @@ import logging
 import os
 import shutil
 from contextlib import contextmanager
-from subprocess import check_output
 
 from django.test import TestCase
 from PIL import Image, ImageDraw
@@ -35,16 +34,8 @@ def same_open_fd_count(testcase):
 
 
 def get_open_fds_count():
-    """Return the number of open file descriptors for current process
-
-        .. warning: will only work on UNIX-like os-es.
-    """
-    pid = os.getpid()
-    procs = check_output(["lsof", '-w', '-Ff', "-p", str(pid)])
-    nprocs = len(
-        [s for s in procs.decode('utf-8').split('\n') if s and s[0] == 'f' and s[1:].isdigit()]
-    )
-    return nprocs
+    """Return the number of open file descriptors for current process."""
+    return len(os.listdir('/dev/fd'))
 
 
 class FakeFile:
@@ -89,6 +80,8 @@ class BaseTestCase(TestCase):
         self.BACKEND = get_module_class(settings.THUMBNAIL_BACKEND)()
         self.ENGINE = get_module_class(settings.THUMBNAIL_ENGINE)()
         self.KVSTORE = get_module_class(settings.THUMBNAIL_KVSTORE)()
+        # A shared Redis keeps keys between runs; start every test from an empty store
+        self.KVSTORE.clear()
 
         if not os.path.exists(settings.MEDIA_ROOT):
             os.makedirs(settings.MEDIA_ROOT)

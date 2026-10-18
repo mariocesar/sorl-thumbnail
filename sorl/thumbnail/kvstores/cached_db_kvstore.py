@@ -1,4 +1,5 @@
 from django.core.cache import InvalidCacheBackendError, cache, caches
+from django.db import connections, router
 
 from sorl.thumbnail.conf import settings
 from sorl.thumbnail.kvstores.base import KVStoreBase
@@ -46,11 +47,15 @@ class KVStore(KVStoreBase):
         return value
 
     def _set_raw(self, key, value):
-        kvstore_value, created = KVStoreModel.objects.get_or_create(
-            key=key, defaults={'value': value})
-        if not created:
-            kvstore_value.value = value
-            kvstore_value.save()
+        features = connections[router.db_for_write(KVStoreModel)].features
+        if features.supports_update_conflicts:
+            # One INSERT ... ON CONFLICT DO UPDATE; MySQL takes no unique_fields
+            unique = ['key'] if features.supports_update_conflicts_with_target else None
+            KVStoreModel.objects.bulk_create(
+                [KVStoreModel(key=key, value=value)],
+                update_conflicts=True, update_fields=['value'], unique_fields=unique)
+        else:
+            KVStoreModel.objects.update_or_create(key=key, defaults={'value': value})
         self.cache.set(key, value, settings.THUMBNAIL_CACHE_TIMEOUT)
 
     def _delete_raw(self, *keys):

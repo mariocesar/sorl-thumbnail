@@ -1,0 +1,178 @@
+name: PR screening
+
+on:
+  pull_request_target:
+    types: [opened]
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number to screen. Leave empty to run the sweep.
+        type: string
+      dry_run:
+        description: Only report, do not label, draft or comment
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+env:
+  LABEL: needs-author-verification
+  FAST_FIX_MINUTES: '60'
+  VELOCITY_DAYS: '7'
+  VELOCITY_PRS: '10'
+  VELOCITY_REPOS: '5'
+  REPLY_DAYS: '7'
+
+jobs:
+  screen:
+    if: github.event_name == 'pull_request_target' || inputs.pr != ''
+    runs-on: ubuntu-26.04
+    steps:
+      # API calls only. Never check out the pull request here.
+      - uses: actions/github-script@v9
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const inputs = context.payload.inputs || {};
+            const dryRun = inputs.dry_run === 'true' || inputs.dry_run === true;
+            const pr = context.payload.pull_request
+              || (await github.rest.pulls.get({ owner, repo, pull_number: Number(inputs.pr) })).data;
+            const login = pr.user.login;
+            const label = process.env.LABEL;
+            const fastMinutes = Number(process.env.FAST_FIX_MINUTES);
+            const velocityDays = Number(process.env.VELOCITY_DAYS);
+            const velocityPrs = Number(process.env.VELOCITY_PRS);
+            const velocityRepos = Number(process.env.VELOCITY_REPOS);
+            const replyDays = Number(process.env.REPLY_DAYS);
+
+            if (pr.user.type === 'Bot') return core.info(`${login} is a bot account, skipping`);
+            if (['OWNER', 'MEMBER', 'COLLABORATOR'].includes(pr.author_association)) {
+              return core.info(`${login} is ${pr.author_association}, skipping`);
+            }
+
+            const search = (q, per_page) => github.rest.search.issuesAndPullRequests({
+              q, per_page, advanced_search: 'true',
+            });
+            const prOpened = new Date(pr.created_at);
+            const reasons = [];
+
+            const text = `${pr.title}\n${pr.body || ''}`;
+            const refs = new Set();
+            for (const m of text.matchAll(/(?:^|[\s(\[])#(\d+)\b/g)) refs.add(Number(m[1]));
+            const urlRe = new RegExp(`github\\.com/${owner}/${repo}/issues/(\\d+)`, 'gi');
+            for (const m of text.matchAll(urlRe)) refs.add(Number(m[1]));
+            for (const n of refs) {
+              let issue;
+              try {
+                ({ data: issue } = await github.rest.issues.get({ owner, repo, issue_number: n }));
+              } catch {
+                continue;
+              }
+              if (issue.pull_request || issue.user.login === login) continue;
+              const minutes = (prOpened - new Date(issue.created_at)) / 60000;
+              if (minutes >= 0 && minutes < fastMinutes) {
+                reasons.push(`it was opened ${Math.round(minutes)} minutes after #${n} was reported`);
+              }
+            }
+
+            const { data: involved } = await search(`repo:${owner}/${repo} involves:${login}`, 1);
+            let commits = [];
+            try {
+              ({ data: commits } = await github.rest.repos.listCommits({ owner, repo, author: login, per_page: 1 }));
+            } catch {}
+            const firstTime = involved.total_count <= 1 && commits.length === 0;
+
+            const since = new Date(prOpened - velocityDays * 86400000).toISOString().slice(0, 10);
+            const { data: recent } = await search(`author:${login} is:pr created:>=${since}`, 100);
+            const repos = new Set(recent.items.map(i => i.repository_url));
+            core.info(`${login}: ${recent.total_count} PRs across ${repos.size} repos in ${velocityDays} days, first time here: ${firstTime}`);
+            if (firstTime && recent.total_count >= velocityPrs && repos.size >= velocityRepos) {
+              reasons.push(`you opened ${recent.total_count} pull requests in ${repos.size} different repositories this week and this is your first one here`);
+            }
+
+            if (reasons.length === 0) return core.notice(`#${pr.number} passes`);
+            core.notice(`${dryRun ? 'Would quarantine' : 'Quarantined'} #${pr.number}: ${reasons.join('; ')}`);
+            if (dryRun) return;
+
+            try {
+              await github.rest.issues.createLabel({ owner, repo, name: label, color: 'e4a11b' });
+            } catch {}
+            await github.rest.issues.addLabels({ owner, repo, issue_number: pr.number, labels: [label] });
+
+            let drafted = pr.draft;
+            if (!drafted) {
+              try {
+                await github.graphql(
+                  `mutation($id: ID!) { convertPullRequestToDraft(input: {pullRequestId: $id}) { pullRequest { isDraft } } }`,
+                  { id: pr.node_id },
+                );
+                drafted = true;
+              } catch (e) {
+                core.warning(`Could not convert #${pr.number} to draft: ${e.message}`);
+              }
+            }
+
+            const guide = 'https://sorl-thumbnail.readthedocs.io/en/latest/contributing.html#using-ai-tools';
+            await github.rest.issues.createComment({
+              owner, repo, issue_number: pr.number,
+              body: [
+                `Hi @${login}, thanks for the patch.`,
+                '',
+                `I ${drafted ? 'turned this into a draft' : 'put this on hold'} because:`,
+                '',
+                ...reasons.map(r => `- ${r}`),
+                '',
+                `That usually means a script sent it, and we don't take those (see [Using AI tools](${guide})). If a person is behind this, reply with:`,
+                '',
+                '- did you use AI, and for what',
+                '- did you run the tests and read the diff yourself',
+                '',
+                `Then I'll ${drafted ? 'mark it ready for review' : 'take the label off and review it'}. If I don't hear back in ${replyDays} days it gets closed. Just comment if you want it reopened.`,
+              ].join('\n'),
+            });
+
+  sweep:
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.pr == '')
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/github-script@v9
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const label = process.env.LABEL;
+            const replyMs = Number(process.env.REPLY_DAYS) * 86400000;
+
+            const open = await github.paginate(github.rest.issues.listForRepo, {
+              owner, repo, state: 'open', labels: label, per_page: 100,
+            });
+            for (const pr of open) {
+              if (!pr.pull_request) continue;
+              const events = await github.paginate(github.rest.issues.listEvents, {
+                owner, repo, issue_number: pr.number, per_page: 100,
+              });
+              const labeled = events.filter(e => e.event === 'labeled' && e.label && e.label.name === label).pop();
+              if (!labeled) continue;
+              const since = labeled.created_at;
+              if (Date.now() - new Date(since) < replyMs) continue;
+
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner, repo, issue_number: pr.number, since, per_page: 100,
+              });
+              const reviewComments = await github.paginate(github.rest.pulls.listReviewComments, {
+                owner, repo, pull_number: pr.number, since, per_page: 100,
+              });
+              const replied = [...comments, ...reviewComments].some(c => c.user && c.user.login === pr.user.login);
+              if (replied) continue;
+
+              core.notice(`Closing #${pr.number}: no reply from @${pr.user.login} since ${since}`);
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: pr.number,
+                body: `No reply in ${process.env.REPLY_DAYS} days, closing. Comment if you want it reopened.`,
+              });
+              await github.rest.pulls.update({ owner, repo, pull_number: pr.number, state: 'closed' });
+            }

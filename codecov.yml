@@ -2,3 +2,7 @@ coverage:
   precision: 2
   round: down
   range: "60...100"
+  ignore:
+  - "*/tests/.*"
+  - "demo/"
+  - "docs/"

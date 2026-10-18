@@ -35,9 +35,10 @@ join us in `GitHub Discussions`_.
 
 Tests
 -----
-The tests should run with tox. Running `tox` will run all tests for all environments.
-However, it is possible to run a certain environment with `tox -e <env>`, a list of all environments
-can be found with `tox -l`. These tests require the dependencies of the different engines defined in
+The tests run with tox, which uses `uv <https://docs.astral.sh/uv/>`_ to create its environments.
+With uv installed, `uvx --with tox-uv tox` will run all tests for all environments.
+However, it is possible to run a certain environment with `uvx --with tox-uv tox -e <env>`, a list of all environments
+can be found with `uvx --with tox-uv tox -l`. These tests require the dependencies of the different engines defined in
 the documentation. The easiest way to run tests is using Docker - see the `contributing documentation <https://sorl-thumbnail.readthedocs.io/en/latest/contributing.html#running-testsuite>`_
 for detailed instructions on running tests locally with Docker.
 
@@ -134,18 +135,19 @@ same name (``thumbnail``) for the templatetag module::
 Frequently asked questions
 ==========================
 
-Is so slow in Amazon S3!
+Is it slow on Amazon S3?
 ------------------------
 
-Possible related to the implementation of your Amazon S3 Backend, see the `issue #351`_
-due the storage backend reviews if there is an existing thumbnail when tries to
-generate the thumbnail that makes an extensive use of the S3 API
+Once a thumbnail is in the key-value store, rendering it makes no request to
+the storage at all. A slow page means thumbnails are being generated, or the
+key-value store was cleared or lost. Generating a thumbnail reads the source
+once and writes the result once, which is as little as it can be.
 
-A fast workaround if you are not willing to tweak your storage backend is to set::
-
-   THUMBNAIL_FORCE_OVERWRITE = True
-
-So it will avoid to overly query the S3 API.
+Older versions of this FAQ recommended ``THUMBNAIL_FORCE_OVERWRITE = True``.
+That advice dates from boto 2. With boto3 it makes things worse: on a key-value
+store miss it regenerates the thumbnail from the full-size source instead of
+making one ``HEAD`` request for the file that is already there. See
+`THUMBNAIL_FORCE_OVERWRITE`_ before enabling it.
 
 
 .. |gh-actions| image:: https://github.com/mariocesar/sorl-thumbnail/workflows/Test/badge.svg
@@ -180,5 +182,5 @@ So it will avoid to overly query the S3 API.
 .. _`Model examples`: https://sorl-thumbnail.readthedocs.io/en/latest/examples.html#model-examples
 .. _`Low level API examples`: https://sorl-thumbnail.readthedocs.io/en/latest/examples.html#low-level-api-examples
 .. _`GitHub Discussions`: https://github.com/mariocesar/sorl-thumbnail/discussions
-.. _`issue #351`: https://github.com/mariocesar/sorl-thumbnail/issues/351
+.. _`THUMBNAIL_FORCE_OVERWRITE`: https://sorl-thumbnail.readthedocs.io/en/latest/reference/settings.html#thumbnail-force-overwrite
 .. _`Django supported versions policy`: https://www.djangoproject.com/download/#supported-versions

@@ -1,0 +1,106 @@
+name: Bug report
+description: Something is broken or behaves differently than documented.
+labels: ["Bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected and what you got instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: The template tag, `get_thumbnail()` call or field you use, with geometry and options.
+      placeholder: |
+        {% thumbnail item.image "300x200" crop="center" format="WEBP" as im %}
+      render: django
+    validations:
+      required: true
+
+  - type: textarea
+    id: traceback
+    attributes:
+      label: Traceback or logs
+      description: Set `THUMBNAIL_DEBUG = True` so template tag errors are raised instead of silently rendering nothing.
+      render: shell
+
+  - type: input
+    id: sorl-version
+    attributes:
+      label: sorl-thumbnail version
+      description: "`python -m pip show sorl-thumbnail`"
+      placeholder: "13.2.0"
+    validations:
+      required: true
+
+  - type: input
+    id: django-python
+    attributes:
+      label: Django and Python versions
+      placeholder: "Django 5.2, Python 3.13"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: engine
+    attributes:
+      label: Engine (THUMBNAIL_ENGINE)
+      options:
+        - PIL / Pillow (default)
+        - Wand
+        - pgmagick
+        - convert (ImageMagick / GraphicsMagick)
+        - vipsthumbnail (libvips)
+        - Custom engine
+    validations:
+      required: true
+
+  - type: input
+    id: engine-version
+    attributes:
+      label: Engine library version
+      description: "Pillow, Wand, ImageMagick (`convert -version`), GraphicsMagick (`gm version`) or libvips (`vips --version`). Mention pillow-avif-plugin if you use it."
+      placeholder: "Pillow 11.3.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kvstore
+    attributes:
+      label: Key-value store (THUMBNAIL_KVSTORE)
+      options:
+        - cached_db (default)
+        - Redis
+        - DBM
+        - DynamoDB
+        - Custom store
+    validations:
+      required: true
+
+  - type: input
+    id: storage
+    attributes:
+      label: Storage and cache backend
+      description: The storage thumbnails are saved to (`THUMBNAIL_STORAGE`) and the Django cache backend used by the store.
+      placeholder: "FileSystemStorage, Memcached"
+
+  - type: input
+    id: source-image
+    attributes:
+      label: Source image
+      description: Format of the original image, and a link to it if you can share one.
+      placeholder: "PNG with transparency, 4000x3000"
+
+  - type: textarea
+    id: settings
+    attributes:
+      label: THUMBNAIL_* settings
+      description: |
+        Paste the output of `python manage.py diffsettings | grep THUMBNAIL_`. Remove any passwords first.
+      render: python
+    validations:
+      required: true

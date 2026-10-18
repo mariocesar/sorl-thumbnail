@@ -16,19 +16,17 @@ jobs:
     steps:
     - uses: actions/checkout@v7
 
-    - name: Set up Python
-      uses: actions/setup-python@v7
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v10.3.0
       with:
         python-version: '3.10'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install --upgrade tox
+        cache-dependency-glob: |
+          pyproject.toml
+          tox.ini
 
     - name: Tox qa
       run: |
-        tox -v -e py310-qa
+        uvx --with tox-uv tox -v -e py310-qa
 
   build:
     runs-on: ubuntu-26.04
@@ -46,40 +44,24 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install lsof imagemagick libjpeg62 zlib1g-dev libavif-dev
+        sudo apt-get install imagemagick libjpeg62 zlib1g-dev libavif-dev libheif-plugin-aomenc
 
     - name: Install GraphicsMagick
       if: matrix.target == 'graphicsmagick'
       run: |
         sudo apt-get install libgraphicsmagick1-dev graphicsmagick
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v7
+    - name: Set up uv and Python ${{ matrix.python-version }}
+      uses: astral-sh/setup-uv@v10.3.0
       with:
         python-version: ${{ matrix.python-version }}
-
-    - name: Get pip cache dir
-      id: pip-cache
-      run: |
-        echo "CACHE_DIR=$(pip cache dir)" >> "$GITHUB_OUTPUT"
-
-    - name: Cache
-      uses: actions/cache@v6
-      with:
-        path: ${{ steps.pip-cache.outputs.CACHE_DIR }}
-        key:
-          test-${{ matrix.python-version }}-v1-${{ hashFiles('**/pyproject.toml') }}
-        restore-keys: |
-          test-${{ matrix.python-version }}-v1-
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install --upgrade tox tox-gh-actions
+        cache-dependency-glob: |
+          pyproject.toml
+          tox.ini
 
     - name: Tox tests
       run: |
-        tox -v
+        uvx --with tox-uv --with tox-gh-actions tox -v
       env:
         TARGET: ${{ matrix.target }}
 
