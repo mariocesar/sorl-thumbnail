@@ -65,6 +65,9 @@ docs = ["sphinx"]
 # below line is required to generating versions with setuptools_scm
 [tool.setuptools_scm]
 
+[tool.setuptools.packages.find]
+include = ["sorl", "sorl.*"]
+
 [tool.ruff]
 exclude = [
     ".tox",
