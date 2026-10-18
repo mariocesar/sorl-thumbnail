@@ -7,7 +7,7 @@ Unreleased
 
 * The PIL engine keeps animated GIFs animated when the thumbnail format is
   ``GIF``. Every frame is thumbnailed, keeping its duration and the loop
-  count. Other formats still take the first frame (#687)
+  count. Other formats still take the first frame (`#687 <https://github.com/mariocesar/sorl-thumbnail/issues/687>`__)
 * ``UrlStorage`` no longer escapes ``+`` and ``/`` in the query string of
   remote image URLs. This broke signed URLs (S3, CloudFront, image proxies),
   which the server then rejected as having an invalid signature
@@ -24,39 +24,39 @@ Unreleased
 
 sorl-thumbnail is moving out of Jazzband, which is closing, and into
 https://github.com/mariocesar/sorl-thumbnail. Thank you to Jazzband and to
-everyone who kept the project alive there for nine years. ❤️ (#827)
+everyone who kept the project alive there for nine years. ❤️ (`#827 <https://github.com/mariocesar/sorl-thumbnail/pull/827>`__)
 
 * Added ``density`` and ``authenticate`` options to the convert engine, passed
   ahead of the source so PDFs rasterize at a given DPI and encrypted PDFs can
   be read, per call instead of globally through ``THUMBNAIL_CONVERT``. Errors
-  from a call carrying a password omit the command line and stderr (#783, #640)
+  from a call carrying a password omit the command line and stderr (`#783 <https://github.com/mariocesar/sorl-thumbnail/issues/783>`__, `#640 <https://github.com/mariocesar/sorl-thumbnail/issues/640>`__)
 * The convert engine now raises ``EngineError`` when ``identify`` reports no
-  image size, instead of crashing with ``AttributeError`` (#640)
+  image size, instead of crashing with ``AttributeError`` (`#640 <https://github.com/mariocesar/sorl-thumbnail/issues/640>`__)
 * Added an engine ``prepare(image, options)`` hook, called before the source
   is sized, for options that change how it is read
 * The ``thumbnail`` template tag now raises ``TemplateSyntaxError`` when the
   source or geometry is missing, instead of ``IndexError`` or compiling a tag
-  that fails at render (#720)
+  that fails at render (`#720 <https://github.com/mariocesar/sorl-thumbnail/issues/720>`__)
 * ``ImageFile.serialize_storage`` resolves the storage alias by instance instead
   of returning the first alias with the same backend class, and ``ImageFile.key``
   includes that alias for storages other than ``default`` and
   ``THUMBNAIL_STORAGE``. Same-named files on same-class storages no longer share
-  a thumbnail (#806)
+  a thumbnail (`#806 <https://github.com/mariocesar/sorl-thumbnail/issues/806>`__)
 * The docs build again on Read the Docs and with current setuptools. The new
-  ``docs`` extra installs what is needed to build them (#823)
-* Added a drawing of how a thumbnail request is served to the operation docs (#714)
+  ``docs`` extra installs what is needed to build them (`#823 <https://github.com/mariocesar/sorl-thumbnail/pull/823>`__)
+* Added a drawing of how a thumbnail request is served to the operation docs (`#714 <https://github.com/mariocesar/sorl-thumbnail/issues/714>`__)
 
 13.1.0
 ======
 * The ``clear_delete_referenced`` management command now supports a ``--timeout``
-  option to selectively delete thumbnails (#721)
-* Added avif support through optional ``pillow-avif-plugin`` package (#772)
+  option to selectively delete thumbnails (`#721 <https://github.com/mariocesar/sorl-thumbnail/issues/721>`__)
+* Added avif support through optional ``pillow-avif-plugin`` package (`#772 <https://github.com/mariocesar/sorl-thumbnail/pull/772>`__)
 * ``ImageField.delete_file`` was removed (obsolete with Django > 1.2.5)
-* Make ``ImageFormField`` render with ``accept="image/*"`` HTML attribute (#731)
+* Make ``ImageFormField`` render with ``accept="image/*"`` HTML attribute (`#731 <https://github.com/mariocesar/sorl-thumbnail/pull/731>`__)
 * ``AdminImageWidget`` inherits now from Django's ``AdminFileWidget``
 * Restored ``ImageFile.key`` output from the pre-13 releases, avoiding obsoleting
-  legacy thumbnails (#805)
-* crop='noop' now uses min-scaling like unset crop (#812)
+  legacy thumbnails (`#805 <https://github.com/mariocesar/sorl-thumbnail/issues/805>`__)
+* crop='noop' now uses min-scaling like unset crop (`#812 <https://github.com/mariocesar/sorl-thumbnail/pull/812>`__)
 * Added testing with Django 6.0 and 6.1, and Python 3.14.
 * Dropped support for Django < 5.2.
 
@@ -70,7 +70,7 @@ everyone who kept the project alive there for nine years. ❤️ (#827)
 * Confirmed support for Python 3.13 (on Django 5.1+).
 * Drop support for Python 3.8 and 3.9.
 * Add support for Django 5.2
-* Accept a tuple as blur radius use GaussianBlur from PIL (#773)
+* Accept a tuple as blur radius use GaussianBlur from PIL (`#773 <https://github.com/mariocesar/sorl-thumbnail/issues/773>`__)
 * Fixed a performance issue in convert engine with _get_exif_orientation
 * Reduced logging in ThumbnailBackend when THUMBNAIL_DUMMY is activated
 * Privileged sRGB as default for ImageMagick colorspace
@@ -103,7 +103,7 @@ everyone who kept the project alive there for nine years. ❤️ (#827)
 * Drop support for Django 3.0.
 * Added support for Django 3.2 and 4.0.
 * Confirmed Python 3.9 and 3.10 support.
-* Adapted size regex getting size from the identify output. #532
+* Adapted size regex getting size from the identify output. `#532 <https://github.com/mariocesar/sorl-thumbnail/issues/532>`__
 * Display possible ``thumbnail`` command labels in command help.
 * Added Jazzband code of conduct.
 
@@ -122,25 +122,25 @@ everyone who kept the project alive there for nine years. ❤️ (#827)
 12.6.3
 ======
 
-* Deprecate Python 2 compatibility shims in favor of Python 3 only codebase. #623
-* Fix README on notes about ImageField cleaning up references on delete. #624
-* Fix image ratios with EXIF orientation. #619
-* Fix test coverage tracking. #622 and #617
+* Deprecate Python 2 compatibility shims in favor of Python 3 only codebase. `#623 <https://github.com/mariocesar/sorl-thumbnail/pull/623>`__
+* Fix README on notes about ImageField cleaning up references on delete. `#624 <https://github.com/mariocesar/sorl-thumbnail/pull/624>`__
+* Fix image ratios with EXIF orientation. `#619 <https://github.com/mariocesar/sorl-thumbnail/pull/619>`__
+* Fix test coverage tracking. `#622 <https://github.com/mariocesar/sorl-thumbnail/pull/622>`__ and `#617 <https://github.com/mariocesar/sorl-thumbnail/pull/617>`__
 
 
 12.6.2
 ======
 
-* Fix rST syntax errors from 12.6.0 and 12.6.1 that blocked release. #613
-* Improve QA setup and add rST validation to Travis and tox test matrix. #613
+* Fix rST syntax errors from 12.6.0 and 12.6.1 that blocked release. `#613 <https://github.com/mariocesar/sorl-thumbnail/pull/613>`__
+* Improve QA setup and add rST validation to Travis and tox test matrix. `#613 <https://github.com/mariocesar/sorl-thumbnail/pull/613>`__
 
 
 12.6.1
 ======
 
-* Deprecate explicit support for Python 3.4 and 3.5 in order to simplify the test matrix #610
-* Add requirement for ``setuptools_scm`` to automatically resolve version from git tags #610
-* Removed property ``thumbnail.__version__`` #610
+* Deprecate explicit support for Python 3.4 and 3.5 in order to simplify the test matrix `#610 <https://github.com/mariocesar/sorl-thumbnail/pull/610>`__
+* Add requirement for ``setuptools_scm`` to automatically resolve version from git tags `#610 <https://github.com/mariocesar/sorl-thumbnail/pull/610>`__
+* Removed property ``thumbnail.__version__`` `#610 <https://github.com/mariocesar/sorl-thumbnail/pull/610>`__
 
 
 12.6.0
@@ -185,12 +185,12 @@ contributors. These are some of the highlights:
 
 * Target Django versions are now 1.8, 1.10, 1.11 and 2.0
 * Target Python versions are now 2.7, 3.3, 3.4, 3.5 and 3.6
-* Enable GIF support (#263)
-* Enable WebP support (#460)
+* Enable GIF support (`#263 <https://github.com/mariocesar/sorl-thumbnail/issues/263>`__)
+* Enable WebP support (`#460 <https://github.com/mariocesar/sorl-thumbnail/pull/460>`__)
 * New ``sorl_thumbnail`` templatetag library that mirrors traditional ``thumbnail``
-* Fix bug RGBA mode not compatible with JPEG on PILLOW >=3.7 (#503)
+* Fix bug RGBA mode not compatible with JPEG on PILLOW >=3.7 (`#503 <https://github.com/mariocesar/sorl-thumbnail/issues/503>`__)
 * Don't check EXIF orientation with GraphicsMagick
-* Bug fix for handling non-ASCII characters in filenames (#434)
-* Better error detection and handling in some cases (#492)
+* Bug fix for handling non-ASCII characters in filenames (`#434 <https://github.com/mariocesar/sorl-thumbnail/pull/434>`__)
+* Better error detection and handling in some cases (`#492 <https://github.com/mariocesar/sorl-thumbnail/pull/492>`__)
 * Improve automated testing
 * Improve documentation
