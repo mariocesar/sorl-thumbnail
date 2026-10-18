@@ -26,7 +26,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install imagemagick graphicsmagick
 
-    - uses: astral-sh/setup-uv@v10
+    - uses: astral-sh/setup-uv@v10.3.0
       with:
         python-version: '3.14'
 
