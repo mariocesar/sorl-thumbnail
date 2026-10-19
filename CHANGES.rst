@@ -19,6 +19,9 @@ Unreleased
 * The PIL engine keeps animated GIFs animated when the thumbnail format is
   ``GIF``. Every frame is thumbnailed, keeping its duration and the loop
   count. Other formats still take the first frame (`#687 <https://github.com/mariocesar/sorl-thumbnail/issues/687>`__)
+* ``UrlStorage`` no longer escapes ``+`` and ``/`` in the query string of
+  remote image URLs, which broke signed URLs. Only applies with
+  ``THUMBNAIL_REMOVE_URL_ARGS = False``, the default strips the query first
 * ``crop='smart'`` no longer hangs on some image sizes, and no longer returns
   a thumbnail narrower than requested when it trims the right side (`#829 <https://github.com/mariocesar/sorl-thumbnail/issues/829>`__)
 * The default branch is now ``main`` instead of ``master``. GitHub redirects

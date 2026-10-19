@@ -53,3 +53,15 @@ class UrlStorageTestCase(unittest.TestCase):
             storage.normalize_url('El jovencito emponzoñado de whisky, qué figura exhibe'),
             'El%20jovencito%20emponzoado%20de%20whisky%2C%20qu%20figura%20exhibe'
         )
+
+    def test_query_keeps_signature_characters(self):
+        storage = get_module_class('sorl.thumbnail.images.UrlStorage')()
+        url = 'https://example.com/image.jpg?Expires=1700000000&Signature=ab+c/d%3D%3D'
+        self.assertEqual(storage.normalize_url(url), url)
+
+    def test_query_escapes_unsafe_characters(self):
+        storage = get_module_class('sorl.thumbnail.images.UrlStorage')()
+        self.assertEqual(
+            storage.normalize_url('https://example.com/image.jpg?q=a b"c'),
+            'https://example.com/image.jpg?q=a%20b%22c'
+        )

@@ -4,7 +4,7 @@ import platform
 import re
 from functools import lru_cache
 from urllib.error import URLError
-from urllib.parse import quote, quote_plus, urlsplit, urlunsplit
+from urllib.parse import quote, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
 
 from django.conf import DEFAULT_STORAGE_ALIAS
@@ -239,7 +239,10 @@ class UrlStorage(Storage):
         scheme, netloc, path, qs, anchor = urlsplit(url)
 
         path = quote(path, b"/%")
-        qs = quote_plus(qs, b":&%=")
+        # Only escape characters not allowed in a query (RFC 3986). Escaping
+        # "+" and "/" breaks signed URLs, whose signatures often contain them.
+        # "%" is kept so already-encoded values aren't encoded twice.
+        qs = quote(qs, b"!$&'()*+,;=:@/?~%")
 
         return urlunsplit((scheme, netloc, path, qs, anchor))
 
