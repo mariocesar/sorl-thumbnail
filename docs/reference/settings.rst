@@ -108,7 +108,7 @@ something else using this setting.
 
 This is the processing class for sorl-thumbnail. It does all the resizing,
 cropping or whatever processing you want to perform. sorl-thumbnail ships with
-four engines:
+five engines:
 
 PIL
 ---
@@ -151,6 +151,54 @@ Features:
 * Produces high quality images
 * Can handle CMYK sources
 * Works on Python 2.6, 2.7, 3.2, 3.3, and PyPy
+
+libvips
+-------
+``'sorl.thumbnail.engines.vips_engine.Engine'``. This engine uses `libvips
+<https://www.libvips.org/>`__ through `pyvips
+<https://libvips.github.io/pyvips/>`_. ``pip install sorl-thumbnail[vips]``
+installs pyvips with libvips as a binary wheel for Linux, macOS and Windows,
+or run ``pip install pyvips`` to use the libvips from your system packages.
+Features:
+
+* Easy to install
+* Produces high quality images
+* It is fast
+* Can handle CMYK sources
+* Reads JPEG, PNG, GIF, WebP, TIFF, AVIF and SVG sources
+* Keeps animated GIFs animated when the thumbnail format is ``GIF``
+
+libvips runs inside the Django process, like Pillow. A crash on a broken or
+hostile image takes the worker down with it. libvips starts its threads with
+the first image it processes, so make no thumbnails in a gunicorn master
+started with ``--preload`` before it forks the workers, or they will hang.
+
+The binary wheel has no PDF, ImageMagick or OpenSlide loaders. Install libvips
+from your system and plain ``pyvips`` if you need them.
+The engine needs libvips 8.15 or later. Ubuntu 24.04 and Debian 13 ship it,
+Debian 12 does not.
+
+For long running workers on glibc Linux, libvips recommends jemalloc and
+turning its operation cache off with ``pyvips.cache_set_max(0)``, see the
+`libvips developer checklist
+<https://www.libvips.org/API/current/developer-checklist.html>`_.
+
+It differs from the PIL engine in a few ways:
+
+* ``padding_color`` must be a hex color such as ``#ff0000``. Color names are
+  not accepted.
+* Resizing uses the libvips resampler, so pixels differ slightly.
+* ``colorspace="GRAY"`` keeps the alpha channel of a transparent source, and
+  the gray values come from the libvips color model.
+* ``crop="smart"`` picks the area with the libvips entropy measure, so it may
+  keep a different part of the image. It always returns the requested size.
+* ``remove_border`` trims the rows and columns of the top left pixel's color,
+  where PIL trims in steps of up to 10 pixels. The result can be a few pixels
+  smaller.
+* Transparent areas turn black when the thumbnail is a JPEG.
+* A truncated source raises an error when the thumbnail is made, and
+  ``is_valid_image`` decodes the whole file, so a form rejects a truncated
+  upload.
 
 ``THUMBNAIL_CONVERT``
 =====================

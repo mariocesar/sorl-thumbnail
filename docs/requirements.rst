@@ -44,8 +44,8 @@ Image Library
 =============
 You need to have an image library installed. sorl-thumbnail ships with support
 for `Python Imaging Library`_, `pgmagick`_, `ImageMagick`_ (or `GraphicsMagick`)
-command line tools. `pgmagick`_ are python bindings for `GraphicsMagick`_
-(Magick++)`,
+command line tools and `libvips`_. `pgmagick`_ are python bindings for
+`GraphicsMagick`_ (Magick++)`,
 
 The `ImageMagick`_ based engine ``sorl.thumbnail.engines.convert_engine.Engine``
 by default calls ``convert`` and ``identify`` shell commands. You can change the
@@ -122,6 +122,22 @@ Ubuntu installation::
     apt-get install libmagickwand-dev
     pip install Wand
 
+libvips installation
+--------------------
+
+Installing `pyvips`_ with libvips as a binary wheel, no system package needed::
+
+    pip install sorl-thumbnail[vips]
+
+The binary wheel has no PDF, ImageMagick or OpenSlide loaders. To use the
+libvips from your system instead, which may have them::
+
+    sudo apt-get install libvips-dev
+    pip install pyvips
+
+The engine needs libvips 8.15 or later. Ubuntu 24.04 and Debian 13 ship it,
+Debian 12 does not.
+
 
 .. _Python Imaging Library: https://python-pillow.org/
 .. _ImageMagick: https://imagemagick.org/
@@ -132,3 +148,5 @@ Ubuntu installation::
 .. _Python: https://www.python.org/
 .. _pgmagick: https://pgmagick.readthedocs.io/
 .. _wand: https://docs.wand-py.org
+.. _libvips: https://www.libvips.org/
+.. _pyvips: https://libvips.github.io/pyvips/

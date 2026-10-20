@@ -7,7 +7,7 @@ Features at a glance
 
 - Support for Django 5.2, 6.0, and 6.1 following the `Django supported versions policy`_
 - Storage support
-- Pluggable Engine support for `Pillow`_, `ImageMagick`_, `PIL`_, `Wand`_, `pgmagick`_, and `vipsthumbnail`_
+- Pluggable Engine support for `Pillow`_, `ImageMagick`_, `PIL`_, `Wand`_, `pgmagick`_, `vipsthumbnail`_, and `libvips`_
 - Pluggable Key Value Store support (cached db and redis)
 - Pluggable Backend support
 - Admin integration with possibility to delete
@@ -177,6 +177,7 @@ making one ``HEAD`` request for the file that is already there. See
 .. _`Wand`: https://docs.wand-py.org/
 .. _`pgmagick`: https://pgmagick.readthedocs.io/
 .. _`vipsthumbnail`: https://www.libvips.org/API/current/Using-vipsthumbnail.html
+.. _`libvips`: https://www.libvips.org/
 
 .. _`Template examples`: https://sorl-thumbnail.readthedocs.io/en/latest/examples.html#template-examples
 .. _`Model examples`: https://sorl-thumbnail.readthedocs.io/en/latest/examples.html#model-examples
