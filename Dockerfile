@@ -7,7 +7,6 @@ RUN apt-get update && apt-get install -y \
     graphicsmagick \
     libjpeg62 \
     zlib1g-dev \
-    libvips-tools \
     && rm -rf /var/lib/apt/lists/*
 
 # Show ImageMagick version

@@ -304,7 +304,7 @@ class SimpleTestCase(BaseTestCase):
     @unittest.skipUnless('pil_engine' in settings.THUMBNAIL_ENGINE
                          or 'wand_engine' in settings.THUMBNAIL_ENGINE
                          or 'convert_engine' in settings.THUMBNAIL_ENGINE,
-                         'not checked on the pgmagick and vipsthumbnail engines')
+                         'not checked on the pgmagick and vips engines')
     def test_transparency_la_to_jpeg(self):
         Image.new('LA', (50, 50)).save(os.path.join(settings.MEDIA_ROOT, 'la.png'))
         th = self.BACKEND.get_thumbnail('la.png', '11x11', format='JPEG')
@@ -615,16 +615,6 @@ class SimpleTestCase(BaseTestCase):
             self.BACKEND.get_thumbnail('broken.pdf', '50x50', authenticate='hunter2')
         # neither the password, the command line nor the tool's stderr leak into the error
         self.assertEqual(str(cm.exception), 'The identify command did not report an image size')
-
-    @unittest.skipIf(
-        'vipsthumbnail_engine' not in settings.THUMBNAIL_ENGINE,
-        'only the vipsthumbnail engine shells out to vipsheader',
-    )
-    def test_vipsheader_failure(self):
-        with open(os.path.join(settings.MEDIA_ROOT, 'broken.pdf'), 'wb') as f:
-            f.write(b'not a pdf')
-        with self.assertRaises(EngineError):
-            self.BACKEND.get_thumbnail('broken.pdf', '50x50')
 
     @unittest.skipIf(
         'convert_engine' not in settings.THUMBNAIL_ENGINE,

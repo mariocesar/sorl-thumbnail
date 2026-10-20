@@ -83,6 +83,10 @@ Unreleased
   (`#833 <https://github.com/mariocesar/sorl-thumbnail/issues/833>`__)
 * The vips engine keeps animated GIFs animated when the thumbnail format is
   ``GIF``, like the PIL engine. Other formats take the first frame (`#833 <https://github.com/mariocesar/sorl-thumbnail/issues/833>`__)
+* Removed the vipsthumbnail engine and its ``THUMBNAIL_VIPSTHUMBNAIL`` and
+  ``THUMBNAIL_VIPSHEADER`` settings. It has failed on every thumbnail with the
+  default settings since 12.6.3. Use ``sorl.thumbnail.engines.vips_engine.Engine``
+  instead (`#833 <https://github.com/mariocesar/sorl-thumbnail/issues/833>`__)
 
 13.3.0
 ======

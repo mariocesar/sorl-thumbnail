@@ -55,7 +55,6 @@ body:
         - pgmagick
         - convert (ImageMagick / GraphicsMagick)
         - vips (pyvips)
-        - vipsthumbnail (libvips)
         - Custom engine
     validations:
       required: true

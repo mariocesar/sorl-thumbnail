@@ -223,11 +223,11 @@ Only applicable for the convert Engine.
 
 - Default ``60``
 
-Seconds a ``convert``, ``identify``, ``vipsthumbnail`` or ``vipsheader`` call
-may run before it is killed and ``EngineError`` is raised. Raise it if large
-sources or high ``density`` values legitimately take longer. ``None`` lets a
-call run as long as it takes, so a malformed or hostile image can keep a worker
-busy indefinitely. Only applicable for the convert and vipsthumbnail Engines.
+Seconds a ``convert`` or ``identify`` call may run before it is killed and
+``EngineError`` is raised. Raise it if large sources or high ``density`` values
+legitimately take longer. ``None`` lets a call run as long as it takes, so a
+malformed or hostile image can keep a worker busy indefinitely. Only applicable
+for the convert Engine.
 
 
 ``THUMBNAIL_FLATTEN``

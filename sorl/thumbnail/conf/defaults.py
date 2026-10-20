@@ -29,11 +29,7 @@ THUMBNAIL_ENGINE = 'sorl.thumbnail.engines.pil_engine.Engine'
 THUMBNAIL_CONVERT = 'convert'
 THUMBNAIL_IDENTIFY = 'identify'
 
-# Path to ``vipsthumbnail`` and ``vipsheader``
-THUMBNAIL_VIPSTHUMBNAIL = 'vipsthumbnail'
-THUMBNAIL_VIPSHEADER = 'vipsheader'
-
-# Seconds a convert, identify, vipsthumbnail or vipsheader call may run, None for no limit
+# Seconds a convert or identify call may run, None for no limit
 THUMBNAIL_COMMAND_TIMEOUT = 60
 
 # Storage for the generated thumbnails, as an alias of the Django STORAGES setting.
