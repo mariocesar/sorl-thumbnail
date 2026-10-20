@@ -453,7 +453,11 @@ class SimpleTestCase(BaseTestCase):
         self.assertEqual(img.format, 'AVIF')
         self.assertEqual(img.size, (100, 100))
 
-    @unittest.skipIf('pil_engine' not in settings.THUMBNAIL_ENGINE, 'animation is only kept in PIL')
+    @unittest.skipIf(
+        'pil_engine' not in settings.THUMBNAIL_ENGINE
+        and 'vips_engine' not in settings.THUMBNAIL_ENGINE,
+        'only the PIL and vips engines keep every frame of an animated GIF',
+    )
     def test_animated_gif(self):
         # A red square moving right over a transparent background
         frames = []
@@ -473,6 +477,20 @@ class SimpleTestCase(BaseTestCase):
         # The square left the top left corner, it must not leave a trail there
         img.seek(2)
         self.assertEqual(img.convert('RGBA').getpixel((0, 0))[3], 0)
+
+    @unittest.skipIf(
+        'pil_engine' not in settings.THUMBNAIL_ENGINE
+        and 'vips_engine' not in settings.THUMBNAIL_ENGINE,
+        'only the PIL and vips engines keep every frame of an animated GIF',
+    )
+    def test_animated_gif_to_one_frame(self):
+        # Twice the frame height must not be read back as two frames
+        th = self.BACKEND.get_thumbnail('data/animation_w_transparency.gif', '1000x884',
+                                        upscale=True, format='WEBP')
+        img = Image.open(th.storage.path(th.name))
+        self.assertEqual((th.x, th.y), (1000, 884))
+        self.assertEqual(img.size, (1000, 884))
+        self.assertEqual(getattr(img, 'n_frames', 1), 1)
 
     def test_image_file_deserialize(self):
         im = ImageFile(Item.objects.get(image='500x500.jpg').image)

@@ -5,12 +5,34 @@ from sorl.thumbnail.engines.base import EngineBase
 
 
 class Engine(EngineBase):
+    def create(self, image, geometry, options):
+        """
+        An animated source written as GIF is thumbnailed frame by frame,
+        other formats take the first frame
+        """
+        height = image.get_page_height()
+        frames = []
+        for top in range(0, image.height, height):
+            frame = image.crop(0, top, image.width, height)
+            frames.append(super().create(frame, geometry, options))
+            if options['format'] != 'GIF':
+                break
+        thumbnail = pyvips.Image.arrayjoin(frames, across=1).copy()
+        # Always set, a frame keeps the source frame height in its metadata
+        thumbnail.set_type(pyvips.GValue.gint_type, 'page-height', frames[0].height)
+        return thumbnail
+
     def get_image(self, source):
+        data = source.read()
         # Raise on a truncated source like PIL instead of filling it with grey
-        return pyvips.Image.new_from_buffer(source.read(), '', fail_on='truncated')
+        image = pyvips.Image.new_from_buffer(data, '', fail_on='truncated')
+        if image.get('vips-loader') == 'gifload_buffer':
+            # Every frame stacked top to bottom, see create()
+            image = pyvips.Image.new_from_buffer(data, '', fail_on='truncated', n=-1)
+        return image
 
     def get_image_size(self, image):
-        return image.width, image.height
+        return image.width, image.get_page_height()
 
     def is_valid_image(self, raw_data):
         try:
