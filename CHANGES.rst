@@ -32,10 +32,13 @@ Unreleased
   or ask for WEBP. Thumbnails created before the upgrade keep working
 * The PIL engine writes a greyscale source with an alpha channel (mode ``LA``)
   as JPEG instead of raising ``OSError: cannot write mode RGBA as JPEG`` (`#474 <https://github.com/mariocesar/sorl-thumbnail/issues/474>`__)
+* The PIL and wand engines now honour ``THUMBNAIL_FLATTEN``. When it is on, a
+  transparent source written as JPEG is composited onto a white background, or
+  the padding color when the thumbnail is padded, as the convert engine already
+  did (`#474 <https://github.com/mariocesar/sorl-thumbnail/issues/474>`__)
 * Documented ``THUMBNAIL_FLATTEN`` and the ``flatten`` option. A transparent
   source written as JPEG shows the color stored under its transparent pixels,
-  usually black. The convert engine flattens it onto a white background when
-  the setting is on, the other engines ignore it (`#474 <https://github.com/mariocesar/sorl-thumbnail/issues/474>`__)
+  usually black (`#474 <https://github.com/mariocesar/sorl-thumbnail/issues/474>`__)
 * The cached DB key-value store writes every entry with a single upsert
   instead of a lookup followed by an insert or update, so creating a thumbnail
   runs six statements instead of nine. Oracle has no upsert in Django and keeps

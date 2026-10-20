@@ -187,10 +187,10 @@ This controls the write format and thumbnail extension. Supported formats are
 ``'JPEG'``.
 
 JPEG has no transparency, so a transparent source written as JPEG shows the
-color stored under its transparent pixels, which is usually black. With the
-convert engine, set ``THUMBNAIL_FLATTEN`` to get a white background instead.
-With the other engines, write PNG with ``format='PNG'`` or
-``THUMBNAIL_PRESERVE_FORMAT``, or flatten the image before uploading it.
+color stored under its transparent pixels, which is usually black. Set
+``THUMBNAIL_FLATTEN`` to get a white background instead, or write PNG with
+``format='PNG'`` or ``THUMBNAIL_PRESERVE_FORMAT``, or flatten the image before
+uploading it.
 
 ``colorspace``
 ^^^^^^^^^^^^^^
@@ -220,12 +220,13 @@ can be globally set with the setting ``THUMBNAIL_PADDING_COLOR``.
 
 ``flatten``
 ^^^^^^^^^^^
-Pass ``flatten="off"`` to write one thumbnail without the ``-flatten`` that
+Pass ``flatten="off"`` to write one thumbnail without the background that
 ``THUMBNAIL_FLATTEN`` adds::
 
     {% thumbnail item.image "100x100" flatten="off" as im %}
 
-Only the string ``"off"`` turns it off, and only the convert engine honours it.
+Only the string ``"off"`` turns it off. The PIL, wand and convert engines
+honour it, every other engine ignores it.
 
 ``density``
 ^^^^^^^^^^^

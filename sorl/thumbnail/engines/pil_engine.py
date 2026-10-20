@@ -1,5 +1,6 @@
 from io import BytesIO
 
+from sorl.thumbnail.conf import settings
 from sorl.thumbnail.engines.base import EngineBase
 
 try:
@@ -118,6 +119,15 @@ class Engine(EngineBase):
         """
         colorspace = options['colorspace']
         format = options['format']
+
+        flatten = settings.THUMBNAIL_FLATTEN and options.get('flatten') != 'off'
+        transparent = image.mode in ('RGBA', 'LA') or 'transparency' in image.info
+        if flatten and transparent and format == 'JPEG':
+            # Composite onto a background before JPEG drops the alpha channel, like convert -flatten
+            color = options.get('padding_color') if options.get('padding') else '#ffffff'
+            background = Image.new('RGB', image.size, color)
+            background.paste(image, mask=image.convert('RGBA').split()[-1])
+            image = background
 
         return self._colorspace(image, colorspace, format)
 

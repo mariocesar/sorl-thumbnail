@@ -254,6 +254,22 @@ class SimpleTestCase(BaseTestCase):
         img = Image.open(th.storage.path(th.name))
         self.assertEqual(img.format, 'JPEG')
 
+    @unittest.skipUnless('pil_engine' in settings.THUMBNAIL_ENGINE
+                         or 'wand_engine' in settings.THUMBNAIL_ENGINE
+                         or 'convert_engine' in settings.THUMBNAIL_ENGINE,
+                         'only the PIL, wand and convert engines honour THUMBNAIL_FLATTEN')
+    def test_flatten(self):
+        # Grey diagonals on a transparent background whose stored color is black
+        item, _created = self.create_image('50x50_transparent.png', (50, 50), transparent=True)
+        with override_settings(THUMBNAIL_FLATTEN=True):
+            th = self.BACKEND.get_thumbnail(item.image, '50x50', format='JPEG')
+            img = Image.open(th.storage.path(th.name)).convert('RGB')
+            self.assertEqual(img.getpixel((25, 2)), (255, 255, 255))
+
+            th = self.BACKEND.get_thumbnail(item.image, '50x50', format='JPEG', flatten='off')
+            img = Image.open(th.storage.path(th.name)).convert('RGB')
+            self.assertEqual(img.getpixel((25, 2)), (0, 0, 0))
+
     @unittest.skipIf(
         settings.THUMBNAIL_CONVERT.startswith('gm ')
         or 'pgmagick_engine' in settings.THUMBNAIL_ENGINE,
