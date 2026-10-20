@@ -5,6 +5,8 @@ Changes
 Unreleased
 ==========
 
+* A project homepage with example galleries for each image engine, built from
+  ``demo/`` and published to https://mariocesar.github.io/sorl-thumbnail/
 * The cached DB key-value store writes every entry with a single upsert
   instead of a lookup followed by an insert or update, so creating a thumbnail
   runs six statements instead of nine. Oracle has no upsert in Django and keeps

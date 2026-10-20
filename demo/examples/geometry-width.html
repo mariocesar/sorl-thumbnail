@@ -1,0 +1,6 @@
+{% load thumbnail %}
+{% thumbnail "images/kimono.avif" "300" as im %}
+  <img src="{{ im.url }}" loading="lazy"
+       width="{{ im.width }}" height="{{ im.height }}"
+       alt="Kimono scaled to 300 pixels wide">
+{% endthumbnail %}
