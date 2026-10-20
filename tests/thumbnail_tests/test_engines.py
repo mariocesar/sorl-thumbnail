@@ -65,9 +65,9 @@ class SimpleTestCase(BaseTestCase):
         self.assertEqual(t.y, 300)
 
     @unittest.skipIf(
-        'pil_engine' not in settings.THUMBNAIL_ENGINE
-        and 'convert_engine' not in settings.THUMBNAIL_ENGINE,
-        'padding is only implemented in PIL and convert',
+        'wand_engine' in settings.THUMBNAIL_ENGINE
+        or 'pgmagick_engine' in settings.THUMBNAIL_ENGINE,
+        'the wand and pgmagick engines do not implement padding',
     )
     def test_padding(self):
         item = Item.objects.get(image='200x100.jpg')
@@ -77,7 +77,40 @@ class SimpleTestCase(BaseTestCase):
         self.assertEqual((t.x, t.y), (300, 300))
         self.assertEqual(Image.open(t.storage.path(t.name)).size, (300, 300))
 
-    @unittest.skipIf('pil_engine' not in settings.THUMBNAIL_ENGINE, 'blur is only supported in PIL')
+    @unittest.skipIf(
+        'wand_engine' in settings.THUMBNAIL_ENGINE
+        or 'pgmagick_engine' in settings.THUMBNAIL_ENGINE,
+        'the wand and pgmagick engines do not implement padding',
+    )
+    def test_padding_color(self):
+        item = Item.objects.get(image='200x100.jpg')
+
+        t = self.BACKEND.get_thumbnail(item.image, '300x300', padding=True, padding_color='#ff0000')
+
+        red, green, blue = Image.open(t.storage.path(t.name)).convert('RGB').getpixel((150, 10))
+        self.assertTrue(red > 250 and green < 5 and blue < 5, (red, green, blue))
+
+    @unittest.skipIf(
+        'pil_engine' not in settings.THUMBNAIL_ENGINE
+        and 'vips_engine' not in settings.THUMBNAIL_ENGINE,
+        'only the PIL and vips engines implement remove_border',
+    )
+    def test_remove_border(self):
+        # A photo between black bars, the bars must go whatever their color
+        photo = Image.open(os.path.join(settings.DATA_ROOT, 'icc_profile_test.jpg'))
+        im = Image.new('RGB', (200, 240))
+        im.paste(photo.convert('RGB').resize((200, 160)), (0, 40))
+        im.save(os.path.join(settings.MEDIA_ROOT, 'letterbox.png'))
+
+        t = self.BACKEND.get_thumbnail('letterbox.png', '200x240', remove_border=True)
+
+        self.assertEqual((t.x, t.y), (200, 160))
+
+    @unittest.skipIf(
+        'pil_engine' not in settings.THUMBNAIL_ENGINE
+        and 'vips_engine' not in settings.THUMBNAIL_ENGINE,
+        'only the PIL and vips engines implement blur',
+    )
     def test_crop_and_blur(self):
         item = Item.objects.get(image='200x100.jpg')
 
@@ -489,7 +522,10 @@ class SimpleTestCase(BaseTestCase):
         imref2 = ImageFile(os.path.join(settings.MEDIA_ROOT, image.name))
         self.assertEqual(imref1.key, imref2.key)
 
-    @unittest.skipIf('pil_engine' not in settings.THUMBNAIL_ENGINE, 'RGBA is only supported in PIL')
+    @unittest.skipIf(
+        'convert_engine' in settings.THUMBNAIL_ENGINE,
+        'ImageMagick and GraphicsMagick reject the RGBA colorspace',
+    )
     def test_rgba_colorspace(self):
         item = Item.objects.get(image='500x500.jpg')
 
@@ -698,8 +734,9 @@ class CropTestCase(BaseTestCase):
                 self.assertEqual(0 <= mean_pixel(x, y) < 5, True)
 
     @unittest.skipIf(
-        'pil_engine' not in settings.THUMBNAIL_ENGINE,
-        'the other engines fail this test',
+        'pil_engine' not in settings.THUMBNAIL_ENGINE
+        and 'vips_engine' not in settings.THUMBNAIL_ENGINE,
+        'only the PIL and vips engines implement smart crop',
     )
     def test_smart_crop(self):
         th = self.BACKEND.get_thumbnail('data/white_border.jpg', '32x32', crop='smart')
@@ -726,8 +763,8 @@ class CropTestCase(BaseTestCase):
                 self.assertEqual(im.size, expected)
 
     @unittest.skipIf(
-        'pil_engine' in settings.THUMBNAIL_ENGINE,
-        'the PIL engine supports smart crop',
+        'pil_engine' in settings.THUMBNAIL_ENGINE or 'vips_engine' in settings.THUMBNAIL_ENGINE,
+        'the PIL and vips engines support smart crop',
     )
     def test_smart_crop_unsupported(self):
         message = "crop='smart' is only supported by the PIL engine"
@@ -761,8 +798,8 @@ class CropTestCase(BaseTestCase):
         self.assertTrue(is_portrait('data/d.jpg'))
 
     @unittest.skipIf(
-        'pil_engine' not in settings.THUMBNAIL_ENGINE,
-        'the other engines fail this test',
+        'pgmagick_engine' in settings.THUMBNAIL_ENGINE,
+        'keeping the ICC profile is not verified on the pgmagick engine',
     )
     def test_crop_image_with_icc_profile(self):
         name = 'data/icc_profile_test.jpg'
@@ -1008,6 +1045,14 @@ class ImageValidationTestCase(unittest.TestCase):
         self.assertTrue(engine.is_valid_image(data))
         self.assertFalse(engine.is_valid_image(data[:-400]))
         self.assertFalse(engine.is_valid_image(broken))
+
+    @unittest.skipIf(
+        'vips_engine' not in settings.THUMBNAIL_ENGINE,
+        'only the PIL and vips engines decode every pixel to validate an image',
+    )
+    def test_vips_truncated_validation(self):
+        with open(os.path.join(settings.DATA_ROOT, 'broken.jpeg'), 'rb') as broken_jpeg:
+            self.assertFalse(default.engine.is_valid_image(broken_jpeg.read()))
 
     @unittest.skipIf(
         'pil_engine' not in settings.THUMBNAIL_ENGINE,

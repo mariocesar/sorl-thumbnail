@@ -51,7 +51,7 @@ For a full list of tox environments, see ``tox.ini``
 Running tests without Docker
 ----------------------------
 
-The ``pil`` environments need no system packages, so with `uv`_ installed you
+The ``pil`` and ``vips`` environments need no system packages, so with `uv`_ installed you
 can run them directly::
 
     uvx --with tox-uv tox -e py312-django52-pil
@@ -76,7 +76,7 @@ Running CI target tests
 
 To replicate GitHub Actions CI tests, use the ``ci`` service with the TARGET
 environment variable. Available targets: ``pil``, ``imagemagick``, ``graphicsmagick``,
-``redis``, ``wand``, ``dbm``, and ``qa`` (for quality assurance checks).
+``redis``, ``wand``, ``dbm``, ``vips``, and ``qa`` (for quality assurance checks).
 
 Run a specific CI target::
 
@@ -86,11 +86,12 @@ Run a specific CI target::
     TARGET=redis docker compose run --rm ci
     TARGET=wand docker compose run --rm ci
     TARGET=dbm docker compose run --rm ci
+    TARGET=vips docker compose run --rm ci
     TARGET=qa docker compose run --rm ci
 
 Run all CI targets in sequence::
 
-    for target in pil imagemagick graphicsmagick redis wand dbm qa; do
+    for target in pil imagemagick graphicsmagick redis wand dbm vips qa; do
       echo "Testing $target..."
       TARGET=$target docker compose run --rm ci
     done

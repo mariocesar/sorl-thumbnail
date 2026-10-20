@@ -21,6 +21,7 @@ THUMBNAIL_KEY_DBCOLUMN = 'key'
 # sorl.thumbnail.engines.convert_engine.Engine
 # sorl.thumbnail.engines.pil_engine.Engine
 # sorl.thumbnail.engines.pgmagick_engine.Engine
+# sorl.thumbnail.engines.vips_engine.Engine
 # convert is preferred but requires imagemagick or graphicsmagick, se docs
 THUMBNAIL_ENGINE = 'sorl.thumbnail.engines.pil_engine.Engine'
 
