@@ -129,6 +129,16 @@ Sending pull requests
 
 .. _pull request: https://help.github.com/articles/using-pull-requests
 
+Keep the branch to the change. Editor settings, fonts, build leftovers and the
+like get flagged by a check that lists what to remove and labels the pull
+request ``needs-cleanup`` until they are gone. The same check holds anything
+that hides what it is, and closes a pull request that would run code on a
+maintainer's machine when the branch is opened. The check is the
+`pr-hygiene`_ action; the rules this project adds live in
+``.github/pr-hygiene.yml``.
+
+.. _pr-hygiene: https://github.com/mariocesar/pr-hygiene
+
 Using AI tools
 ==============
 

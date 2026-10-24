@@ -1,0 +1,41 @@
+name: PR hygiene
+
+# Runs mariocesar/pr-hygiene from the base branch with the pull request read through the
+# API. The pull request's code is never checked out here; keep it that way.
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number to check
+        type: string
+        required: true
+      dry_run:
+        description: Only report, do not label, draft, close or comment
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: pr-hygiene-${{ github.event.pull_request.number || inputs.pr }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-26.04
+    steps:
+      # Base branch only, for the rules file.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+        with:
+          persist-credentials: false
+      - uses: mariocesar/pr-hygiene@a8288d82d34396e3ef1aeab9333a448928dd1af9  # v1.0.0
+        with:
+          rules: .github/pr-hygiene.yml
+          pr-number: ${{ inputs.pr }}
+          dry-run: ${{ inputs.dry_run }}
+          draft-token: ${{ secrets.PR_DRAFT_TOKEN }}

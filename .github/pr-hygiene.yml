@@ -1,0 +1,35 @@
+# Rules for the PR hygiene check that this project adds on top of the bundled rules of
+# mariocesar/pr-hygiene (editor auto-run tasks, scripts hidden under binary names, invisible
+# characters, editor and OS files, build leftovers and so on). A rule here with the same name
+# as a bundled one replaces it. Rule syntax and the outcome of each severity are documented
+# in that repository's README.
+#
+#   severity  cleanup  the file does not belong: label needs-cleanup, draft, ask to remove it
+#             hold     a maintainer must look before anyone checks the branch out
+#             block    close the pull request and ask the owner to block the author
+
+rules:
+  - name: fonts
+    severity: cleanup
+    paths: ["*.ttf", "*.otf", "*.woff", "*.woff2", "*.eot", "*.lff"]
+    message: Font files. Remove them, sorl-thumbnail ships no fonts.
+
+  - name: web-assets
+    severity: cleanup
+    paths: ["public/**", "static/**", "assets/**"]
+    message: Web assets. Remove them, this is a Python library without a front end.
+
+  - name: node-packages
+    severity: cleanup
+    paths: ["package.json", "package-lock.json", "yarn.lock", "pnpm-lock.yaml"]
+    message: Node packages. Remove them, this project has no JavaScript build.
+
+  - name: build-output
+    severity: cleanup
+    paths: ["build/**", "dist/**"]
+    message: Build output. Remove it, releases are built by the publish workflow.
+
+  - name: gitignore
+    severity: cleanup
+    paths: ["/.gitignore"]
+    message: Leave .gitignore as it is unless the change needs it, and say why in the description.
