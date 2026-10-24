@@ -262,16 +262,36 @@ class SimpleTestCase(BaseTestCase):
                          'only the PIL, wand and convert engines honour THUMBNAIL_FLATTEN')
     def test_flatten(self):
         # Grey diagonals on a transparent background whose stored color is black
-        item, _created = self.create_image('50x50_transparent.png', (50, 50), transparent=True)
+        self.create_image('50x50_transparent.png', (50, 50), transparent=True)
+        # Alpha channel with black stored under the transparent pixels
+        rgba = Image.new('RGBA', (50, 50), (0, 0, 0, 0))
+        rgba.save(os.path.join(settings.MEDIA_ROOT, 'rgba.png'))
         with override_settings(THUMBNAIL_FLATTEN=True):
-            th = self.BACKEND.get_thumbnail(item.image, '50x50', format='JPEG')
-            img = Image.open(th.storage.path(th.name)).convert('RGB')
-            self.assertEqual(img.getpixel((25, 2)), (255, 255, 255))
-
-            for off in ('off', False):
-                th = self.BACKEND.get_thumbnail(item.image, '50x50', format='JPEG', flatten=off)
+            for name in ('50x50_transparent.png', 'rgba.png'):
+                th = self.BACKEND.get_thumbnail(name, '50x50', format='JPEG')
                 img = Image.open(th.storage.path(th.name)).convert('RGB')
-                self.assertEqual(img.getpixel((25, 2)), (0, 0, 0))
+                self.assertEqual(img.getpixel((25, 2)), (255, 255, 255))
+
+                for off in ('off', False):
+                    th = self.BACKEND.get_thumbnail(name, '50x50', format='JPEG', flatten=off)
+                    img = Image.open(th.storage.path(th.name)).convert('RGB')
+                    self.assertEqual(img.getpixel((25, 2)), (0, 0, 0))
+
+    @unittest.skipUnless('pil_engine' in settings.THUMBNAIL_ENGINE
+                         or 'convert_engine' in settings.THUMBNAIL_ENGINE,
+                         'only the PIL and convert engines pad and flatten')
+    def test_flatten_padding_color(self):
+        rgba = Image.new('RGBA', (50, 25), (0, 0, 0, 0))
+        rgba.save(os.path.join(settings.MEDIA_ROOT, 'rgba_wide.png'))
+        with override_settings(THUMBNAIL_FLATTEN=True):
+            th = self.BACKEND.get_thumbnail(
+                'rgba_wide.png', '50x50', format='JPEG', padding=True, padding_color='#ff0000'
+            )
+        img = Image.open(th.storage.path(th.name)).convert('RGB')
+        # The transparent source gets the padding color, not white, like the bars around it
+        for xy in ((25, 2), (25, 25)):
+            r, g, b = img.getpixel(xy)
+            self.assertTrue(r > 250 and g < 5 and b < 5, img.getpixel(xy))
 
     @unittest.skipIf(
         settings.THUMBNAIL_CONVERT.startswith('gm ')
