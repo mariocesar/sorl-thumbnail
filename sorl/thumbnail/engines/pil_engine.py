@@ -125,9 +125,9 @@ class Engine(EngineBase):
         if flatten and transparent and format == 'JPEG':
             # Composite onto a background before JPEG drops the alpha channel, like convert -flatten
             color = options.get('padding_color') if options.get('padding') else '#ffffff'
-            background = Image.new('RGB', image.size, color)
-            background.paste(image, mask=image.convert('RGBA').split()[-1])
-            image = background
+            rgba = image.convert('RGBA')
+            image = Image.new('RGB', image.size, color)
+            image.paste(rgba, mask=rgba)
 
         return self._colorspace(image, colorspace, format)
 
