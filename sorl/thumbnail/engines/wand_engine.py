@@ -6,6 +6,7 @@ from wand import exceptions
 from wand.image import Image
 from wand.version import MAGICK_VERSION_NUMBER
 
+from sorl.thumbnail.conf import settings
 from sorl.thumbnail.engines.base import EngineBase
 
 
@@ -84,6 +85,14 @@ class Engine(EngineBase):
     def _cropbox(self, image, x, y, x2, y2):
         image.crop(left=x, top=y, width=x2 - x, height=y2 - y)
         return image
+
+    def write(self, image, options, thumbnail):
+        flatten = settings.THUMBNAIL_FLATTEN and options.get('flatten') not in ('off', False)
+        if flatten and options['format'] == 'JPEG':
+            # Composite onto white before JPEG drops the alpha channel, like convert -flatten
+            image.background_color = 'white'
+            image.alpha_channel = 'remove'
+        super().write(image, options, thumbnail)
 
     def _get_raw_data(self, image, format_, quality, image_info=None, progressive=False):
         image.compression_quality = quality

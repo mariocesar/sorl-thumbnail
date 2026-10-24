@@ -1,5 +1,6 @@
 from io import BytesIO
 
+from sorl.thumbnail.conf import settings
 from sorl.thumbnail.engines.base import EngineBase
 
 try:
@@ -119,6 +120,15 @@ class Engine(EngineBase):
         colorspace = options['colorspace']
         format = options['format']
 
+        flatten = settings.THUMBNAIL_FLATTEN and options.get('flatten') not in ('off', False)
+        transparent = image.mode in ('RGBA', 'LA') or 'transparency' in image.info
+        if flatten and transparent and format == 'JPEG':
+            # Composite onto a background before JPEG drops the alpha channel, like convert -flatten
+            color = options.get('padding_color') if options.get('padding') else '#ffffff'
+            rgba = image.convert('RGBA')
+            image = Image.new('RGB', image.size, color)
+            image.paste(rgba, mask=rgba)
+
         return self._colorspace(image, colorspace, format)
 
     def _cropbox(self, image, x, y, x2, y2):
@@ -165,8 +175,8 @@ class Engine(EngineBase):
             # Pillow JPEG doesn't allow RGBA anymore. It was converted to RGB before.
             if image.mode == 'RGBA' and format != 'JPEG':
                 return image  # RGBA is just RGB + Alpha
-            if image.mode == 'LA' or (
-                image.mode == 'P' and 'transparency' in image.info and format != 'JPEG'
+            if format != 'JPEG' and (
+                image.mode == 'LA' or (image.mode == 'P' and 'transparency' in image.info)
             ):
                 newimage = image.convert('RGBA')
                 transparency = image.info.get('transparency')

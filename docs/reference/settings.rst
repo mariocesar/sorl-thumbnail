@@ -175,6 +175,23 @@ call run as long as it takes, so a malformed or hostile image can keep a worker
 busy indefinitely. Only applicable for the convert and vipsthumbnail Engines.
 
 
+``THUMBNAIL_FLATTEN``
+=====================
+
+- Default: ``False``
+
+When ``True`` a transparent source written as JPEG gets a solid background
+instead of the color stored under its transparent pixels, which is usually
+black. The background is white, or the padding color when the thumbnail is
+padded.
+
+The PIL and wand engines only flatten thumbnails written as JPEG. The convert
+engine adds ``-flatten`` to the convert command whatever the format, so PNG,
+GIF and WEBP thumbnails lose their transparency too. Every other engine ignores
+this setting. Pass ``flatten=False`` or ``flatten="off"`` as a thumbnail option
+to turn it off for one thumbnail.
+
+
 ``THUMBNAIL_STORAGE``
 =====================
 
