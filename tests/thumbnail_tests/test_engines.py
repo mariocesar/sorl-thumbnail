@@ -246,6 +246,14 @@ class SimpleTestCase(BaseTestCase):
         img = Image.open(th.storage.path(th.name))
         self.assertFalse(self.is_transparent(img))
 
+    @unittest.skipIf('pil_engine' not in settings.THUMBNAIL_ENGINE,
+                     'only the PIL engine converted LA to RGBA before writing JPEG')
+    def test_transparency_la_to_jpeg(self):
+        Image.new('LA', (50, 50)).save(os.path.join(settings.MEDIA_ROOT, 'la.png'))
+        th = self.BACKEND.get_thumbnail('la.png', '11x11', format='JPEG')
+        img = Image.open(th.storage.path(th.name))
+        self.assertEqual(img.format, 'JPEG')
+
     @unittest.skipIf(
         settings.THUMBNAIL_CONVERT.startswith('gm ')
         or 'pgmagick_engine' in settings.THUMBNAIL_ENGINE,

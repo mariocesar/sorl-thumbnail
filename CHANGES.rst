@@ -30,6 +30,8 @@ Unreleased
   Browsers displayed those files, so sites that ask for AVIF on such a machine
   will now see the thumbnail tag fail instead. Install ``libheif-plugin-aomenc``
   or ask for WEBP. Thumbnails created before the upgrade keep working
+* The PIL engine writes a greyscale source with an alpha channel (mode ``LA``)
+  as JPEG instead of raising ``OSError: cannot write mode RGBA as JPEG`` (`#474 <https://github.com/mariocesar/sorl-thumbnail/issues/474>`__)
 * Documented ``THUMBNAIL_FLATTEN`` and the ``flatten`` option. A transparent
   source written as JPEG shows the color stored under its transparent pixels,
   usually black. The convert engine flattens it onto a white background when
