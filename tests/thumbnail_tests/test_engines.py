@@ -6,6 +6,7 @@ from unittest import mock
 
 from django.core.files.storage import default_storage, storages
 from django.template.loader import render_to_string
+from django.test.utils import override_settings
 from PIL import Image, ImageSequence
 
 from sorl.thumbnail import default
@@ -13,7 +14,7 @@ from sorl.thumbnail.base import ThumbnailBackend
 from sorl.thumbnail.conf import settings
 from sorl.thumbnail.engines.convert_engine import EngineError
 from sorl.thumbnail.engines.pil_engine import Engine as PILEngine
-from sorl.thumbnail.helpers import get_module_class, tokey
+from sorl.thumbnail.helpers import get_module_class, run, tokey
 from sorl.thumbnail.images import ImageFile
 from sorl.thumbnail.parsers import parse_geometry
 from sorl.thumbnail.templatetags.thumbnail import margin
@@ -398,6 +399,16 @@ class SimpleTestCase(BaseTestCase):
         # neither the password, the command line nor the tool's stderr leak into the error
         self.assertEqual(str(cm.exception), 'The identify command did not report an image size')
 
+    @unittest.skipIf(
+        'vipsthumbnail_engine' not in settings.THUMBNAIL_ENGINE,
+        'only the vipsthumbnail engine shells out to vipsheader',
+    )
+    def test_vipsheader_failure(self):
+        with open(os.path.join(settings.MEDIA_ROOT, 'broken.pdf'), 'wb') as f:
+            f.write(b'not a pdf')
+        with self.assertRaises(EngineError):
+            self.BACKEND.get_thumbnail('broken.pdf', '50x50')
+
     def test_falsey_file_argument(self):
         with self.assertRaises(ValueError):
             self.BACKEND.get_thumbnail('', '100x100')
@@ -742,6 +753,36 @@ class DummyTestCase(unittest.TestCase):
             '<img src="https://dummyimage.com/600x400" width="600" '
             'height="400" srcset="https://dummyimage.com/1200x800 2x; '
             'https://dummyimage.com/900x600 1.5x">'
+        )
+
+
+class ShellTestCase(unittest.TestCase):
+    def test_captures_text_and_exit_code(self):
+        p = run(['sh', '-c', 'echo out; echo err >&2; exit 3'])
+        self.assertEqual((p.returncode, p.stdout, p.stderr), (3, 'out\n', 'err\n'))
+
+    def test_large_stderr_does_not_block(self):
+        # more than a pipe buffer on stderr deadlocked the old Popen + wait() pattern
+        p = run(['sh', '-c', 'head -c 300000 /dev/zero | tr "\\0" x >&2'])
+        self.assertEqual((p.returncode, len(p.stderr)), (0, 300000))
+
+    def test_stdin_is_closed(self):
+        # cat would block on an inherited terminal instead of returning
+        self.assertEqual(run(['cat']).stdout, '')
+
+    def test_missing_tool(self):
+        with self.assertRaises(EngineError) as cm:
+            run(['sorl-thumbnail-no-such-tool'])
+        self.assertEqual(
+            str(cm.exception), 'sorl-thumbnail-no-such-tool is not installed or not on PATH'
+        )
+
+    @override_settings(THUMBNAIL_COMMAND_TIMEOUT=0.1)
+    def test_timeout(self):
+        with self.assertRaises(EngineError) as cm:
+            run(['sleep', '5'])
+        self.assertEqual(
+            str(cm.exception), 'sleep did not finish in 0.1 seconds, see THUMBNAIL_COMMAND_TIMEOUT'
         )
 
 

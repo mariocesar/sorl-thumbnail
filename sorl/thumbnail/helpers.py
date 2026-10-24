@@ -1,13 +1,20 @@
 import hashlib
 import json
 import math
+import subprocess
 from importlib import import_module
 
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.encoding import force_str
 
+from sorl.thumbnail.conf import settings
+
 
 class ThumbnailError(Exception):
+    pass
+
+
+class EngineError(Exception):
     pass
 
 
@@ -17,7 +24,7 @@ class SortedJSONEncoder(json.JSONEncoder):
     """
 
     def __init__(self, **kwargs):
-        kwargs['sort_keys'] = True
+        kwargs["sort_keys"] = True
         super().__init__(**kwargs)
 
 
@@ -40,7 +47,7 @@ def tokey(*args):
     """
     Computes a unique key from arguments given.
     """
-    salt = '||'.join([force_str(arg) for arg in args])
+    salt = "||".join([force_str(arg) for arg in args])
     return hashlib.md5(salt.encode(), usedforsecurity=False).hexdigest()
 
 
@@ -50,7 +57,7 @@ def serialize(obj):
 
 def deserialize(s):
     if isinstance(s, bytes):
-        return json.loads(s.decode('utf-8'))
+        return json.loads(s.decode("utf-8"))
     return json.loads(s)
 
 
@@ -59,7 +66,7 @@ def get_module_class(class_path):
     imports and returns module class from ``path.to.module.Class``
     argument
     """
-    mod_name, cls_name = class_path.rsplit('.', 1)
+    mod_name, cls_name = class_path.rsplit(".", 1)
 
     try:
         mod = import_module(mod_name)
@@ -67,3 +74,25 @@ def get_module_class(class_path):
         raise ImproperlyConfigured(('Error importing module %s: "%s"' % (mod_name, e)))
 
     return getattr(mod, cls_name)
+
+
+def run(args):
+    """
+    Runs an image tool with stdin closed, output captured as text and the configured timeout
+    """
+    timeout = settings.THUMBNAIL_COMMAND_TIMEOUT
+    try:
+        return subprocess.run(
+            args,
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+            errors="replace",
+            timeout=timeout,
+        )
+    except FileNotFoundError:
+        error_msg = f"{args[0]} is not installed or not on PATH"
+        raise EngineError(error_msg)
+    except subprocess.TimeoutExpired:
+        error_msg = f"{args[0]} did not finish in {timeout} seconds, see THUMBNAIL_COMMAND_TIMEOUT"
+        raise EngineError(error_msg)

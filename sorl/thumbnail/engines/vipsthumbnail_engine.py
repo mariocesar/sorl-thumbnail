@@ -1,14 +1,16 @@
+import logging
 import os
 import re
-import subprocess
 from collections import OrderedDict
 
 from django.core.files.temp import NamedTemporaryFile
-from django.utils.encoding import smart_str
 
 from sorl.thumbnail.base import EXTENSIONS
 from sorl.thumbnail.conf import settings
 from sorl.thumbnail.engines.base import EngineBase
+from sorl.thumbnail.helpers import EngineError, run
+
+logger = logging.getLogger(__name__)
 
 size_re = re.compile(r'^(?:.+) (?P<x>\d+)x(?P<y>\d+)')
 
@@ -23,7 +25,7 @@ class Engine(EngineBase):
         Writes the thumbnail image
         """
 
-        args = settings.THUMBNAIL_VIPSTHUMBNAIL.split(' ')
+        args = settings.THUMBNAIL_VIPSTHUMBNAIL.split()
         args.append(image['source'])
 
         for k in image['options']:
@@ -49,13 +51,15 @@ class Engine(EngineBase):
             args.append("-o")
             args.append(fp.name + "[%s]" % ",".join(write_options))
 
-            args = map(smart_str, args)
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            p.wait()
-            out, err = p.communicate()
+            p = run(args)
 
-            if err:
-                raise Exception(err)
+            if p.returncode:
+                raise EngineError(
+                    "The vipsthumbnail command exited with a non-zero exit code: '%s' "
+                    "printed this to stderr:\n%s" % (' '.join(args), p.stderr)
+                )
+            elif p.stderr:
+                logger.error("Captured stderr: %s", p.stderr)
 
             thumbnail.write(fp.read())
 
@@ -75,11 +79,15 @@ class Engine(EngineBase):
         Returns the image width and height as a tuple
         """
         if image['size'] is None:
-            args = settings.THUMBNAIL_VIPSHEADER.split(' ')
+            args = settings.THUMBNAIL_VIPSHEADER.split()
             args.append(image['source'])
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            p.wait()
-            m = size_re.match(str(p.stdout.read()))
+            p = run(args)
+            m = size_re.match(p.stdout)
+            if not m:
+                raise EngineError(
+                    "The vipsheader command did not report an image size: '%s' "
+                    "printed this to stderr:\n%s" % (' '.join(args), p.stderr)
+                )
             image['size'] = int(m.group('x')), int(m.group('y'))
         return image['size']
 
@@ -91,11 +99,10 @@ class Engine(EngineBase):
         with NamedTemporaryFile(mode='wb') as fp:
             fp.write(raw_data)
             fp.flush()
-            args = settings.THUMBNAIL_VIPSHEADER.split(' ')
+            args = settings.THUMBNAIL_VIPSHEADER.split()
             args.append(fp.name)
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            retcode = p.wait()
-        return retcode == 0
+            p = run(args)
+        return p.returncode == 0
 
     def _orientation(self, image):
         # vipsthumbnail also corrects the orientation exif data for

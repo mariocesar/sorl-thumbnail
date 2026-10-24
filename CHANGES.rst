@@ -5,6 +5,18 @@ Changes
 Unreleased
 ==========
 
+* The convert and vipsthumbnail engines run their tools through
+  ``subprocess.run``. This fixes a deadlock when a tool wrote more than the
+  pipe buffer to stderr, and closes the pipes that ``is_valid_image`` and the
+  size probes left open. A call that runs longer than the new
+  ``THUMBNAIL_COMMAND_TIMEOUT`` setting, 60 seconds by default, is killed and
+  raises ``EngineError``. Set it higher for large sources, or to ``None`` for
+  the previous unbounded behaviour
+* The vipsthumbnail engine no longer fails on any stderr output, which made
+  every thumbnail fail on a libvips that prints a warning on startup. It checks
+  the exit code like the convert engine does, and raises ``EngineError``
+  instead of a bare ``Exception`` or ``AttributeError`` when ``vipsthumbnail``
+  or ``vipsheader`` fail
 * ``crop='smart'`` now returns the requested size. It could hang forever,
   raise ``ValueError``, or return a thumbnail that was too narrow, like
   44×200 for ``200x200`` (`#829 <https://github.com/mariocesar/sorl-thumbnail/issues/829>`__)

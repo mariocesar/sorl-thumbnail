@@ -1,16 +1,15 @@
 import logging
 import os
 import re
-import subprocess
 from collections import OrderedDict
 
 from django.core.files.temp import NamedTemporaryFile
-from django.utils.encoding import smart_str
 
 from sorl.thumbnail.base import EXTENSIONS
 from sorl.thumbnail.conf import settings
 from sorl.thumbnail.conf.defaults import DefaultRGB
 from sorl.thumbnail.engines.base import EngineBase
+from sorl.thumbnail.helpers import EngineError, run
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +58,7 @@ class Engine(EngineBase):
 
         image['options']['quality'] = options['quality']
 
-        args = settings.THUMBNAIL_CONVERT.split(' ')
+        args = settings.THUMBNAIL_CONVERT.split()
 
         for k, v in image['read_options'].items():
             args.extend(['-%s' % k, '%s' % v])
@@ -83,17 +82,14 @@ class Engine(EngineBase):
 
         with NamedTemporaryFile(suffix=suffix, mode='rb') as fp:
             args.append(fp.name)
-            args = list(map(smart_str, args))
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            returncode = p.wait()
-            out, err = p.communicate()
+            p = run(args)
 
-            if returncode:
+            if p.returncode:
                 raise self.error(
-                    image, args, err, "The convert command exited with a non-zero exit code"
+                    image, args, p.stderr, "The convert command exited with a non-zero exit code"
                 )
-            elif err:
-                logger.error("Captured stderr: %s", err)
+            elif p.stderr:
+                logger.error("Captured stderr: %s", p.stderr)
 
             thumbnail.write(fp.read())
 
@@ -121,19 +117,18 @@ class Engine(EngineBase):
         Returns the image width and height as a tuple
         """
         if image['size'] is None:
-            args = settings.THUMBNAIL_IDENTIFY.split(' ')
+            args = settings.THUMBNAIL_IDENTIFY.split()
 
             for k, v in image['read_options'].items():
                 args.extend(['-%s' % k, '%s' % v])
 
             args.append(image['source'] + '[0]')
 
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            out, err = p.communicate()
-            m = size_re.match(str(out))
+            p = run(args)
+            m = size_re.match(p.stdout)
             if not m:
                 raise self.error(
-                    image, args, err, "The identify command did not report an image size"
+                    image, args, p.stderr, "The identify command did not report an image size"
                 )
             image['size'] = int(m.group('x')), int(m.group('y'))
         return image['size']
@@ -146,21 +141,18 @@ class Engine(EngineBase):
         with NamedTemporaryFile(mode='wb') as fp:
             fp.write(raw_data)
             fp.flush()
-            args = settings.THUMBNAIL_IDENTIFY.split(' ')
+            args = settings.THUMBNAIL_IDENTIFY.split()
             args.append(fp.name + '[0]')
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            retcode = p.wait()
-        return retcode == 0
+            p = run(args)
+        return p.returncode == 0
 
     def _get_exif_orientation(self, image):
         args = settings.THUMBNAIL_IDENTIFY.split()
         image_param = f"{image['source']}[0]"
         args.extend(["-format", "%[exif:orientation]", image_param])
-        p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        p.wait()
-        result = p.stdout.read().strip()
+        p = run(args)
         try:
-            return int(result)
+            return int(p.stdout.strip())
         except ValueError:
             return None
 
@@ -246,7 +238,3 @@ class Engine(EngineBase):
         image['options']['extent'] = '%sx%s' % (geometry[0], geometry[1])
         image['size'] = (geometry[0], geometry[1])  # update image size
         return image
-
-
-class EngineError(Exception):
-    pass
