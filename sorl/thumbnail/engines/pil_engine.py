@@ -230,7 +230,7 @@ class Engine(EngineBase):
             if self._get_image_entropy(left) < self._get_image_entropy(right):
                 image = image.crop((slice_width, 0, image_width, image_height))
             else:
-                image = image.crop((0, 0, image_height - slice_width, image_height))
+                image = image.crop((0, 0, image_width - slice_width, image_height))
 
             image_width -= slice_width
 

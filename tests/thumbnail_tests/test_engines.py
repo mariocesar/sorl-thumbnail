@@ -511,6 +511,17 @@ class CropTestCase(BaseTestCase):
         self.assertEqual(im.size[0], 32)
         self.assertEqual(im.size[1], 32)
 
+    def test_smart_crop_size(self):
+        engine = PILEngine()
+        cases = [
+            ((1280, 720), (200, 200), True, (200, 200)),  # came out 44px wide
+        ]
+        for source, geometry, upscale, expected in cases:
+            with self.subTest(source=source, geometry=geometry):
+                options = dict(ThumbnailBackend.default_options, crop='smart', upscale=upscale)
+                im = engine.create(Image.new('RGB', source), geometry, options)
+                self.assertEqual(im.size, expected)
+
     def test_image_with_orientation(self):
         name = 'data/aspect_test.jpg'
         item, _ = Item.objects.get_or_create(image=name)
