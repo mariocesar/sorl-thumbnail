@@ -41,15 +41,17 @@ jobs:
       if: matrix.target == 'redis'
       uses: supercharge/redis-github-action@1.8.1
 
-    - name: Install system dependencies
+    - name: Install ImageMagick
+      if: matrix.target == 'imagemagick' || matrix.target == 'wand'
       run: |
-        sudo apt-get update
-        sudo apt-get install imagemagick libjpeg62 zlib1g-dev libavif-dev libheif-plugin-aomenc
+        sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 update
+        sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Dpkg::Options::=--force-unsafe-io install --no-install-recommends imagemagick libheif-plugin-aomenc
 
     - name: Install GraphicsMagick
       if: matrix.target == 'graphicsmagick'
       run: |
-        sudo apt-get install libgraphicsmagick1-dev graphicsmagick
+        sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 update
+        sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Dpkg::Options::=--force-unsafe-io install --no-install-recommends graphicsmagick
 
     - name: Set up uv and Python ${{ matrix.python-version }}
       uses: astral-sh/setup-uv@v10.3.0
