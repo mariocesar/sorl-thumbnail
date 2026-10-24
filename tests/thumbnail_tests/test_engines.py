@@ -10,7 +10,7 @@ from django.test.utils import override_settings
 from PIL import Image, ImageSequence
 
 from sorl.thumbnail import default
-from sorl.thumbnail.base import ThumbnailBackend
+from sorl.thumbnail.base import EXTENSIONS, ThumbnailBackend
 from sorl.thumbnail.conf import settings
 from sorl.thumbnail.engines.convert_engine import EngineError
 from sorl.thumbnail.engines.pil_engine import Engine as PILEngine
@@ -408,6 +408,18 @@ class SimpleTestCase(BaseTestCase):
             f.write(b'not a pdf')
         with self.assertRaises(EngineError):
             self.BACKEND.get_thumbnail('broken.pdf', '50x50')
+
+    @unittest.skipIf(
+        'convert_engine' not in settings.THUMBNAIL_ENGINE,
+        'only the convert engine falls back to another format',
+    )
+    def test_unsupported_output_format(self):
+        item = Item.objects.get(image='100x100.jpg')
+        # stands in for AVIF on an ImageMagick without the libheif encoder plugin
+        with mock.patch.dict(EXTENSIONS, {'NOPE': 'nope'}):
+            with self.assertRaises(EngineError) as cm:
+                self.BACKEND.get_thumbnail(item.image, '50x50', format='NOPE')
+        self.assertIn('The convert command wrote JPEG instead of NOPE', str(cm.exception))
 
     def test_falsey_file_argument(self):
         with self.assertRaises(ValueError):

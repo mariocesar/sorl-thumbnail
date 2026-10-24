@@ -91,6 +91,16 @@ class Engine(EngineBase):
             elif p.stderr:
                 logger.error("Captured stderr: %s", p.stderr)
 
+            # convert falls back to the source format when it can't write the requested one
+            identify = settings.THUMBNAIL_IDENTIFY.split()
+            identify.extend(['-format', '%m', fp.name + '[0]'])
+            written = run(identify).stdout.strip()
+            if written != options['format']:
+                raise self.error(
+                    image, args, p.stderr,
+                    "The convert command wrote %s instead of %s" % (written, options['format'])
+                )
+
             thumbnail.write(fp.read())
 
     def cleanup(self, image):

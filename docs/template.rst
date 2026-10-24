@@ -74,7 +74,7 @@ sorl-thumbnail supports these formats:
 #. png
 #. gif
 #. webp
-#. avif  (requires pillow and pillow-avif-plugin)
+#. avif  (the PIL engine needs pillow-avif-plugin, ImageMagick needs an AVIF encoder, see :ref:`image-library`)
 
 to use different format for your images set this variable in your settings.
 

@@ -23,6 +23,10 @@ Unreleased
 * Documented ``crop='smart'``. It only works with the PIL engine, and the other
   engines now say so in the error instead of raising an empty
   ``NotImplementedError``
+* The convert engine raises an error when convert writes a different format
+  than the one requested. Without an AVIF encoder, ImageMagick printed a
+  warning, exited with 0 and wrote a JPEG, which was saved under an ``.avif``
+  name (`#837 <https://github.com/mariocesar/sorl-thumbnail/issues/837>`__)
 * The cached DB key-value store writes every entry with a single upsert
   instead of a lookup followed by an insert or update, so creating a thumbnail
   runs six statements instead of nine. Oracle has no upsert in Django and keeps
