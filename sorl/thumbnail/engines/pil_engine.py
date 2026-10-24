@@ -218,11 +218,13 @@ class Engine(EngineBase):
     # This is just a slight rework of pycrops implimentation
     def _entropy_crop(self, image, geometry_width, geometry_height, image_width, image_height):
         geometry_ratio = geometry_width / geometry_height
+        target_width = max(min(image_width, round(image_height * geometry_ratio)), 1)
+        target_height = max(min(image_height, round(image_width / geometry_ratio)), 1)
 
         # The is proportionally wider than it should be
-        while image_width / image_height > geometry_ratio:
+        while image_width > target_width:
 
-            slice_width = max(image_width - geometry_width, 10)
+            slice_width = min(image_width - target_width, 10)
 
             right = image.crop((image_width - slice_width, 0, image_width, image_height))
             left = image.crop((0, 0, slice_width, image_height))
@@ -235,9 +237,9 @@ class Engine(EngineBase):
             image_width -= slice_width
 
         # The image is proportionally taller than it should be
-        while image_width / image_height < geometry_ratio:
+        while image_height > target_height:
 
-            slice_height = min(image_height - geometry_height, 10)
+            slice_height = min(image_height - target_height, 10)
 
             bottom = image.crop((0, image_height - slice_height, image_width, image_height))
             top = image.crop((0, 0, image_width, slice_height))

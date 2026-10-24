@@ -515,6 +515,9 @@ class CropTestCase(BaseTestCase):
         engine = PILEngine()
         cases = [
             ((1280, 720), (200, 200), True, (200, 200)),  # came out 44px wide
+            ((500, 442), (60, 60), True, (60, 60)),  # never returned
+            ((720, 1280), (50, 100), True, (50, 100)),  # raised ValueError
+            ((100, 50), (200, 200), False, (50, 50)),  # not scaled, never returned
         ]
         for source, geometry, upscale, expected in cases:
             with self.subTest(source=source, geometry=geometry):
