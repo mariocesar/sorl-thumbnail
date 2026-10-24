@@ -34,8 +34,9 @@ Unreleased
   as JPEG instead of raising ``OSError: cannot write mode RGBA as JPEG`` (`#474 <https://github.com/mariocesar/sorl-thumbnail/issues/474>`__)
 * The PIL and wand engines now honour ``THUMBNAIL_FLATTEN``. When it is on, a
   transparent source written as JPEG is composited onto a white background, or
-  the padding color when the thumbnail is padded, as the convert engine already
-  did (`#474 <https://github.com/mariocesar/sorl-thumbnail/issues/474>`__)
+  the padding color when the thumbnail is padded. The convert engine already
+  flattened, and does so for every format, so its PNG, GIF and WEBP thumbnails
+  lose their transparency too (`#474 <https://github.com/mariocesar/sorl-thumbnail/issues/474>`__)
 * Documented ``THUMBNAIL_FLATTEN`` and the ``flatten`` option. A transparent
   source written as JPEG shows the color stored under its transparent pixels,
   usually black (`#474 <https://github.com/mariocesar/sorl-thumbnail/issues/474>`__)

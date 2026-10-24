@@ -185,8 +185,10 @@ instead of the color stored under its transparent pixels, which is usually
 black. The background is white, or the padding color when the thumbnail is
 padded.
 
-The PIL, wand and convert engines honour this setting, the convert engine by
-adding ``-flatten`` to the convert command. Every other engine ignores it. Pass
+The PIL and wand engines only flatten thumbnails written as JPEG. The convert
+engine adds ``-flatten`` to the convert command whatever the format, so PNG,
+GIF and WEBP thumbnails lose their transparency too. Every other engine ignores
+this setting. Pass
 ``flatten="off"`` as a thumbnail option to turn it off for one thumbnail. Only
 that string turns it off.
 
