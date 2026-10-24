@@ -525,6 +525,15 @@ class CropTestCase(BaseTestCase):
                 im = engine.create(Image.new('RGB', source), geometry, options)
                 self.assertEqual(im.size, expected)
 
+    @unittest.skipIf(
+        'pil_engine' in settings.THUMBNAIL_ENGINE,
+        'the PIL engine supports smart crop',
+    )
+    def test_smart_crop_unsupported(self):
+        message = "crop='smart' is only supported by the PIL engine"
+        with self.assertRaisesMessage(NotImplementedError, message):
+            self.BACKEND.get_thumbnail('data/white_border.jpg', '32x32', crop='smart')
+
     def test_image_with_orientation(self):
         name = 'data/aspect_test.jpg'
         item, _ = Item.objects.get_or_create(image=name)
