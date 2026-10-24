@@ -31,20 +31,19 @@ Unreleased
   will now see the thumbnail tag fail instead. Install ``libheif-plugin-aomenc``
   or ask for WEBP. Thumbnails created before the upgrade keep working
 * The PIL engine writes a greyscale source with an alpha channel (mode ``LA``)
-  as JPEG instead of raising ``OSError: cannot write mode RGBA as JPEG`` (`#474 <https://github.com/mariocesar/sorl-thumbnail/issues/474>`__)
-* The PIL and wand engines now honour ``THUMBNAIL_FLATTEN``. When it is on, a
-  transparent source written as JPEG is composited onto a white background, or
-  the padding color when the thumbnail is padded. The convert engine already
-  flattened, and does so for every format, so its PNG, GIF and WEBP thumbnails
-  lose their transparency too (`#474 <https://github.com/mariocesar/sorl-thumbnail/issues/474>`__).
-  The setting is not part of the thumbnail name, so thumbnails created before
-  the upgrade keep their black background until you delete them, for example
-  with ``manage.py thumbnail clear_delete_all``
-* Documented ``THUMBNAIL_FLATTEN`` and the ``flatten`` option. A transparent
-  source written as JPEG shows the color stored under its transparent pixels,
-  usually black (`#474 <https://github.com/mariocesar/sorl-thumbnail/issues/474>`__).
-  ``flatten=False`` now turns it off for one thumbnail, before only the string
-  ``"off"`` did
+  as JPEG instead of raising ``OSError: cannot write mode RGBA as JPEG``
+  (`#474 <https://github.com/mariocesar/sorl-thumbnail/issues/474>`__)
+* The PIL and wand engines now honour ``THUMBNAIL_FLATTEN``, which is now
+  documented along with the ``flatten`` option. A transparent source written as
+  JPEG shows the color stored under its transparent pixels, usually black. With
+  the setting on it is composited onto a white background, or the padding color
+  when the thumbnail is padded (`#474 <https://github.com/mariocesar/sorl-thumbnail/issues/474>`__).
+  The convert engine already flattened, and does so for every format, so its
+  PNG, GIF and WEBP thumbnails lose their transparency too. ``flatten=False``
+  now turns it off for one thumbnail, before only the string ``"off"`` did. The
+  setting is not part of the thumbnail name, so thumbnails created before the
+  upgrade keep their black background until you delete them, for example with
+  ``manage.py thumbnail clear_delete_all``
 * The cached DB key-value store writes every entry with a single upsert
   instead of a lookup followed by an insert or update, so creating a thumbnail
   runs six statements instead of nine. Oracle has no upsert in Django and keeps
