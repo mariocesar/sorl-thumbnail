@@ -22,6 +22,7 @@ permissions:
 
 env:
   LABEL: needs-author-verification
+  CLOSED_LABEL: closed-no-reply
   FAST_FIX_MINUTES: '60'
   VELOCITY_DAYS: '7'
   VELOCITY_PRS: '10'
@@ -146,6 +147,8 @@ jobs:
             const { owner, repo } = context.repo;
             const label = process.env.LABEL;
             const replyMs = Number(process.env.REPLY_DAYS) * 86400000;
+            const inputs = context.payload.inputs || {};
+            const dryRun = inputs.dry_run === 'true' || inputs.dry_run === true;
 
             const open = await github.paginate(github.rest.issues.listForRepo, {
               owner, repo, state: 'open', labels: label, per_page: 100,
@@ -169,10 +172,12 @@ jobs:
               const replied = [...comments, ...reviewComments].some(c => c.user && c.user.login === pr.user.login);
               if (replied) continue;
 
-              core.notice(`Closing #${pr.number}: no reply from @${pr.user.login} since ${since}`);
+              core.notice(`${dryRun ? 'Would close' : 'Closing'} #${pr.number}: no reply from @${pr.user.login} since ${since}`);
+              if (dryRun) continue;
               await github.rest.issues.createComment({
                 owner, repo, issue_number: pr.number,
                 body: `No reply in ${process.env.REPLY_DAYS} days, closing. Comment if you want it reopened.`,
               });
+              await github.rest.issues.addLabels({ owner, repo, issue_number: pr.number, labels: [process.env.CLOSED_LABEL] });
               await github.rest.pulls.update({ owner, repo, pull_number: pr.number, state: 'closed' });
             }
