@@ -266,9 +266,10 @@ class SimpleTestCase(BaseTestCase):
             img = Image.open(th.storage.path(th.name)).convert('RGB')
             self.assertEqual(img.getpixel((25, 2)), (255, 255, 255))
 
-            th = self.BACKEND.get_thumbnail(item.image, '50x50', format='JPEG', flatten='off')
-            img = Image.open(th.storage.path(th.name)).convert('RGB')
-            self.assertEqual(img.getpixel((25, 2)), (0, 0, 0))
+            for off in ('off', False):
+                th = self.BACKEND.get_thumbnail(item.image, '50x50', format='JPEG', flatten=off)
+                img = Image.open(th.storage.path(th.name)).convert('RGB')
+                self.assertEqual(img.getpixel((25, 2)), (0, 0, 0))
 
     @unittest.skipIf(
         settings.THUMBNAIL_CONVERT.startswith('gm ')

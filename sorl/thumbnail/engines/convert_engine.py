@@ -71,11 +71,7 @@ class Engine(EngineBase):
             if v is not None:
                 args.append('%s' % v)
 
-        flatten = "on"
-        if 'flatten' in options:
-            flatten = options['flatten']
-
-        if settings.THUMBNAIL_FLATTEN and not flatten == "off":
+        if settings.THUMBNAIL_FLATTEN and options.get('flatten') not in ('off', False):
             args.append('-flatten')
 
         suffix = '.%s' % EXTENSIONS[options['format']]

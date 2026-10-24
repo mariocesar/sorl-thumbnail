@@ -120,7 +120,7 @@ class Engine(EngineBase):
         colorspace = options['colorspace']
         format = options['format']
 
-        flatten = settings.THUMBNAIL_FLATTEN and options.get('flatten') != 'off'
+        flatten = settings.THUMBNAIL_FLATTEN and options.get('flatten') not in ('off', False)
         transparent = image.mode in ('RGBA', 'LA') or 'transparency' in image.info
         if flatten and transparent and format == 'JPEG':
             # Composite onto a background before JPEG drops the alpha channel, like convert -flatten

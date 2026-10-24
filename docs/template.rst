@@ -220,13 +220,13 @@ can be globally set with the setting ``THUMBNAIL_PADDING_COLOR``.
 
 ``flatten``
 ^^^^^^^^^^^
-Pass ``flatten="off"`` to write one thumbnail without the background that
+Pass ``flatten=False`` to write one thumbnail without the background that
 ``THUMBNAIL_FLATTEN`` adds::
 
-    {% thumbnail item.image "100x100" flatten="off" as im %}
+    {% thumbnail item.image "100x100" flatten=False as im %}
 
-Only the string ``"off"`` turns it off. The PIL, wand and convert engines
-honour it, every other engine ignores it.
+``flatten="off"`` does the same. The PIL, wand and convert engines honour it,
+every other engine ignores it.
 
 ``density``
 ^^^^^^^^^^^

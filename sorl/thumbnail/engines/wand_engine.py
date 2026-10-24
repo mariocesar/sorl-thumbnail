@@ -87,7 +87,7 @@ class Engine(EngineBase):
         return image
 
     def write(self, image, options, thumbnail):
-        flatten = settings.THUMBNAIL_FLATTEN and options.get('flatten') != 'off'
+        flatten = settings.THUMBNAIL_FLATTEN and options.get('flatten') not in ('off', False)
         if flatten and options['format'] == 'JPEG':
             # Composite onto white before JPEG drops the alpha channel, like convert -flatten
             image.background_color = 'white'

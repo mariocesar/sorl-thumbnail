@@ -42,7 +42,9 @@ Unreleased
   with ``manage.py thumbnail clear_delete_all``
 * Documented ``THUMBNAIL_FLATTEN`` and the ``flatten`` option. A transparent
   source written as JPEG shows the color stored under its transparent pixels,
-  usually black (`#474 <https://github.com/mariocesar/sorl-thumbnail/issues/474>`__)
+  usually black (`#474 <https://github.com/mariocesar/sorl-thumbnail/issues/474>`__).
+  ``flatten=False`` now turns it off for one thumbnail, before only the string
+  ``"off"`` did
 * The cached DB key-value store writes every entry with a single upsert
   instead of a lookup followed by an insert or update, so creating a thumbnail
   runs six statements instead of nine. Oracle has no upsert in Django and keeps

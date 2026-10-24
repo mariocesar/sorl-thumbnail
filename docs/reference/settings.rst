@@ -188,9 +188,8 @@ padded.
 The PIL and wand engines only flatten thumbnails written as JPEG. The convert
 engine adds ``-flatten`` to the convert command whatever the format, so PNG,
 GIF and WEBP thumbnails lose their transparency too. Every other engine ignores
-this setting. Pass
-``flatten="off"`` as a thumbnail option to turn it off for one thumbnail. Only
-that string turns it off.
+this setting. Pass ``flatten=False`` or ``flatten="off"`` as a thumbnail option
+to turn it off for one thumbnail.
 
 
 ``THUMBNAIL_STORAGE``
