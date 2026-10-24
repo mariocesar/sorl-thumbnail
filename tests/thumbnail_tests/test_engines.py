@@ -511,6 +511,29 @@ class CropTestCase(BaseTestCase):
         self.assertEqual(im.size[0], 32)
         self.assertEqual(im.size[1], 32)
 
+    def test_smart_crop_size(self):
+        engine = PILEngine()
+        cases = [
+            ((1280, 720), (200, 200), True, (200, 200)),  # came out 44px wide
+            ((500, 442), (60, 60), True, (60, 60)),  # never returned
+            ((720, 1280), (50, 100), True, (50, 100)),  # raised ValueError
+            ((100, 50), (200, 200), False, (50, 50)),  # not scaled, never returned
+        ]
+        for source, geometry, upscale, expected in cases:
+            with self.subTest(source=source, geometry=geometry):
+                options = dict(ThumbnailBackend.default_options, crop='smart', upscale=upscale)
+                im = engine.create(Image.new('RGB', source), geometry, options)
+                self.assertEqual(im.size, expected)
+
+    @unittest.skipIf(
+        'pil_engine' in settings.THUMBNAIL_ENGINE,
+        'the PIL engine supports smart crop',
+    )
+    def test_smart_crop_unsupported(self):
+        message = "crop='smart' is only supported by the PIL engine"
+        with self.assertRaisesMessage(NotImplementedError, message):
+            self.BACKEND.get_thumbnail('data/white_border.jpg', '32x32', crop='smart')
+
     def test_image_with_orientation(self):
         name = 'data/aspect_test.jpg'
         item, _ = Item.objects.get_or_create(image=name)

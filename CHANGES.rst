@@ -5,6 +5,12 @@ Changes
 Unreleased
 ==========
 
+* ``crop='smart'`` now returns the requested size. It could hang forever,
+  raise ``ValueError``, or return a thumbnail that was too narrow, like
+  44×200 for ``200x200`` (`#829 <https://github.com/mariocesar/sorl-thumbnail/issues/829>`__)
+* Documented ``crop='smart'``. It only works with the PIL engine, and the other
+  engines now say so in the error instead of raising an empty
+  ``NotImplementedError``
 * The cached DB key-value store writes every entry with a single upsert
   instead of a lookup followed by an insert or update, so creating a thumbnail
   runs six statements instead of nine. Oracle has no upsert in Django and keeps

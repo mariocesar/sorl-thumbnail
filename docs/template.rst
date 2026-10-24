@@ -142,6 +142,10 @@ some differences to the `css background-position`_:
 - Only % and px are valid lengths (units)
 - ``noop`` (No Operation) is a valid option which means there is no
   cropping after the initial rescaling to minimum of width and height.
+- ``smart`` crops away the parts of the image with the least detail instead of
+  cropping at a fixed position. It trims whichever side has less entropy, 10px
+  at a time, until the image has the requested aspect ratio. Only the PIL
+  engine supports it; the other engines raise ``NotImplementedError``.
 
 There are many overlapping options here for example ``center`` is equivalent to
 ``50%``. There is not a problem with that in it self but it is a bit of a
