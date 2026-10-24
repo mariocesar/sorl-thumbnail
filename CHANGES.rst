@@ -26,7 +26,10 @@ Unreleased
 * The convert engine raises an error when convert writes a different format
   than the one requested. Without an AVIF encoder, ImageMagick printed a
   warning, exited with 0 and wrote a JPEG, which was saved under an ``.avif``
-  name (`#837 <https://github.com/mariocesar/sorl-thumbnail/issues/837>`__)
+  name (`#837 <https://github.com/mariocesar/sorl-thumbnail/issues/837>`__).
+  Browsers displayed those files, so sites that ask for AVIF on such a machine
+  will now see the thumbnail tag fail instead. Install ``libheif-plugin-aomenc``
+  or ask for WEBP. Thumbnails created before the upgrade keep working
 * The cached DB key-value store writes every entry with a single upsert
   instead of a lookup followed by an insert or update, so creating a thumbnail
   runs six statements instead of nine. Oracle has no upsert in Django and keeps

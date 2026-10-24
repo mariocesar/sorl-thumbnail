@@ -421,6 +421,20 @@ class SimpleTestCase(BaseTestCase):
                 self.BACKEND.get_thumbnail(item.image, '50x50', format='NOPE')
         self.assertIn('The convert command wrote JPEG instead of NOPE', str(cm.exception))
 
+    @unittest.skipIf(
+        'convert_engine' not in settings.THUMBNAIL_ENGINE,
+        'only the convert engine checks the written format',
+    )
+    def test_format_check_only_on_conversion(self):
+        item = Item.objects.get(image='100x100.jpg')
+        with mock.patch('subprocess.Popen', wraps=Popen) as popen:
+            self.BACKEND.get_thumbnail(item.image, '40x40', format='JPEG')
+            self.BACKEND.get_thumbnail(item.image, '40x40', format='PNG')
+        checks = [call.args[0] for call in popen.call_args_list if '%m' in call.args[0]]
+        # JPEG to JPEG can't fall back to another format, so only the PNG is checked
+        self.assertEqual(len(checks), 1)
+        self.assertTrue(checks[0][-1].endswith('.png[0]'))
+
     def test_falsey_file_argument(self):
         with self.assertRaises(ValueError):
             self.BACKEND.get_thumbnail('', '100x100')
