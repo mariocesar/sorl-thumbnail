@@ -173,6 +173,21 @@ may run before it is killed and ``EngineError`` is raised. Raise it if large
 sources or high ``density`` values legitimately take longer. ``None`` lets a
 call run as long as it takes, so a malformed or hostile image can keep a worker
 busy indefinitely. Only applicable for the convert and vipsthumbnail Engines.
+``THUMBNAIL_FLATTEN``
+=====================
+
+
+- Default: ``False``
+
+When ``True`` the convert engine adds ``-flatten`` to the convert command, so a
+transparent source written as JPEG gets a solid background instead of the color
+stored under its transparent pixels, which is usually black. The background is
+white, or the padding color when the thumbnail is padded.
+
+Only the convert engine honours this setting, with ImageMagick and
+GraphicsMagick. Every other engine ignores it. Pass ``flatten="off"`` as a
+thumbnail option to turn it off for one thumbnail. Only that string turns it
+off.
 
 
 ``THUMBNAIL_STORAGE``

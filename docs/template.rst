@@ -182,8 +182,15 @@ source EXIF tags for orientation. Default value is ``True``.
 
 ``format``
 ^^^^^^^^^^
-This controls the write format and thumbnail extension. Formats supported by
-the shipped engines are ``'JPEG'`` and ``'PNG'``. Default value is ``'JPEG'``.
+This controls the write format and thumbnail extension. Supported formats are
+``'JPEG'``, ``'PNG'``, ``'GIF'``, ``'WEBP'`` and ``'AVIF'``. Default value is
+``'JPEG'``.
+
+JPEG has no transparency, so a transparent source written as JPEG shows the
+color stored under its transparent pixels, which is usually black. With the
+convert engine, set ``THUMBNAIL_FLATTEN`` to get a white background instead.
+With the other engines, write PNG with ``format='PNG'`` or
+``THUMBNAIL_PRESERVE_FORMAT``, or flatten the image before uploading it.
 
 ``colorspace``
 ^^^^^^^^^^^^^^
@@ -210,6 +217,15 @@ Images are not padded by default, but this can be changed by setting
 ^^^^^^^^^^^^^^^^^
 This is the color to use for padding the image. It defaults to ``#ffffff`` and
 can be globally set with the setting ``THUMBNAIL_PADDING_COLOR``.
+
+``flatten``
+^^^^^^^^^^^
+Pass ``flatten="off"`` to write one thumbnail without the ``-flatten`` that
+``THUMBNAIL_FLATTEN`` adds::
+
+    {% thumbnail item.image "100x100" flatten="off" as im %}
+
+Only the string ``"off"`` turns it off, and only the convert engine honours it.
 
 ``density``
 ^^^^^^^^^^^
