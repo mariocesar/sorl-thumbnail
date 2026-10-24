@@ -13,7 +13,7 @@ from sorl.thumbnail.helpers import EngineError, run
 
 logger = logging.getLogger(__name__)
 
-size_re = re.compile(r'^(?:.+) (?:[A-Z0-9]+) (?P<x>\d+)x(?P<y>\d+)')
+size_re = re.compile(r'^(?:.+) (?P<format>[A-Z0-9]+) (?P<x>\d+)x(?P<y>\d+)')
 
 
 class Engine(EngineBase):
@@ -91,6 +91,17 @@ class Engine(EngineBase):
             elif p.stderr:
                 logger.error("Captured stderr: %s", p.stderr)
 
+            # convert falls back to the source format when it can't write the requested one
+            if options['format'] != image['format']:
+                identify = settings.THUMBNAIL_IDENTIFY.split()
+                identify.extend(['-format', '%m', fp.name + '[0]'])
+                written = run(identify).stdout.strip() or 'an unreadable file'
+                if written != options['format']:
+                    raise self.error(
+                        image, args, p.stderr,
+                        "The convert command wrote %s instead of %s" % (written, options['format'])
+                    )
+
             thumbnail.write(fp.read())
 
     def cleanup(self, image):
@@ -110,6 +121,7 @@ class Engine(EngineBase):
             'options': OrderedDict(),
             'read_options': OrderedDict(),
             'size': None,
+            'format': None,
         }
 
     def get_image_size(self, image):
@@ -131,6 +143,7 @@ class Engine(EngineBase):
                     image, args, p.stderr, "The identify command did not report an image size"
                 )
             image['size'] = int(m.group('x')), int(m.group('y'))
+            image['format'] = m.group('format')
         return image['size']
 
     def is_valid_image(self, raw_data):

@@ -53,6 +53,11 @@ paths to these tools by setting ``THUMBNAIL_CONVERT`` and ``THUMBNAIL_IDENTIFY``
 respectively.  Note that you need to change these to use `GraphicsMagick`_ to
 ``/path/to/gm convert`` and ``/path/to/gm identify``.
 
+To write AVIF, ImageMagick needs libheif with an AV1 encoder. On Debian and
+Ubuntu that is the ``libheif-plugin-aomenc`` package. It is only a recommended
+package, so ``--no-install-recommends`` leaves it out. Without it the convert
+engine raises an error instead of saving a JPEG under an ``.avif`` name.
+
 Python Imaging Library installation
 -----------------------------------
 Prerequisites:
