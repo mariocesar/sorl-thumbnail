@@ -176,7 +176,7 @@ class Engine(EngineBase):
             if image.mode == 'RGBA' and format != 'JPEG':
                 return image  # RGBA is just RGB + Alpha
             if format != 'JPEG' and (
-                image.mode == 'LA' or image.mode == 'P' and 'transparency' in image.info
+                image.mode == 'LA' or (image.mode == 'P' and 'transparency' in image.info)
             ):
                 newimage = image.convert('RGBA')
                 transparency = image.info.get('transparency')
