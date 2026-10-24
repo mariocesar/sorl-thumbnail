@@ -220,38 +220,28 @@ class Engine(EngineBase):
         geometry_ratio = geometry_width / geometry_height
         target_width = max(min(image_width, round(image_height * geometry_ratio)), 1)
         target_height = max(min(image_height, round(image_width / geometry_ratio)), 1)
+        left, top, right, bottom = 0, 0, image_width, image_height
 
-        # The is proportionally wider than it should be
-        while image_width > target_width:
-
-            slice_width = min(image_width - target_width, 10)
-
-            right = image.crop((image_width - slice_width, 0, image_width, image_height))
-            left = image.crop((0, 0, slice_width, image_height))
-
-            if self._get_image_entropy(left) < self._get_image_entropy(right):
-                image = image.crop((slice_width, 0, image_width, image_height))
+        # Trim the side with less entropy, up to 10px per round, then crop once
+        while right - left > target_width:
+            step = min(right - left - target_width, 10)
+            left_strip = image.crop((left, top, left + step, bottom))
+            right_strip = image.crop((right - step, top, right, bottom))
+            if self._get_image_entropy(left_strip) < self._get_image_entropy(right_strip):
+                left += step
             else:
-                image = image.crop((0, 0, image_width - slice_width, image_height))
+                right -= step
 
-            image_width -= slice_width
-
-        # The image is proportionally taller than it should be
-        while image_height > target_height:
-
-            slice_height = min(image_height - target_height, 10)
-
-            bottom = image.crop((0, image_height - slice_height, image_width, image_height))
-            top = image.crop((0, 0, image_width, slice_height))
-
-            if self._get_image_entropy(bottom) < self._get_image_entropy(top):
-                image = image.crop((0, 0, image_width, image_height - slice_height))
+        while bottom - top > target_height:
+            step = min(bottom - top - target_height, 10)
+            top_strip = image.crop((left, top, right, top + step))
+            bottom_strip = image.crop((left, bottom - step, right, bottom))
+            if self._get_image_entropy(bottom_strip) < self._get_image_entropy(top_strip):
+                bottom -= step
             else:
-                image = image.crop((0, slice_height, image_width, image_height))
+                top += step
 
-            image_height -= slice_height
-
-        return image
+        return image.crop((left, top, right, bottom))
 
     # Add the histogram_entropy fumnction as a static method:
     _get_image_entropy = staticmethod(histogram_entropy)
