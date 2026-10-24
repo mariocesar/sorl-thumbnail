@@ -32,6 +32,7 @@ pip-delete-this-directory.txt
 .LSOverride
 ._*
 .~
+temp_auto_push.bat
 .bak
 *.swp
 *.swo
@@ -66,3 +67,5 @@ thumbnail_kvstore.lock
 htmlcov/
 coverage.xml
 dump.rdb
+.gitignore
+branch_structure.json

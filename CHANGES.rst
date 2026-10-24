@@ -5,6 +5,10 @@ Changes
 Unreleased
 ==========
 
+* ``ImageFile.serialize_storage()`` now resolves storage aliases by instance
+  matching without requiring an exact string match on ``BACKEND``, ensuring
+  aliases using re-exported or short paths (such as ``django.core.files.storage.FileSystemStorage``)
+  retain their alias and ``OPTIONS`` across cache lookups (`#834 <https://github.com/mariocesar/sorl-thumbnail/issues/834>`__)
 * The cached DB key-value store writes every entry with a single upsert
   instead of a lookup followed by an insert or update, so creating a thumbnail
   runs six statements instead of nine. Oracle has no upsert in Django and keeps

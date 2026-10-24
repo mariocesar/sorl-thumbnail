@@ -196,10 +196,18 @@ class ImageFile(BaseImageFile):
         if use_backend_name:
             return backend
         # Resolve the alias by instance, not by class: several aliases may share
-        # a backend class and differ only in OPTIONS (#806).
-        for alias, params in storages.backends.items():
-            if params.get("BACKEND") == backend and storages[alias] is storage:
-                return alias
+        # a backend class and differ only in OPTIONS (#806, #834).
+        for alias in storages.backends:
+            try:
+                alias_storage = storages[alias]
+                if isinstance(alias_storage, LazyObject):
+                    if alias_storage._wrapped is empty:
+                        alias_storage._setup()
+                    alias_storage = alias_storage._wrapped
+                if alias_storage is storage:
+                    return alias
+            except Exception:
+                pass
         return backend
 
     @property
