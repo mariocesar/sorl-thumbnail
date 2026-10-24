@@ -1,6 +1,4 @@
 import os
-import re
-from subprocess import PIPE, Popen
 
 from django.template import Template, TemplateSyntaxError
 from django.template.loader import render_to_string
@@ -60,21 +58,13 @@ class TemplateTestCaseA(BaseTestCase):
         im = Item.objects.get(image='500x500.jpg').image
         th = self.BACKEND.get_thumbnail(im, '100x100', progressive=True)
         path = os.path.join(settings.MEDIA_ROOT, th.name)
-        p = Popen(['identify', '-verbose', path], stdout=PIPE)
-        p.wait()
-        m = re.search('Interlace: JPEG', str(p.stdout.read()))
-        p.stdout.close()
-        self.assertEqual(bool(m), True)
+        self.assertTrue(Image.open(path).info.get('progressive'))
 
     def test_nonprogressive(self):
         im = Item.objects.get(image='500x500.jpg').image
         th = self.BACKEND.get_thumbnail(im, '100x100', progressive=False)
         path = os.path.join(settings.MEDIA_ROOT, th.name)
-        p = Popen(['identify', '-verbose', path], stdout=PIPE)
-        p.wait()
-        m = re.search('Interlace: None', str(p.stdout.read()))
-        p.stdout.close()
-        self.assertEqual(bool(m), True)
+        self.assertFalse(Image.open(path).info.get('progressive'))
 
     def test_orientation(self):
         ref = Image.open(os.path.join(DATA_DIR, '1_topleft.jpg'))

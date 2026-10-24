@@ -1,7 +1,8 @@
 import os
 import platform
 import unittest
-from subprocess import PIPE, Popen
+from io import BytesIO
+from subprocess import Popen
 from unittest import mock
 
 from django.core.files.storage import default_storage, storages
@@ -226,11 +227,11 @@ class SimpleTestCase(BaseTestCase):
     def test_quality(self):
         im = ImageFile(Item.objects.get(image='500x500.jpg').image)
         th = self.BACKEND.get_thumbnail(im, '100x100', quality=50)
-        p1 = Popen(['identify', '-verbose', th.storage.path(th.name)], stdout=PIPE)
-        p2 = Popen(['grep', '-c', 'Quality: 50'], stdin=p1.stdout, stdout=PIPE)
-        p1.stdout.close()
-        output = p2.communicate()[0].strip()
-        self.assertEqual(output.decode('utf-8'), '1')
+        img = Image.open(th.storage.path(th.name))
+        # Every engine writes JPEG with libjpeg, so quality 50 gives the same tables as Pillow's
+        reference = BytesIO()
+        Image.new(img.mode, (8, 8)).save(reference, 'JPEG', quality=50)
+        self.assertEqual(img.quantization, Image.open(reference).quantization)
 
     def test_transparency(self):
         item, _created = self.create_image(
