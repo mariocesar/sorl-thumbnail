@@ -2,8 +2,8 @@
 Changes
 =======
 
-Unreleased
-==========
+13.3.0
+======
 
 * The convert and vipsthumbnail engines run their tools through
   ``subprocess.run``. This fixes a deadlock when a tool wrote more than the
