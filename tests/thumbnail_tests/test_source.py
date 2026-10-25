@@ -2,6 +2,7 @@ import io
 import logging
 from collections import Counter
 from unittest import skipIf
+from unittest.mock import patch
 
 import django
 from django.core.cache import cache
@@ -192,6 +193,18 @@ class SourceCacheTestCase(BaseTestCase):
             remote.files['x.jpg'] = jpeg(100, 200)
             self.assertEqual(ImageFile('x.jpg', storage=remote).read(), remote.files['x.jpg'])
         self.assertEqual(remote.fetches['x.jpg'], 2)
+
+    def test_url_source_is_downloaded_once(self):
+        downloads = []
+
+        def urlopen(request, timeout=None):
+            downloads.append(request.full_url)
+            return Stream(jpeg(100, 200))
+
+        with patch('sorl.thumbnail.images.urlopen', urlopen), source_cache():
+            self.assertTrue(is_portrait('https://example.com/x.jpg'))
+            self.assertEqual(get_thumbnail('https://example.com/x.jpg', '50x50').size, [25, 50])
+        self.assertEqual(downloads, ['https://example.com/x.jpg'])
 
     def test_caller_handles_are_left_alone(self):
         self.item.image.open('rb')
