@@ -19,6 +19,10 @@ var/
 .eggs
 .installed.cfg
 
+# Secrets
+.envrc
+.env*
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
@@ -51,7 +55,7 @@ docs/_build/
 
 # Virtualenv
 .python-version
-.env/
+.venv/
 
 # dbm stuff
 tests/thumbnail_kvstore
