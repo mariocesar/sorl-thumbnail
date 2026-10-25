@@ -242,9 +242,10 @@ class ImageFile(BaseImageFile):
         if use_backend_name:
             return backend
         # Resolve the alias by instance, not by class: several aliases may share
-        # a backend class and differ only in OPTIONS (#806).
+        # a backend class and differ only in OPTIONS (#806). BACKEND is imported,
+        # not compared as text, as it may name a re-export of the class (#834).
         for alias, params in storages.backends.items():
-            if params.get("BACKEND") == backend and storages[alias] is storage:
+            if get_module_class(params["BACKEND"]) is cls and storages[alias] is storage:
                 return alias
         return backend
 

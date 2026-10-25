@@ -55,6 +55,18 @@ Unreleased
   whole image. The other engines accept these files on purpose: ImageMagick,
   GraphicsMagick and wand make the thumbnail and fill the missing part with
   grey (`#427 <https://github.com/mariocesar/sorl-thumbnail/issues/427>`__)
+* Cached thumbnails keep the ``OPTIONS`` of their ``STORAGES`` alias, like
+  ``base_url`` and ``location``, when the ``BACKEND`` is written the way
+  Django's docs write it, ``django.core.files.storage.FileSystemStorage``.
+  The alias was found by comparing that text with the class's full path,
+  ``django.core.files.storage.filesystem.FileSystemStorage``, so it never
+  matched, and the second request for a thumbnail built a storage without the
+  options and returned a different URL. The alias is now found by the class
+  the ``BACKEND`` imports. This applies to every engine. Run
+  ``manage.py thumbnail clear`` once after upgrading: it empties the key-value
+  store, sorl-thumbnail's record of the thumbnails it made, without deleting
+  any file
+  (`#834 <https://github.com/mariocesar/sorl-thumbnail/issues/834>`__)
 
 13.3.0
 ======

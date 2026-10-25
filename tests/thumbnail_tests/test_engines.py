@@ -17,7 +17,7 @@ from sorl.thumbnail.conf import settings
 from sorl.thumbnail.engines.convert_engine import EngineError
 from sorl.thumbnail.engines.pil_engine import Engine as PILEngine
 from sorl.thumbnail.helpers import get_module_class, run, tokey
-from sorl.thumbnail.images import ImageFile
+from sorl.thumbnail.images import ImageFile, deserialize_image_file
 from sorl.thumbnail.parsers import parse_geometry
 from sorl.thumbnail.templatetags.thumbnail import is_portrait, margin
 
@@ -223,6 +223,27 @@ class SimpleTestCase(BaseTestCase):
             self.assertEqual(on_default.key, tokey('same.jpg', test_storage))
             self.assertEqual(on_other.key, tokey('same.jpg', 'other'))
             self.assertNotEqual(on_default.key, on_other.key)
+
+    def test_storage_serialize_short_backend_path(self):
+        # Django's docs name FileSystemStorage by its re-export, not its module (#834).
+        backend = 'django.core.files.storage.FileSystemStorage'
+        with self.settings(STORAGES={
+            'default': {'BACKEND': backend, 'OPTIONS': {'base_url': '/media/'}},
+            'short': {'BACKEND': backend, 'OPTIONS': {'base_url': '/short/'}},
+        }):
+            on_default = ImageFile('short.jpg', storages['default'])
+            on_short = ImageFile('short.jpg', storages['short'])
+            on_short.set_size((10, 10))
+            self.assertEqual(on_default.serialize_storage(), 'default')
+            self.assertEqual(on_short.serialize_storage(), 'short')
+            # The default storage keeps its pre-13 key, the real class path.
+            self.assertEqual(
+                on_default.key,
+                tokey('short.jpg', 'django.core.files.storage.filesystem.FileSystemStorage'),
+            )
+            cached = deserialize_image_file(on_short.serialize())
+            self.assertIs(cached.storage, storages['short'])
+            self.assertEqual(cached.url, '/short/short.jpg')
 
     @unittest.skipIf(platform.system() == "Darwin", 'quality is saved a different way on os x')
     def test_quality(self):
