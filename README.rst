@@ -1,188 +1,173 @@
 |pypi| |python-badge| |django-badge| |docs| |gh-actions| |codecov| |precommit|
 
-Thumbnails for Django.
+==============
+sorl-thumbnail
+==============
 
-Website, with examples for every image engine: https://mariocesar.github.io/sorl-thumbnail/
+Thumbnails for Django. You write the size in the template, or ask for it in
+Python, and sorl-thumbnail makes the thumbnail on first use with Pillow,
+libvips or ImageMagick, saves it on your media storage and remembers it in a
+key-value store, so later renders cost no image work and no storage request.
 
-Features at a glance
-====================
+- Website, with an example gallery for every image engine:
+  https://mariocesar.github.io/sorl-thumbnail/
+- Documentation: https://sorl-thumbnail.readthedocs.io/
 
-- Support for Django 5.2, 6.0, and 6.1 following the `Django supported versions policy`_
-- Storage support
-- Pluggable engine support for `Pillow`_, `libvips`_, `ImageMagick`_, `GraphicsMagick`_, `Wand`_ and `pgmagick`_
-- Pluggable Key Value Store support (cached db and redis)
-- Pluggable Backend support
-- Admin integration with possibility to delete
-- Dummy generation (placeholders)
-- Flexible, simple syntax, generates no html
-- CSS style cropping options
-- Smart cropping, and removing plain borders before cropping
-- Margin calculation for vertical positioning
-- Alternative resolutions versions of a thumbnail
+Quick start
+===========
 
-Read more in `the documentation (latest version) <https://sorl-thumbnail.readthedocs.io/>`_
+Install sorl-thumbnail with Pillow::
 
-Developers
-==========
+    pip install "sorl-thumbnail[pil]"
 
-By contributing you agree to abide by the
-`Code of Conduct <https://github.com/mariocesar/sorl-thumbnail/blob/main/CODE_OF_CONDUCT.md>`_.
-To report a security issue, follow the
-`security policy <https://github.com/mariocesar/sorl-thumbnail/blob/main/SECURITY.md>`_
-instead of opening a public issue.
-
-Feel free to create a new Pull request if you want to propose a new feature.
-If you need development support or want to discuss with other developers
-join us in `GitHub Discussions`_.
-
-Tests
------
-The tests run with tox, which uses `uv <https://docs.astral.sh/uv/>`_ to create its environments.
-With uv installed, `uvx --with tox-uv tox` will run all tests for all environments.
-However, it is possible to run a certain environment with `uvx --with tox-uv tox -e <env>`, a list of all environments
-can be found with `uvx --with tox-uv tox -l`. These tests require the dependencies of the different engines defined in
-the documentation. The easiest way to run tests is using Docker - see the `contributing documentation <https://sorl-thumbnail.readthedocs.io/en/latest/contributing.html#running-testsuite>`_
-for detailed instructions on running tests locally with Docker.
-
-User Support
-============
-
-If you need help using sorl-thumbnail ask in the Q&A category of `GitHub Discussions`_.
-
-
-How to Use
-==========
-
-Get the code
-------------
-
-Getting the code for the latest stable release use 'pip'. ::
-
-   $ pip install sorl-thumbnail
-
-Install in your project
------------------------
-
-Then register 'sorl.thumbnail', in the 'INSTALLED_APPS' section of
-your project's settings. ::
+Add ``'sorl.thumbnail'`` to ``INSTALLED_APPS``::
 
     INSTALLED_APPS = [
-        'django.contrib.admin',
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-        'django.contrib.sessions',
-        'django.contrib.messages',
-        'django.contrib.staticfiles',
-
+        ...
         'sorl.thumbnail',
     ]
 
+and create its table::
 
-Templates Usage
----------------
+    python manage.py migrate
 
-All of the examples assume that you first load the thumbnail template tag in
-your template.::
+Then, in a template::
 
     {% load thumbnail %}
 
-
-A simple usage. ::
-
     {% thumbnail item.image "100x100" crop="center" as im %}
         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
     {% endthumbnail %}
 
-See more examples in the section `Template examples`_ in the Documentation
-
-Model Usage
------------
-
-You can use ``sorl.thumbnail.ImageField`` in your models::
-
-    from django.db import models
-    from sorl.thumbnail import ImageField
-
-    class Item(models.Model):
-        image = ImageField(upload_to='whatever')
-
-See more examples in the section `Model examples`_ in the Documentation
-
-Low level API
--------------
-
-You can use the 'get_thumbnail'::
+``item.image`` can be an ``ImageField``, a path in your media storage or the
+URL of an image. The same from Python::
 
     from sorl.thumbnail import get_thumbnail
-    from sorl.thumbnail import delete
 
-    im = get_thumbnail(my_file, '100x100', crop='center', quality=99)
-    delete(my_file)
+    im = get_thumbnail(item.image, '100x100', crop='center', quality=99)
 
-See more examples in the section `Low level API examples`_ in the Documentation
+The `quickstart`_ walks through this. The documentation covers the
+`template tag and its options`_, every `setting`_, `thumbnails on Amazon S3`_
+and `troubleshooting`_.
 
-Using in combination with other thumbnailers
---------------------------------------------
+Features
+========
 
-Alternatively, you load the templatetags by {% load sorl_thumbnail %}
-instead of traditional {% load thumbnail %}. It's especially useful in
-projects that do make use of multiple thumbnailer libraries that use the
-same name (``thumbnail``) for the templatetag module::
+- Resize to a box, a width or a height. Crop by position, percentage, pixels
+  or a crop box, crop to the busiest part of the image, or cut plain borders
+  first.
+- JPEG, PNG, GIF, WEBP and AVIF output, with quality, progressive JPEG,
+  grayscale, padding, rounded corners and blur. Animated GIFs stay animated
+  with Pillow and libvips.
+- Follows the EXIF orientation of photos.
+- Any Django storage for sources and thumbnails, Amazon S3 included. The
+  key-value store, your database read through your cache or Redis, remembers
+  every thumbnail, so a cached one costs no storage request.
+- An ``ImageField`` that validates uploads, an admin widget with a preview,
+  and placeholder images for developing without the real media.
+- Alternative resolutions for high-density screens, and the ``is_portrait``
+  and ``margin`` filters for layout.
+- Django 5.2, 6.0 and 6.1, following the `Django supported versions
+  policy`_, on Python 3.10 and later.
+
+Engines
+=======
+
+The engine does the resizing. Set it with ``THUMBNAIL_ENGINE``; Pillow is the
+default.
+
+- `Pillow`_, the default: ``pip install "sorl-thumbnail[pil]"``.
+- `libvips`_ through pyvips: ``pip install "sorl-thumbnail[vips]"``.
+- `ImageMagick`_, through its ``convert`` and ``identify`` commands. Also
+  reads PDF pages.
+- `GraphicsMagick`_, the same engine through ``gm convert`` and
+  ``gm identify``.
+- `Wand`_, a Python binding for ImageMagick: ``pip install "sorl-thumbnail[wand]"``.
+- `pgmagick`_, a Python binding for GraphicsMagick:
+  ``pip install "sorl-thumbnail[pgmagick]"``.
+
+Each engine has an example gallery on the `website`_, and the documentation
+lists which options each one supports.
+
+Using it next to another thumbnail library
+==========================================
+
+Other libraries also register a ``thumbnail`` template library. Load
+sorl-thumbnail's tags as ``sorl_thumbnail`` instead, the tag is the same::
 
     {% load sorl_thumbnail %}
-    {% thumbnail item.image "100x100" crop="center" as im %}
-        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-    {% endthumbnail %}
 
-Frequently asked questions
-==========================
+Help
+====
 
-Is it slow on Amazon S3?
-------------------------
+Ask in the Q&A category of `GitHub Discussions`_. Report bugs in the
+`issue tracker`_.
 
-Once a thumbnail is in the key-value store, rendering it makes no request to
-the storage at all. A slow page means thumbnails are being generated, or the
-key-value store was cleared or lost. Generating a thumbnail reads the source
-once and writes the result once, which is as little as it can be.
+Contributing
+============
 
-Older versions of this FAQ recommended ``THUMBNAIL_FORCE_OVERWRITE = True``.
-That advice dates from boto 2. With boto3 it makes things worse: on a key-value
-store miss it regenerates the thumbnail from the full-size source instead of
-making one ``HEAD`` request for the file that is already there. See
-`THUMBNAIL_FORCE_OVERWRITE`_ before enabling it.
+Pull requests are welcome. The `contributing guide`_ explains how to run the
+tests and send a change. Using AI tools is fine if you say so and test the
+change yourself; pull requests sent by scripts are closed. By contributing
+you agree to the `Code of Conduct`_. To report a security issue, follow the
+`security policy`_ instead of opening a public issue.
+
+The tests run with tox through `uv`_, one environment per Python, Django and
+engine::
+
+    uvx --with tox-uv tox -l
+    uvx --with tox-uv tox -e py312-django52-pil
+
+The Pillow and libvips environments need nothing else. The others need the
+engine's tools, see the `requirements`_, or run them in Docker as the
+contributing guide shows.
+
+License
+=======
+
+BSD 3-Clause, see the `LICENSE file <https://github.com/mariocesar/sorl-thumbnail/blob/main/LICENSE>`_.
 
 
-.. |gh-actions| image:: https://github.com/mariocesar/sorl-thumbnail/workflows/Test/badge.svg
-    :target: https://github.com/mariocesar/sorl-thumbnail/actions
+.. |gh-actions| image:: https://github.com/mariocesar/sorl-thumbnail/actions/workflows/test.yml/badge.svg
+    :target: https://github.com/mariocesar/sorl-thumbnail/actions/workflows/test.yml
+    :alt: Test status
 .. |docs| image:: https://readthedocs.org/projects/sorl-thumbnail/badge/?version=latest
-    :alt: Documentation for latest version
     :target: https://sorl-thumbnail.readthedocs.io/en/latest/
+    :alt: Documentation for the latest version
 .. |pypi| image:: https://img.shields.io/pypi/v/sorl-thumbnail.svg
-    :target: https://pypi.python.org/pypi/sorl-thumbnail
+    :target: https://pypi.org/project/sorl-thumbnail/
     :alt: sorl-thumbnail on PyPI
 .. |python-badge| image:: https://img.shields.io/pypi/pyversions/sorl-thumbnail.svg
-    :target: https://pypi.python.org/pypi/sorl-thumbnail
+    :target: https://pypi.org/project/sorl-thumbnail/
     :alt: Supported Python versions
 .. |django-badge| image:: https://img.shields.io/pypi/djversions/sorl-thumbnail.svg
-    :target: https://pypi.python.org/pypi/sorl-thumbnail
+    :target: https://pypi.org/project/sorl-thumbnail/
     :alt: Supported Django versions
-.. |codecov| image:: https://codecov.io/gh/mariocesar/sorl-thumbnail/graph/badge.svg?token=YSN2eCESQT 
+.. |codecov| image:: https://codecov.io/gh/mariocesar/sorl-thumbnail/graph/badge.svg
     :target: https://codecov.io/gh/mariocesar/sorl-thumbnail
-    :alt: Coverage
+    :alt: Test coverage
 .. |precommit| image:: https://results.pre-commit.ci/badge/github/mariocesar/sorl-thumbnail/main.svg
-   :target: https://results.pre-commit.ci/latest/github/mariocesar/sorl-thumbnail/main
-   :alt: pre-commit.ci status
+    :target: https://results.pre-commit.ci/latest/github/mariocesar/sorl-thumbnail/main
+    :alt: pre-commit.ci status
 
-.. _`Pillow`: https://pillow.readthedocs.io/
-.. _`ImageMagick`: https://imagemagick.org/
-.. _`GraphicsMagick`: http://www.graphicsmagick.org/
-.. _`Wand`: https://docs.wand-py.org/
-.. _`pgmagick`: https://pgmagick.readthedocs.io/
-.. _`libvips`: https://www.libvips.org/
+.. _Pillow: https://pillow.readthedocs.io/
+.. _libvips: https://www.libvips.org/
+.. _ImageMagick: https://imagemagick.org/
+.. _GraphicsMagick: http://www.graphicsmagick.org/
+.. _Wand: https://docs.wand-py.org/
+.. _pgmagick: https://pgmagick.readthedocs.io/
+.. _uv: https://docs.astral.sh/uv/
+.. _website: https://mariocesar.github.io/sorl-thumbnail/
 
-.. _`Template examples`: https://sorl-thumbnail.readthedocs.io/en/latest/examples.html#template-examples
-.. _`Model examples`: https://sorl-thumbnail.readthedocs.io/en/latest/examples.html#model-examples
-.. _`Low level API examples`: https://sorl-thumbnail.readthedocs.io/en/latest/examples.html#low-level-api-examples
-.. _`GitHub Discussions`: https://github.com/mariocesar/sorl-thumbnail/discussions
-.. _`THUMBNAIL_FORCE_OVERWRITE`: https://sorl-thumbnail.readthedocs.io/en/latest/reference/settings.html#thumbnail-force-overwrite
-.. _`Django supported versions policy`: https://www.djangoproject.com/download/#supported-versions
+.. _quickstart: https://sorl-thumbnail.readthedocs.io/en/latest/quickstart.html
+.. _template tag and its options: https://sorl-thumbnail.readthedocs.io/en/latest/template.html
+.. _setting: https://sorl-thumbnail.readthedocs.io/en/latest/reference/settings.html
+.. _thumbnails on Amazon S3: https://sorl-thumbnail.readthedocs.io/en/latest/s3.html
+.. _troubleshooting: https://sorl-thumbnail.readthedocs.io/en/latest/troubleshooting.html
+.. _requirements: https://sorl-thumbnail.readthedocs.io/en/latest/requirements.html
+.. _contributing guide: https://sorl-thumbnail.readthedocs.io/en/latest/contributing.html
+.. _Django supported versions policy: https://www.djangoproject.com/download/#supported-versions
+.. _GitHub Discussions: https://github.com/mariocesar/sorl-thumbnail/discussions
+.. _issue tracker: https://github.com/mariocesar/sorl-thumbnail/issues
+.. _Code of Conduct: https://github.com/mariocesar/sorl-thumbnail/blob/main/CODE_OF_CONDUCT.md
+.. _security policy: https://github.com/mariocesar/sorl-thumbnail/blob/main/SECURITY.md
