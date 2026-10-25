@@ -22,8 +22,10 @@
 </ul>
 
 <h2 id="install">Install</h2>
-<pre><code>pip install sorl-thumbnail[pil]</code></pre>
+<pre><code>pip install "sorl-thumbnail[pil]"</code></pre>
 <p>Add <code>"sorl.thumbnail"</code> to <code>INSTALLED_APPS</code>. The
+  <a href="https://sorl-thumbnail.readthedocs.io/en/latest/quickstart.html">quickstart</a> gets you to
+  a first thumbnail, and the
   <a href="https://sorl-thumbnail.readthedocs.io/en/latest/installation.html">installation guide</a>
   covers the settings, the key-value store and what each image engine needs.</p>
 
@@ -51,15 +53,15 @@
   <li>Grayscale, padding, rounded corners, blur, border removal and smart crop, depending on the engine.
     See <a href="demo-pil.html#colorspace">colorspace</a>, <a href="demo-pil.html#padding">padding</a>
     and <a href="demo-pil.html#effects">effects</a>.</li>
-  <li>Follows EXIF orientation. Keeps GIF animation with Wand and libvips, and with Pillow after 13.2.0.
+  <li>Follows EXIF orientation. Keeps GIF animation with Wand and libvips, and with Pillow since 13.3.0.
     See <a href="demo-pil.html#orientation">orientation</a> and <a href="demo-pil.html#animation">animation</a>.</li>
   <li>The <code>{% templatetag openblock %} thumbnail {% templatetag closeblock %}</code> tag, the <code>is_portrait</code>
     and <code>margin</code> filters, and <code>get_thumbnail()</code> for Python code.
     See the <a href="https://sorl-thumbnail.readthedocs.io/en/latest/template.html">template reference</a>.</li>
-  <li>Reads and writes through any Django storage, including Amazon S3 with
-    <a href="https://django-storages.readthedocs.io/">django-storages</a>. Thumbnail sizes are cached in a key-value store:
-    the cached database or Redis.
-    See the <a href="https://sorl-thumbnail.readthedocs.io/en/latest/reference/settings.html">settings</a>.</li>
+  <li>Reads and writes through any Django storage, including Amazon S3 with django-storages.
+    Thumbnail sizes are cached in a key-value store, so a cached thumbnail costs no storage request.
+    See <a href="https://sorl-thumbnail.readthedocs.io/en/latest/s3.html">thumbnails on Amazon S3</a>
+    and the <a href="https://sorl-thumbnail.readthedocs.io/en/latest/reference/settings.html">settings</a>.</li>
   <li>An <code>ImageField</code> that validates uploads, and an admin mixin that shows a preview.
     See the <a href="https://sorl-thumbnail.readthedocs.io/en/latest/examples.html#model-examples">model examples</a>.</li>
 </ul>
@@ -84,6 +86,7 @@
   <li>Bug reports: <a href="https://github.com/mariocesar/sorl-thumbnail/issues">GitHub Issues</a></li>
   <li>Security issues: follow the <a href="https://github.com/mariocesar/sorl-thumbnail/blob/main/SECURITY.md">security policy</a>, not a public issue</li>
   <li>Pull requests: read the <a href="https://sorl-thumbnail.readthedocs.io/en/latest/contributing.html">contributing guide</a></li>
+  <li>Something not working: the <a href="https://sorl-thumbnail.readthedocs.io/en/latest/troubleshooting.html">troubleshooting page</a></li>
 </ul>
 
 <h2 id="history">History</h2>
