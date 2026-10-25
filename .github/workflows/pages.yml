@@ -33,7 +33,7 @@ jobs:
         python-version: '3.14'
 
     - name: Build site
-      run: uv run --locked --group demo demo/manage.py build --require pil,imagemagick,graphicsmagick,wand
+      run: uv run --locked --group demo demo/manage.py build --require pil,vips,imagemagick,graphicsmagick,wand
 
     - uses: actions/upload-pages-artifact@v5
       with:

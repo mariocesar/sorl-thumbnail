@@ -52,13 +52,13 @@
   <li>Grayscale, padding, rounded corners, blur, border removal and smart crop, depending on the engine.
     See <a href="demo-pil.html#colorspace">colorspace</a>, <a href="demo-pil.html#padding">padding</a>
     and <a href="demo-pil.html#effects">effects</a>.</li>
-  <li>Follows EXIF orientation. Keeps GIF animation with Wand, and with Pillow after 13.2.0.
+  <li>Follows EXIF orientation. Keeps GIF animation with Wand and libvips, and with Pillow after 13.2.0.
     See <a href="demo-pil.html#orientation">orientation</a> and <a href="demo-pil.html#animation">animation</a>.</li>
   <li>The <code>{% templatetag openblock %} thumbnail {% templatetag closeblock %}</code> tag, the <code>is_portrait</code>
     and <code>margin</code> filters, and <code>get_thumbnail()</code> for Python code.
     See the <a href="https://sorl-thumbnail.readthedocs.io/en/latest/template.html">template reference</a>.</li>
   <li>Reads and writes through any Django storage. Thumbnail sizes are cached in a key-value store:
-    the cached database, Redis or DynamoDB.
+    the cached database or Redis.
     See the <a href="https://sorl-thumbnail.readthedocs.io/en/latest/reference/settings.html">settings</a>.</li>
   <li>An <code>ImageField</code> that validates uploads, and an admin mixin that shows a preview.
     See the <a href="https://sorl-thumbnail.readthedocs.io/en/latest/examples.html#model-examples">model examples</a>.</li>
@@ -72,7 +72,7 @@
   {% for e in engine_table %}
   <tr>
     <td><a href="demo-{{ e.key }}.html">{{ e.label }}</a><br><span class="small muted">{{ e.install }}</span></td>
-    <td>{% if e.broken %}Currently broken, see <a href="https://github.com/mariocesar/sorl-thumbnail/issues/833">#833</a>{% else %}{{ e.gaps|join:", "|default:"—" }}{% endif %}</td>
+    <td>{{ e.gaps|join:", "|default:"—" }}</td>
   </tr>
   {% endfor %}
   </tbody>

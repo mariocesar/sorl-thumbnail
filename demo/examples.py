@@ -6,10 +6,10 @@ from importlib.util import find_spec
 
 # Options an engine leaves out, as option: reason. Examples that need one are shown, not run.
 EFFECTS = {
-    'smart': 'smart cropping is only implemented by Pillow',
-    'rounded': 'rounded corners are only implemented by Pillow',
-    'blur': 'blur is only implemented by Pillow',
-    'remove_border': 'border removal is only implemented by Pillow',
+    'smart': 'smart cropping is only implemented by Pillow and libvips',
+    'rounded': 'rounded corners are only implemented by Pillow and libvips',
+    'blur': 'blur is only implemented by Pillow and libvips',
+    'remove_border': 'border removal is only implemented by Pillow and libvips',
 }
 NO_PADDING = {'padding': 'this engine does not implement padding'}
 BAD_PADDING = {'padding': 'with padding this engine reports the unpadded size, see '
@@ -26,6 +26,15 @@ ENGINES = {
         'modules': ['PIL'],
         'tools': [],
         'version': [sys.executable, '-c', 'import PIL; print("Pillow", PIL.__version__)'],
+        'unsupported': {},
+    },
+    'vips': {
+        'install': 'pip install sorl-thumbnail[vips]',
+        'label': 'libvips',
+        'modules': ['pyvips'],
+        'tools': [],
+        'version': [sys.executable, '-c', 'import pyvips; '
+                    'print("libvips %d.%d.%d" % tuple(map(pyvips.version, range(3))))'],
         'unsupported': {},
     },
     'imagemagick': {
@@ -60,19 +69,6 @@ ENGINES = {
         'version': [sys.executable, '-c', 'import pgmagick; print(pgmagick.gminfo().version)'],
         'unsupported': EFFECTS | NO_PADDING,
     },
-    'vipsthumbnail': {
-        'install': 'the vipsthumbnail command from libvips',
-        'label': 'vipsthumbnail',
-        'broken': 'The vipsthumbnail engine currently fails on every thumbnail, see '
-                  'https://github.com/mariocesar/sorl-thumbnail/issues/833',
-        'modules': [],
-        'tools': ['vipsthumbnail', 'vipsheader'],
-        'version': ['vips', '--version'],
-        'unsupported': EFFECTS | NO_PADDING | {
-            'crop': 'vipsthumbnail only scales, it does not crop',
-            'colorspace': 'vipsthumbnail ignores the colorspace option',
-        },
-    },
 }
 
 SECTIONS = [
@@ -91,8 +87,9 @@ SECTIONS = [
     ('padding', 'Padding', 'With <code>padding</code> the thumbnail is centered on a '
      'canvas of the exact requested size.'),
     ('effects', 'Effects', 'Rounded corners, blur and border removal.'),
-    ('animation', 'Animation', 'With GIF output, Wand keeps every frame, and so does Pillow '
-     'after 13.2.0 (<a href="https://github.com/mariocesar/sorl-thumbnail/issues/687">#687</a>). '
+    ('animation', 'Animation', 'With GIF output, Wand and libvips keep every frame, and so '
+     'does Pillow after 13.2.0 '
+     '(<a href="https://github.com/mariocesar/sorl-thumbnail/issues/687">#687</a>). '
      'ImageMagick, GraphicsMagick and every other format take the first frame.'),
     ('orientation', 'Orientation', 'Photos are rotated following their EXIF orientation '
      'unless <code>orientation=False</code>. This test image is stored sideways.'),

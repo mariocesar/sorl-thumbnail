@@ -18,7 +18,7 @@ class Command(BaseCommand):
         parser.add_argument('--engines', default=','.join(ENGINES),
                             help='engines to build, the rest get a page without results')
         parser.add_argument('--require', default='',
-                            help='fail if one of these engines is missing or broken')
+                            help='fail if one of these engines is missing')
 
     def handle(self, engines, require, **options):
         selected = [key for key in engines.split(',') if key]
@@ -29,16 +29,14 @@ class Command(BaseCommand):
         if 'pil' not in selected:
             raise CommandError('pil is needed, it renders the homepage')
         for key in required:
-            if key not in selected or ENGINES[key].get('broken') or missing(key):
-                raise CommandError('%s is required but not selected, broken or missing' % key)
+            if key not in selected or missing(key):
+                raise CommandError('%s is required but not selected or missing' % key)
 
         shutil.rmtree(settings.SITE_DIR, ignore_errors=True)
         settings.SITE_DIR.mkdir()
         for key in ENGINES:
             if key not in selected:
                 reason = 'Not included in this build'
-            elif ENGINES[key].get('broken'):
-                reason = 'Not built. %s' % ENGINES[key]['broken']
             elif missing(key):
                 reason = 'This site was built without %s' % ', '.join(missing(key))
             else:
