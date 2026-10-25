@@ -1,5 +1,5 @@
 .. meta::
-   :description: sorl-thumbnail troubleshooting: the tag renders nothing, Invalid block tag endthumbnail, thumbnails that do not update, black backgrounds, EngineError from convert, options an engine does not support, slow S3.
+   :description: Fixes for sorl-thumbnail problems: a tag that renders nothing, thumbnails that do not update, black backgrounds, engine errors and slow S3.
 
 ***************
 Troubleshooting

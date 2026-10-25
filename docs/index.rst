@@ -1,5 +1,5 @@
 .. meta::
-   :description: sorl-thumbnail documentation. Thumbnails for Django made in the template with Pillow, libvips, ImageMagick, GraphicsMagick or Wand, remembered in a key-value store and stored on any Django storage, Amazon S3 included.
+   :description: Thumbnails for Django made in the template with Pillow, libvips or ImageMagick, stored on any Django storage including Amazon S3.
 
 *************************************
 sorl-thumbnail: thumbnails for Django

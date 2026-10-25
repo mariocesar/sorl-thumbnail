@@ -1,5 +1,5 @@
 .. meta::
-   :description: sorl-thumbnail, easy-thumbnails, django-imagekit, django-versatileimagefield and django-pictures compared: where you define the size, when the image is made, and which fits which project.
+   :description: sorl-thumbnail, easy-thumbnails, django-imagekit, django-versatileimagefield and django-pictures compared, and which fits which project.
 
 ****************************
 Choosing a thumbnail library

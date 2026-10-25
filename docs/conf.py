@@ -105,9 +105,11 @@ pygments_style = 'sphinx'
 # "<project> v<release> documentation".
 html_title = 'sorl-thumbnail docs'
 
-# Read the Docs passes the canonical URL of the version being built, so every
-# page gets a <link rel="canonical">
-html_baseurl = os.environ.get('READTHEDOCS_CANONICAL_URL', '')
+# Every version on Read the Docs points search engines at stable, so latest
+# and the old versions don't compete with it
+html_baseurl = ''
+if os.environ.get('READTHEDOCS'):
+    html_baseurl = 'https://sorl-thumbnail.readthedocs.io/en/stable/'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = None

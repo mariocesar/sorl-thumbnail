@@ -1,5 +1,5 @@
 .. meta::
-   :description: Django thumbnails on Amazon S3 with django-storages: why they are slow, which requests sorl-thumbnail makes, the settings that avoid them and the errors to expect.
+   :description: Django thumbnails on Amazon S3 with django-storages: which requests sorl-thumbnail makes, the settings that avoid them and the errors to expect.
 
 ***********************
 Thumbnails on Amazon S3
