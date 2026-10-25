@@ -202,39 +202,27 @@ class Engine(EngineBase):
                 values.append(self._get_image_entropy(background))
             return max(values)
 
-        borders = {
-            'top': lambda iy, dy, y: (dy, dy + y),
-            'right': lambda ix, dx, x: (ix - dx - x, ix - dx),
-            'bottom': lambda iy, dy, y: (iy - dy - y, iy - dy),
-            'left': lambda ix, dx, x: (dx, dx + x),
-        }
+        left, top, right, bottom = 0, 0, image_width, image_height
+        # Don't remove too much, the image may just be plain
+        max_x, max_y = int(image_width / 3.5), int(image_height / 3.5)
 
-        offset = {'top': 0, 'right': 0, 'bottom': 0, 'left': 0, }
+        # Trim plain strips 10px at a time, then 1px at a time to find where the picture starts
+        for step in (10, 1):
+            while top + step <= max_y and entropy((left, top, right, top + step)) < 2.0:
+                top += step
+        for step in (10, 1):
+            while (bottom - step >= image_height - max_y
+                   and entropy((left, bottom - step, right, bottom)) < 2.0):
+                bottom -= step
+        for step in (10, 1):
+            while left + step <= max_x and entropy((left, top, left + step, bottom)) < 2.0:
+                left += step
+        for step in (10, 1):
+            while (right - step >= image_width - max_x
+                   and entropy((right - step, top, right, bottom)) < 2.0):
+                right -= step
 
-        for border in ['top', 'bottom']:
-            # Don't remove too much, the image may just be plain
-            while offset[border] < image_height / 3.5:
-                slice_size = min(image_width / 20, 10)
-                y_range = borders[border](image_height, offset[border], slice_size)
-                box = (0, y_range[0], image_width, y_range[1])
-                # If this section is below the threshold; remove it
-                if entropy(box) < 2.0:
-                    offset[border] += slice_size
-                else:
-                    break
-
-        for border in ['left', 'right']:
-            while offset[border] < image_width / 3.5:
-                slice_size = min(image_height / 20, 10)
-                x_range = borders[border](image_width, offset[border], slice_size)
-                box = (x_range[0], 0, x_range[1], image_height)
-                if entropy(box) < 2.0:
-                    offset[border] += slice_size
-                else:
-                    break
-
-        return image.crop((offset['left'], offset['top'], image_width - offset['right'],
-                           image_height - offset['bottom']))
+        return image.crop((left, top, right, bottom))
 
     # Credit to chrisopherhan https://github.com/christopherhan/pycrop
     # This is just a slight rework of pycrops implimentation

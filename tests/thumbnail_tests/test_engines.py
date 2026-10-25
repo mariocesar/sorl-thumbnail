@@ -368,6 +368,24 @@ class SimpleTestCase(BaseTestCase):
             )
             self.assertEqual((th.width, th.height), (60, 60), name)
 
+    def test_remove_border_size(self):
+        engine = PILEngine()
+        cases = [
+            ((2000, 30), 0, (858, 14)),  # plain, came out (856, 10), a third off top and bottom
+            ((600, 100), 8, (584, 84)),  # came out (590, 100)
+            ((600, 600), 8, (584, 584)),  # thinner than a 10px strip, nothing was removed
+            ((600, 600), 15, (570, 570)),  # came out (580, 580)
+        ]
+        for source, border, expected in cases:
+            with self.subTest(source=source, border=border):
+                im = Image.new('L', source, 255)
+                if border:
+                    noise = (source[0] - 2 * border, source[1] - 2 * border)
+                    im.paste(Image.effect_noise(noise, 64), (border, border))
+                options = dict(ThumbnailBackend.default_options, remove_border=True, upscale=False)
+                im = engine.create(im, (5000, 5000), options)
+                self.assertEqual(im.size, expected)
+
     @unittest.skipIf(
         settings.THUMBNAIL_CONVERT.startswith('gm ')
         or 'pgmagick_engine' in settings.THUMBNAIL_ENGINE,

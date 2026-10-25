@@ -20,6 +20,11 @@ Unreleased
   counts as flat when it looks flat on both a black and a white background, so
   the color a file happens to store under its transparent pixels makes no
   difference. Only the PIL engine supports ``remove_border``
+* ``remove_border=True`` now cuts the border exactly. Borders thinner than
+  10 px were kept, thicker ones were cut short, and wide or tall images lost
+  too much. Delete old thumbnails with ``manage.py thumbnail clear_delete_all``
+  to regenerate them
+  (`#845 <https://github.com/mariocesar/sorl-thumbnail/issues/845>`__)
 * Blurring a transparent image no longer leaves a dark outline. ``blur`` mixed
   in the color stored under the transparent pixels, usually black, so a white
   shape on a transparent background came out with grey edges. The PIL engine
