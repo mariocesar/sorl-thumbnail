@@ -123,11 +123,18 @@ class Engine(EngineBase):
         return image.crop(x, y, x2 - x, y2 - y)
 
     def _rounded(self, image, r):
-        svg = '<svg width="%d" height="%d"><rect width="100%%" height="100%%" rx="%d"/></svg>'
-        mask = pyvips.Image.svgload_buffer((svg % (image.width, image.height, r)).encode())
+        width, height = image.width, image.height
+        r = min(r, width // 2, height // 2)
+        # A circle in each corner and a cross between them, without the blocked SVG loader
+        mask = pyvips.Image.black(width, height)
+        for x in (r, width - 1 - r):
+            for y in (r, height - 1 - r):
+                mask = mask.draw_circle(255, x, y, r, fill=True)
+        mask = mask.draw_rect(255, 0, r, width, height - 2 * r, fill=True)
+        mask = mask.draw_rect(255, r, 0, width - 2 * r, height, fill=True)
         if image.hasalpha():
             image = image.extract_band(0, n=image.bands - 1)
-        return image.bandjoin(mask[3])
+        return image.bandjoin(mask)
 
     def _blur(self, image, radius):
         if not image.hasalpha():
