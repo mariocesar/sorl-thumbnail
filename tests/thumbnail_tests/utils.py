@@ -8,7 +8,7 @@ from PIL import Image, ImageDraw
 
 from sorl.thumbnail.conf import settings
 from sorl.thumbnail.helpers import get_module_class
-from sorl.thumbnail.images import ImageFile, release_source
+from sorl.thumbnail.images import ImageFile
 from sorl.thumbnail.log import ThumbnailLogHandler
 
 from .models import Item
@@ -92,7 +92,6 @@ class BaseTestCase(TestCase):
             self.create_image(name, dimension)
 
     def tearDown(self):
-        release_source()
         shutil.rmtree(settings.MEDIA_ROOT)
 
 

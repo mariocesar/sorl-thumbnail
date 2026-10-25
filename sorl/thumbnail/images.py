@@ -2,7 +2,8 @@ import json
 import os
 import platform
 import re
-import threading
+from contextlib import contextmanager
+from contextvars import ContextVar
 from functools import lru_cache
 from urllib.error import URLError
 from urllib.parse import quote, urlsplit, urlunsplit
@@ -11,7 +12,6 @@ from urllib.request import Request, urlopen
 from django.conf import DEFAULT_STORAGE_ALIAS
 from django.core.files.base import ContentFile, File
 from django.core.files.storage import InvalidStorageError, Storage, storages
-from django.db.models.fields.files import FieldFile
 from django.utils.encoding import force_str
 from django.utils.functional import LazyObject, empty
 
@@ -23,18 +23,32 @@ from sorl.thumbnail.parsers import parse_geometry
 
 url_pat = re.compile(r'^(https?|ftp):\/\/')
 
-# The model field source this thread keeps open, so it is downloaded once per request.
-held = threading.local()
+# The last source read, as bytes, kept for the rest of the request or source_cache() block
+sources = ContextVar('sorl.thumbnail.sources', default=None)
 
 
-def release_source(**kwargs):
-    """Close the held source. Connected to request_finished."""
-    source = getattr(held, 'source', None)
-    held.source = None
-    # FieldFile.delete() may have dropped the handle already
-    if source is not None and hasattr(source, '_file'):
-        source.close()
-        del source.file
+@contextmanager
+def source_cache():
+    """Keep the last source read until the block ends, so each image is read once."""
+    token = sources.set({})
+    try:
+        yield
+    finally:
+        sources.reset(token)
+
+
+def open_source_cache(**kwargs):
+    """request_started: a request is a source_cache() block."""
+    sources.set({})
+
+
+def close_source_cache(**kwargs):
+    """request_finished"""
+    cache = sources.get()
+    if cache is not None:
+        # Threads the request ran through sync_to_async share this dict
+        cache.clear()
+    sources.set(None)
 
 
 @lru_cache
@@ -137,8 +151,6 @@ class ImageFile(BaseImageFile):
             if self.name.startswith(location):
                 self.name = self.name[len(location):]
 
-        self.field_file = file_ if isinstance(file_, FieldFile) else None
-
     def __str__(self):
         return self.name
 
@@ -182,27 +194,20 @@ class ImageFile(BaseImageFile):
         return self.storage.url(self.name)
 
     def read(self):
-        source = self.field_file
-        # Use the FieldFile when closed or ours; a handle the user opened is left alone
-        if source is not None and (source.closed or source is getattr(held, 'source', None)):
-            if source.closed:
-                release_source()
-                # A fresh storage.open: FTP files cannot reopen, S3 files only in the same mode
-                if hasattr(source, '_file'):
-                    del source.file
-                source.open('rb')
-                held.source = source
-            position = source.tell()
-            source.seek(0)
-            data = source.read()
-            source.seek(position)
-            return data
-
-        f = self.storage.open(self.name)
-        try:
-            return f.read()
-        finally:
-            f.close()
+        cache = sources.get()
+        key = (self.storage, self.name)
+        data = cache.get(key) if cache is not None else None
+        if data is None:
+            f = self.storage.open(self.name)
+            try:
+                data = f.read()
+            finally:
+                f.close()
+            if cache is not None:
+                # One entry: a filter, the tag and every size of one image share it
+                cache.clear()
+                cache[key] = data
+        return data
 
     def write(self, content):
         if not isinstance(content, File):
