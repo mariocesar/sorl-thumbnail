@@ -10,7 +10,7 @@ from django.template import Context, Template
 from django.test import AsyncClient, Client
 from PIL import Image
 
-from sorl.thumbnail import get_thumbnail, source_cache
+from sorl.thumbnail import delete, get_thumbnail, source_cache
 from sorl.thumbnail.images import ImageFile, sources
 from sorl.thumbnail.templatetags.thumbnail import is_portrait
 
@@ -209,6 +209,16 @@ class SourceCacheTestCase(BaseTestCase):
         self.assertFalse(self.item.image.closed)
         self.assertEqual(self.item.image.tell(), 20)
         self.item.image.close()
+
+    def test_source_replaced_inside_a_block(self):
+        with source_cache():
+            get_thumbnail(self.item.image, '50x50')
+            self.create_image('500x500.jpg', (100, 200))
+            # The kept read is served until the source is deleted from the store
+            self.assertEqual(get_thumbnail(self.item.image, '60x60').size, [60, 60])
+            delete(self.item.image, delete_file=False)
+            self.assertEqual(get_thumbnail(self.item.image, '60x60').size, [30, 60])
+        self.assertEqual(self.opens(), 2)
 
     def test_request_reads_once_and_releases(self):
         with same_open_fd_count(self):

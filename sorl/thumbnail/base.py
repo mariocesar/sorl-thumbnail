@@ -150,6 +150,8 @@ class ThumbnailBackend:
         image_file = ImageFile(file_)
         if delete_file:
             image_file.delete()
+        # The source may have been replaced; the next read must see the new file
+        image_file.forget()
         default.kvstore.delete(image_file)
 
     def _create_thumbnail(self, source_image, geometry_string, options,
