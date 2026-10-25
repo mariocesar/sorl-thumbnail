@@ -31,6 +31,13 @@ Unreleased
   now blurs with premultiplied alpha, which weighs each pixel by how visible it
   is. Thumbnails made before the upgrade keep the outline until you delete
   them, for example with ``manage.py thumbnail clear_delete_all``
+* ``orientation=False`` now applies only to the thumbnail it is given to. One
+  such call used to turn off EXIF orientation for the size of every later
+  thumbnail in the same process, so a photo taken in portrait could come out
+  squashed or with the wrong ``is_portrait``, until the server restarted. This
+  affected every engine. If you use ``orientation=False``, delete thumbnails
+  made before the upgrade with ``manage.py thumbnail clear_delete_all``
+  (`#843 <https://github.com/mariocesar/sorl-thumbnail/issues/843>`__)
 
 13.3.0
 ======

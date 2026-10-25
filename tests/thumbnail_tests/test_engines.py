@@ -1,5 +1,6 @@
 import os
 import platform
+import shutil
 import unittest
 from io import BytesIO
 from subprocess import Popen
@@ -18,10 +19,10 @@ from sorl.thumbnail.engines.pil_engine import Engine as PILEngine
 from sorl.thumbnail.helpers import get_module_class, run, tokey
 from sorl.thumbnail.images import ImageFile
 from sorl.thumbnail.parsers import parse_geometry
-from sorl.thumbnail.templatetags.thumbnail import margin
+from sorl.thumbnail.templatetags.thumbnail import is_portrait, margin
 
 from .models import Item
-from .utils import BaseTestCase
+from .utils import DATA_DIR, BaseTestCase
 
 
 class SimpleTestCase(BaseTestCase):
@@ -723,6 +724,20 @@ class CropTestCase(BaseTestCase):
         # the thumbnail should end up 25x50
         self.assertEqual(th.x, 25)
         self.assertEqual(th.y, 50)
+
+    def test_orientation_off_applies_to_one_call(self):
+        # aspect_test.jpg is stored 200x100 with orientation 6, so it shows as 100x200
+        source = os.path.join(DATA_DIR, 'aspect_test.jpg')
+        for name in 'abcd':
+            shutil.copy(source, os.path.join(DATA_DIR, f'{name}.jpg'))
+
+        th = self.BACKEND.get_thumbnail('data/a.jpg', '50')
+        self.assertEqual((th.x, th.y), (50, 100))
+        th = self.BACKEND.get_thumbnail('data/b.jpg', '50', orientation=False)
+        self.assertEqual((th.x, th.y), (50, 25))
+        th = self.BACKEND.get_thumbnail('data/c.jpg', '50')
+        self.assertEqual((th.x, th.y), (50, 100))
+        self.assertTrue(is_portrait('data/d.jpg'))
 
     @unittest.skipIf(
         'pil_engine' not in settings.THUMBNAIL_ENGINE,

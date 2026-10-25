@@ -39,13 +39,11 @@ class EngineBase:
         """
         if options.get('orientation', settings.THUMBNAIL_ORIENTATION):
             return self._orientation(image)
-        self.reoriented = True
         return image
 
     def flip_dimensions(self, image, geometry=None, options=None):
         options = options or {}
-        reoriented = hasattr(self, 'reoriented')
-        if options.get('orientation', settings.THUMBNAIL_ORIENTATION) and not reoriented:
+        if options.get('orientation', settings.THUMBNAIL_ORIENTATION):
             return self._flip_dimensions(image)
         return False
 
@@ -75,7 +73,7 @@ class EngineBase:
         """
         upscale = options['upscale']
         x_image, y_image = map(float, self.get_image_size(image))
-        if self.flip_dimensions(image):
+        if self.flip_dimensions(image, options=options):
             x_image, y_image = y_image, x_image
         factor = self._calculate_scaling_factor(x_image, y_image, geometry, options)
 
@@ -169,7 +167,7 @@ class EngineBase:
 
         ratio = float(x) / y
 
-        if self.flip_dimensions(image):
+        if self.flip_dimensions(image, options=options):
             ratio = 1.0 / ratio
 
         return ratio
