@@ -6,9 +6,14 @@
   .notice { border: 1px solid #ddd; background: #fafafa; padding: .6rem .8rem; }
   .notice, .skipped { overflow-wrap: anywhere; }
   .wrap { max-width: 80rem; }
-  .examples { display: grid; gap: 1.75rem 1.25rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 30rem), 1fr)); margin-top: 1.25rem; }
-  .example { margin: 0; display: flex; flex-direction: column; gap: .4rem; }
+  .examples { display: grid; gap: 2rem; margin-top: 1.25rem; }
+  .example { margin: 0; display: grid; gap: .4rem 1.25rem; align-items: start; }
+  .example .output { display: flex; flex-direction: column; gap: .4rem; }
   .example .details { margin: 0; }
+  @media (min-width: 48rem) {
+    .example { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .example h3 { grid-column: 1 / -1; }
+  }
   .example .skipped { min-height: 5rem; display: flex; align-items: center; justify-content: center; text-align: center; border: 1px dashed #ccc; padding: .75rem; color: #555; }
   .sources img { width: auto; height: auto; max-width: 6rem; max-height: 4.5rem; display: block; }
   .sources td { vertical-align: middle; }
@@ -36,6 +41,9 @@
   {% for example in section.examples %}
   <figure class="example" id="{{ example.id }}">
     <h3>{{ example.title }}</h3>
+    <pre><code>{% for indent, line in example.lines %}<span class="line" style="--indent: {{ indent }}ch">{{ line }}</span>
+{% endfor %}</code></pre>
+    <div class="output">
     {% if example.html %}
     <div class="result">{{ example.html }}</div>
     <p class="details">{% for d in example.details %}{{ d }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</p>
@@ -44,8 +52,7 @@
     {% else %}
     <div class="skipped">Not built.</div>
     {% endif %}
-    <pre><code>{% for indent, line in example.lines %}<span class="line" style="--indent: {{ indent }}ch">{{ line }}</span>
-{% endfor %}</code></pre>
+    </div>
   </figure>
   {% endfor %}
   </div>
