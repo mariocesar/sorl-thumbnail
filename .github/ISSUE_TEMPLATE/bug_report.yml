@@ -76,7 +76,6 @@ body:
         - cached_db (default)
         - Redis
         - DBM
-        - DynamoDB
         - Custom store
     validations:
       required: true

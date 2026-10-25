@@ -8,7 +8,7 @@ Features at a glance
 - Support for Django 5.2, 6.0, and 6.1 following the `Django supported versions policy`_
 - Storage support
 - Pluggable Engine support for `Pillow`_, `ImageMagick`_, `PIL`_, `Wand`_, `pgmagick`_, and `vipsthumbnail`_
-- Pluggable Key Value Store support (cached db, redis, and dynamodb by AWS)
+- Pluggable Key Value Store support (cached db and redis)
 - Pluggable Backend support
 - Admin integration with possibility to delete
 - Dummy generation (placeholders)

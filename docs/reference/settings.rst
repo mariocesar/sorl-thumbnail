@@ -37,6 +37,13 @@ your own implementation.
     Please configure the cache that suits your use case at Django level and set
     this cache alias in ``THUMBNAIL_CACHE``.
 
+.. versionchanged:: 13.4.0
+
+    The DynamoDB store, ``sorl.thumbnail.kvstores.dynamodb_kvstore.KVStore``,
+    was removed. It was built on boto 2 and could not be imported on any
+    supported Python. The default Cached DB store works with any Django cache,
+    including one backed by DynamoDB.
+
 sorl-thumbnail needs a Key Value Store to :doc:`/operation`.
 sorl-thumbnail ships with support for three Key Value Stores:
 

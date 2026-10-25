@@ -38,7 +38,7 @@ services:
       - LANG=en_US.UTF-8
       - LC_ALL=en_US.UTF-8
       - REDIS_HOST=redis
-      # Test only the backends used in CI (excludes dynamodb, pgmagick, vipsthumbnail)
+      # Test only the backends used in CI (excludes pgmagick, vipsthumbnail)
       - TARGET=${TARGET:-pil}
       - DJANGO=${DJANGO:-5.2}
     command: tox -v

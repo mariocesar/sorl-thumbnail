@@ -67,6 +67,15 @@ Unreleased
   store, sorl-thumbnail's record of the thumbnails it made, without deleting
   any file
   (`#834 <https://github.com/mariocesar/sorl-thumbnail/issues/834>`__)
+* The DynamoDB key-value store is removed. It was built on boto 2, which can't
+  be imported on any Python sorl-thumbnail supports, so the store failed before
+  making a single thumbnail: ``cannot import name 'Mapping' from
+  'collections'`` on Python 3.10 and 3.11, ``No module named
+  'boto.vendored.six.moves'`` from 3.12. If ``THUMBNAIL_KVSTORE`` still names
+  ``sorl.thumbnail.kvstores.dynamodb_kvstore.KVStore``, remove the setting to
+  use the default Cached DB store, and point ``THUMBNAIL_CACHE`` at any Django
+  cache alias, a DynamoDB one included
+  (`#838 <https://github.com/mariocesar/sorl-thumbnail/issues/838>`__)
 
 13.3.0
 ======
