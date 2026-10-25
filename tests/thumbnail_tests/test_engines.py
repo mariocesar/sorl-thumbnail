@@ -390,7 +390,9 @@ class SimpleTestCase(BaseTestCase):
         # Next to the black corner, so allow some JPEG noise
         self.assertTrue(r > 245 and g < 10 and b < 10, img.getpixel((0, 12)))
 
-    @unittest.skipIf('pil_engine' not in settings.THUMBNAIL_ENGINE, 'blur is only supported in PIL')
+    @unittest.skipUnless('pil_engine' in settings.THUMBNAIL_ENGINE
+                         or 'vips_engine' in settings.THUMBNAIL_ENGINE,
+                         'only the PIL and vips engines implement blur')
     def test_flatten_blur_and_remove_border(self):
         # A white and a noise square inside a 20px transparent border whose stored color is black
         rgba = Image.new('RGBA', (100, 100), (0, 0, 0, 0))
@@ -410,7 +412,9 @@ class SimpleTestCase(BaseTestCase):
             img = Image.open(th.storage.path(th.name)).convert('L')
             self.assertTrue(ImageStat.Stat(img.crop((0, 0, 100, 5))).mean[0] < 200)
 
-    @unittest.skipIf('pil_engine' not in settings.THUMBNAIL_ENGINE, 'blur is only supported in PIL')
+    @unittest.skipUnless('pil_engine' in settings.THUMBNAIL_ENGINE
+                         or 'vips_engine' in settings.THUMBNAIL_ENGINE,
+                         'only the PIL and vips engines implement blur')
     def test_transparent_blur(self):
         rgba = Image.new('RGBA', (100, 100), (0, 0, 0, 0))
         rgba.paste((255, 255, 255, 255), (20, 20, 80, 80))

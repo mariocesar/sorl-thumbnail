@@ -104,7 +104,10 @@ class Engine(EngineBase):
         return image.bandjoin(mask[3])
 
     def _blur(self, image, radius):
-        return image.gaussblur(radius)
+        if not image.hasalpha():
+            return image.gaussblur(radius)
+        # Weigh each pixel by its alpha, so the color under transparent pixels doesn't bleed in
+        return image.premultiply().gaussblur(radius).unpremultiply().cast(image.format)
 
     def _padding(self, image, geometry, options):
         color = background(options['padding_color'], image)
