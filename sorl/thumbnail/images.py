@@ -209,16 +209,24 @@ class ImageFile(BaseImageFile):
                 cache[key] = data
         return data
 
+    def forget(self):
+        """Drop the kept read of this file, so the next read goes to the storage."""
+        cache = sources.get()
+        if cache:
+            cache.pop((self.storage, self.name), None)
+
     def write(self, content):
         if not isinstance(content, File):
             content = ContentFile(content)
 
         self._size = None
+        self.forget()
         self.name = self.storage.save(self.name, content)
 
         return self.name
 
     def delete(self):
+        self.forget()
         return self.storage.delete(self.name)
 
     def serialize_storage(self, use_backend_name=False):
