@@ -231,7 +231,7 @@ class EngineBase:
         Crop the image to the correct aspect ratio
         by removing the lowest entropy parts
         """
-        raise NotImplementedError("crop='smart' is only supported by the PIL engine")
+        raise NotImplementedError("crop='smart' is only supported by the PIL and vips engines")
 
     def _scale(self, image, width, height):
         """

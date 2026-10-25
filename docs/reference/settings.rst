@@ -228,7 +228,8 @@ Seconds a ``convert`` or ``identify`` call may run before it is killed and
 ``EngineError`` is raised. Raise it if large sources or high ``density`` values
 legitimately take longer. ``None`` lets a call run as long as it takes, so a
 malformed or hostile image can keep a worker busy indefinitely. Only applicable
-for the convert Engine.
+for the convert Engine. The vips engine runs libvips inside the Django process,
+so it has no timeout.
 
 
 ``THUMBNAIL_FLATTEN``

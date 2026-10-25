@@ -826,7 +826,7 @@ class CropTestCase(BaseTestCase):
         'the PIL and vips engines support smart crop',
     )
     def test_smart_crop_unsupported(self):
-        message = "crop='smart' is only supported by the PIL engine"
+        message = "crop='smart' is only supported by the PIL and vips engines"
         with self.assertRaisesMessage(NotImplementedError, message):
             self.BACKEND.get_thumbnail('data/white_border.jpg', '32x32', crop='smart')
 
