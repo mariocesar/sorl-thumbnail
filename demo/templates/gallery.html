@@ -20,10 +20,10 @@
 {% endblock %}
 {% block content %}
 <h1>{{ engine.label }} examples</h1>
-<p>Every result below is made by sorl-thumbnail with the {{ engine.label }} engine,
+<p class="lede">Every result below is made by sorl-thumbnail with the {{ engine.label }} engine,
   from the template shown with it.{% if engine_version %} Built with {{ engine_version }}.{% endif %}</p>
 
-<nav class="engines" aria-label="Engines">Engine:
+<nav class="engines" aria-label="Engines"><span class="label">Engine</span>
   {% for key, label in engines %}<a href="demo-{{ key }}.html"{% if key == engine.key %} aria-current="page"{% endif %}>{{ label }}</a>{% if not forloop.last %} · {% endif %}{% endfor %}
 </nav>
 
@@ -35,7 +35,7 @@
 <section>
   <h2 id="{{ section.id }}">{{ section.title }}</h2>
   <p>{{ section.intro }}</p>
-  <p class="compare">Compare:
+  <p class="compare"><span class="label">Compare</span>
     {% for key, label in engines %}<a href="demo-{{ key }}.html#{{ section.id }}"{% if key == engine.key %} aria-current="true"{% endif %}>{{ label }}</a>{% if not forloop.last %} · {% endif %}{% endfor %}</p>
   <div class="examples">
   {% for example in section.examples %}

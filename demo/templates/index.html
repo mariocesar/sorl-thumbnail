@@ -11,7 +11,7 @@
 {% endblock %}
 {% block content %}
 <h1>sorl-thumbnail</h1>
-<p>Thumbnails for Django. Resize, crop and convert images from your templates.
+<p class="lede">Thumbnails for Django. Resize, crop and convert images from your templates.
   sorl-thumbnail makes each thumbnail once, saves it through your Django storage,
   and gives you its URL.</p>
 <ul class="facts small">
@@ -32,11 +32,11 @@
 <div class="pair">
   <figure>
     <div class="result"><img src="{{ sources.0.file }}" width="{{ sources.0.size.0 }}" height="{{ sources.0.size.1 }}" alt="Mona Lisa, original"></div>
-    <figcaption>Original: {{ sources.0.details }}</figcaption>
+    <figcaption><span class="label">Original</span>{{ sources.0.details }}</figcaption>
   </figure>
   <figure>
     <div class="result">{{ hero.html }}</div>
-    <figcaption>Thumbnail: {{ hero.details.0 }}</figcaption>
+    <figcaption><span class="label">Thumbnail</span>{{ hero.details.0 }}</figcaption>
   </figure>
 </div>
 <pre><code>{% for indent, line in hero.lines %}<span class="line" style="--indent: {{ indent }}ch">{{ line }}</span>
