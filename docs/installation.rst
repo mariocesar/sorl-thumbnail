@@ -1,3 +1,6 @@
+.. meta::
+   :description: Install sorl-thumbnail with the extra for your image library, add it to INSTALLED_APPS, run migrate, and add the middleware for ASGI on Django 5.2 and 6.0.
+
 ********************
 Installation & Setup
 ********************

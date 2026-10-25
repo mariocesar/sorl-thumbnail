@@ -1,3 +1,6 @@
+.. meta::
+   :description: Every THUMBNAIL_* setting of sorl-thumbnail with its default: engine, key-value store, storage, format, quality, padding, dummy images, timeouts and more.
+
 ********
 Settings
 ********
@@ -9,10 +12,11 @@ Settings
 
 - Default: ``False``
 
-When set to ``True`` the ``ThumbnailNode.render`` method can raise errors.
-Django recommends that tags never raise errors in the ``Node.render`` method
-but since sorl-thumbnail is such a complex tag we will need to have more
-debugging available.
+With the default ``False`` the ``thumbnail`` tag and the filters never break
+a page: the error is logged to the ``sorl.thumbnail`` logger and the tag
+renders its ``{% empty %}`` block, or nothing. That is right for production
+and hides the cause in development. Set it to ``True`` in development so the
+error is raised and Django's debug page shows it. See :doc:`/troubleshooting`.
 
 
 ``THUMBNAIL_BACKEND``
@@ -212,8 +216,9 @@ It differs from the PIL engine in a few ways:
 
 - Default ``'convert'``
 
-Path to convert command, use ``'gm convert'`` for GraphicsMagick.
-Only applicable for the convert Engine.
+Path to the convert command. Use ``'magick'`` for ImageMagick 7, whose
+``convert`` prints a deprecation warning on every call, and ``'gm convert'``
+for GraphicsMagick. Only applicable for the convert Engine.
 
 
 ``THUMBNAIL_IDENTIFY``
@@ -221,8 +226,9 @@ Only applicable for the convert Engine.
 
 - Default ``'identify'``
 
-Path to identify command, use ``'gm identify'`` for GraphicsMagick.
-Only applicable for the convert Engine.
+Path to the identify command. Use ``'magick identify'`` for ImageMagick 7
+and ``'gm identify'`` for GraphicsMagick. Only applicable for the convert
+Engine.
 
 
 ``THUMBNAIL_COMMAND_TIMEOUT``
@@ -320,6 +326,23 @@ The host for Redis server. Only applicable for the Redis Key Value Store
 - Default: ``6379``
 
 The port for Redis server. Only applicable for the Redis Key Value Store
+
+
+``THUMBNAIL_REDIS_UNIX_SOCKET_PATH``
+====================================
+
+- Default: ``None``
+
+Path of a Redis Unix socket. When set, redis-py connects through it instead
+of the host and port. Only applicable for the Redis Key Value Store
+
+
+``THUMBNAIL_REDIS_SSL``
+=======================
+
+- Default: ``False``
+
+Connect to Redis over TLS. Only applicable for the Redis Key Value Store
 
 
 ``THUMBNAIL_REDIS_TIMEOUT``
@@ -437,6 +460,35 @@ Should we upscale by default? ``True`` means we upscale images by default.
 
 Default thumbnail quality. A value between 0 and 100 is allowed. This can be
 overridden by individual options.
+
+``THUMBNAIL_BLUR``
+==================
+
+- Default: ``0``
+
+Radius of a Gaussian blur applied to every thumbnail, ``0`` for none. The
+``blur`` option overrides it per thumbnail. PIL and vips engines only.
+
+
+``THUMBNAIL_PADDING``
+=====================
+
+- Default: ``False``
+
+Pad every thumbnail to the requested size instead of leaving it smaller on
+one side. The ``padding`` option overrides it per thumbnail. PIL, convert
+and vips engines only.
+
+
+``THUMBNAIL_PADDING_COLOR``
+===========================
+
+- Default: ``'#ffffff'``
+
+Color of the padding and, when the thumbnail is padded, of the background
+behind a flattened or rounded JPEG. The ``padding_color`` option overrides
+it per thumbnail. The vips engine takes hex colors only.
+
 
 ``THUMBNAIL_PROGRESSIVE``
 =========================

@@ -12,6 +12,16 @@ This is the recommended production setting. However it can still be useful to be
 notified of those errors. Thus sorl-thumbnail logs errors to a logger and
 provides a log handler that sends emails to ``settings.ADMINS``.
 
+In development set ``THUMBNAIL_DEBUG = True`` so the error is raised and
+Django's debug page shows it. To see the errors in the console instead, give
+the ``sorl.thumbnail`` logger a handler in ``LOGGING``::
+
+    LOGGING = {
+        'version': 1,
+        'handlers': {'console': {'class': 'logging.StreamHandler'}},
+        'loggers': {'sorl.thumbnail': {'handlers': ['console'], 'level': 'ERROR'}},
+    }
+
 
 How to setup logging
 ====================

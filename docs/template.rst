@@ -1,3 +1,6 @@
+.. meta::
+   :description: The sorl-thumbnail template tag and filters: geometry, crop, format, quality, padding, rounded corners, blur and the other options, with the engines that support each.
+
 *************************
 Template tags and filters
 *************************
@@ -31,6 +34,14 @@ Alternative syntax using empty::
 The ``{% empty %}`` section is rendered if the thumbnail source is resolved to
 an empty value or an invalid image source, you can think of it as rendering
 when the thumbnail becomes undefined.
+
+Without ``as var`` the tag outputs the thumbnail URL and takes no closing
+tag::
+
+    <img src="{% thumbnail item.image "100x100" crop="center" %}">
+
+This form has no ``{% empty %}``; a missing or broken source outputs an
+empty string.
 
 .. _source:
 
@@ -120,6 +131,76 @@ keys are not resolved in context but values are. Passing all options to the
 engine means that you can easily subclass an engine and create new features
 like rounded corners or what ever processing you like. The options described
 below are how they are used and interpreted in the shipped engines.
+
+Not every engine implements every option. In this table ``yes`` means the
+option works, ``no`` means the engine raises ``NotImplementedError`` and an
+empty cell means the engine ignores the option.
+
+.. list-table::
+   :header-rows: 1
+   :stub-columns: 1
+
+   * - Option
+     - PIL
+     - convert
+     - wand
+     - pgmagick
+     - vips
+   * - ``crop``, ``cropbox``, ``upscale``, ``quality``, ``progressive``,
+       ``orientation``, ``format``, ``colorspace``
+     - yes
+     - yes
+     - yes
+     - yes
+     - yes
+   * - ``crop="smart"``
+     - yes
+     - no
+     - no
+     - no
+     - yes
+   * - ``remove_border``
+     - yes
+     - no
+     - no
+     - no
+     - yes
+   * - ``padding``
+     - yes
+     - yes
+     - no
+     - no
+     - yes
+   * - ``rounded``
+     - yes
+     - no
+     - no
+     - no
+     - yes
+   * - ``blur``
+     - yes
+     - no
+     - no
+     - no
+     - yes
+   * - ``flatten``
+     - yes
+     - yes, every format
+     - yes
+     -
+     - yes
+   * - ``density``, ``authenticate``
+     -
+     - yes
+     -
+     -
+     -
+   * - animated GIF output
+     - yes
+     - first frame
+     - first frame
+     - first frame
+     - yes
 
 ``cropbox``
 ^^^^^^^^^^^
@@ -236,6 +317,25 @@ Images are not padded by default, but this can be changed by setting
 This is the color to use for padding the image. It defaults to ``#ffffff`` and
 can be globally set with the setting ``THUMBNAIL_PADDING_COLOR``.
 
+``rounded``
+^^^^^^^^^^^
+Radius in pixels of the rounded corners::
+
+    {% thumbnail item.image "100x100" rounded=10 as im %}
+
+The corners are transparent in PNG and WEBP thumbnails. JPEG has no
+transparency, so there they are filled with white, or with ``padding_color``
+when the thumbnail is padded. The PIL and vips engines support it.
+
+``blur``
+^^^^^^^^
+Radius of a Gaussian blur applied to the thumbnail::
+
+    {% thumbnail item.image "400x300" blur=4 as im %}
+
+The default is ``0``, no blur; ``THUMBNAIL_BLUR`` changes it for every
+thumbnail. The PIL and vips engines support it.
+
 ``flatten``
 ^^^^^^^^^^^
 Pass ``flatten=False`` to write one thumbnail without the background that
@@ -345,6 +445,15 @@ outputs all values.
 
 .. _css background-position: https://www.w3.org/TR/CSS2/colors.html#propdef-background-position
 
+background_margin
+=================
+Like `margin`_, for an image used as a CSS background. It returns the two
+offsets, horizontal then vertical, that center the image in the box, ready
+for ``background-position``::
+
+    <div style="background-image: url({{ im.url }});
+                background-position: {{ im|background_margin:"300x300" }}"></div>
+
 resolution
 ==========
 Resolution is a filter for obtaining alternative resolution versions of a
@@ -366,3 +475,19 @@ With that setting the alternative versions go in a ``srcset``::
     {% endthumbnail %}
 
 Apply the filter to the thumbnail URL, not to the source image.
+
+html_thumbnails and markdown_thumbnails
+=======================================
+These filters take a text, find the images in it and replace each image URL
+with the URL of a thumbnail ``THUMBNAIL_FILTER_WIDTH`` pixels wide, 500 by
+default. ``html_thumbnails`` matches ``<img src="...">`` tags, with an
+optional ``alt`` before ``src`` and nothing else in between;
+``markdown_thumbnails`` matches ``![caption](url)``. A URL under
+``MEDIA_URL`` is read from the default storage, an ``http`` or ``https``
+URL is downloaded::
+
+    {{ page.body|html_thumbnails }}
+    {{ page.body|markdown_thumbnails }}
+
+The thumbnails are made while the filter runs, so use it on content whose
+images you trust.

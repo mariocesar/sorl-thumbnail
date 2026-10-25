@@ -1,3 +1,6 @@
+.. meta::
+   :description: sorl-thumbnail examples: the thumbnail template tag with crop, geometry and format, the ImageField and admin widget, and the get_thumbnail Python API.
+
 ********
 Examples
 ********
@@ -95,10 +98,11 @@ Using ``sorl.thumbnail.ImageField`` in your models::
         image = ImageField(upload_to='whatever')
 
 
-.. note:: You do not need to use the ``sorl.thumbnail.ImageField`` to use
-    ``sorl.thumbnail``. The standard ``django.db.models.ImageField`` is fine
-    except that using the ``sorl.thumbnail.ImageField`` lets you plugin the
-    nice admin addition explained in the next section.
+.. note:: You do not need ``sorl.thumbnail.ImageField`` to make thumbnails;
+    the standard ``django.db.models.ImageField`` works. The sorl field adds
+    the admin widget explained in the next section, and validates uploads
+    with the thumbnail engine: a corrupt or truncated file is rejected with
+    "Upload a valid image", and the file input gets ``accept="image/*"``.
 
 
 Another example on how to use ``sorl.thumbnail.ImageField`` in your existing

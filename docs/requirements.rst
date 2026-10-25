@@ -1,3 +1,6 @@
+.. meta::
+   :description: What sorl-thumbnail needs: Python 3.10+, Django 5.2 to 6.1, a key-value store with a shared cache, and one image library: Pillow, libvips, ImageMagick, GraphicsMagick, Wand or pgmagick.
+
 ************
 Requirements
 ************
@@ -53,6 +56,13 @@ by default calls ``convert`` and ``identify`` shell commands. You can change the
 paths to these tools by setting ``THUMBNAIL_CONVERT`` and ``THUMBNAIL_IDENTIFY``
 respectively.  Note that you need to change these to use `GraphicsMagick`_ to
 ``/path/to/gm convert`` and ``/path/to/gm identify``.
+
+ImageMagick 7 merged the tools into one ``magick`` command. Its ``convert``
+still works but prints "The convert command is deprecated in IMv7" on every
+call, and the engine logs that as an error. On ImageMagick 7 set::
+
+    THUMBNAIL_CONVERT = 'magick'
+    THUMBNAIL_IDENTIFY = 'magick identify'
 
 To write AVIF, ImageMagick needs libheif with an AV1 encoder. On Debian and
 Ubuntu that is the ``libheif-plugin-aomenc`` package. It is only a recommended
