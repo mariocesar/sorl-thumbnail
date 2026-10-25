@@ -171,9 +171,11 @@ Features:
 libvips runs inside the Django process, like Pillow. A crash on a broken or
 hostile image takes the worker down with it. Like Pillow, it refuses sources
 over 178,956,970 pixels, so a small upload that unpacks into a huge image can't
-use up the memory. libvips starts its threads with the first image it
-processes, so make no thumbnails in a gunicorn master started with
-``--preload`` before it forks the workers, or they will hang.
+use up the memory.
+
+sorl-thumbnail loads pyvips with the first thumbnail, not when Django starts,
+and libvips starts its threads then. With gunicorn's ``--preload``, make no
+thumbnails in the master before it forks the workers, or the workers will hang.
 
 The binary wheel has no PDF, ImageMagick or OpenSlide loaders. Install libvips
 from your system and plain ``pyvips`` if you need them.
