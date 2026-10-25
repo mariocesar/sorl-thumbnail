@@ -65,9 +65,10 @@ class SimpleTestCase(BaseTestCase):
         self.assertEqual(t.y, 300)
 
     @unittest.skipIf(
-        'wand_engine' in settings.THUMBNAIL_ENGINE
-        or 'pgmagick_engine' in settings.THUMBNAIL_ENGINE,
-        'the wand and pgmagick engines do not implement padding',
+        'pil_engine' not in settings.THUMBNAIL_ENGINE
+        and 'convert_engine' not in settings.THUMBNAIL_ENGINE
+        and 'vips_engine' not in settings.THUMBNAIL_ENGINE,
+        'padding is only implemented in PIL, convert and vips',
     )
     def test_padding(self):
         item = Item.objects.get(image='200x100.jpg')
@@ -78,9 +79,10 @@ class SimpleTestCase(BaseTestCase):
         self.assertEqual(Image.open(t.storage.path(t.name)).size, (300, 300))
 
     @unittest.skipIf(
-        'wand_engine' in settings.THUMBNAIL_ENGINE
-        or 'pgmagick_engine' in settings.THUMBNAIL_ENGINE,
-        'the wand and pgmagick engines do not implement padding',
+        'pil_engine' not in settings.THUMBNAIL_ENGINE
+        and 'convert_engine' not in settings.THUMBNAIL_ENGINE
+        and 'vips_engine' not in settings.THUMBNAIL_ENGINE,
+        'padding is only implemented in PIL, convert and vips',
     )
     def test_padding_color(self):
         item = Item.objects.get(image='200x100.jpg')
@@ -592,8 +594,9 @@ class SimpleTestCase(BaseTestCase):
         self.assertEqual(imref1.key, imref2.key)
 
     @unittest.skipIf(
-        'convert_engine' in settings.THUMBNAIL_ENGINE,
-        'ImageMagick and GraphicsMagick reject the RGBA colorspace',
+        'pil_engine' not in settings.THUMBNAIL_ENGINE
+        and 'vips_engine' not in settings.THUMBNAIL_ENGINE,
+        'RGBA is only supported in PIL and vips',
     )
     def test_rgba_colorspace(self):
         item = Item.objects.get(image='500x500.jpg')
@@ -857,8 +860,9 @@ class CropTestCase(BaseTestCase):
         self.assertTrue(is_portrait('data/d.jpg'))
 
     @unittest.skipIf(
-        'pgmagick_engine' in settings.THUMBNAIL_ENGINE,
-        'keeping the ICC profile is not verified on the pgmagick engine',
+        'pil_engine' not in settings.THUMBNAIL_ENGINE
+        and 'vips_engine' not in settings.THUMBNAIL_ENGINE,
+        'the other engines fail this test',
     )
     def test_crop_image_with_icc_profile(self):
         name = 'data/icc_profile_test.jpg'
