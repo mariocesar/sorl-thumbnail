@@ -108,11 +108,15 @@ def parse_color(color):
     Parses a #rgb or #rrggbb color and returns a (red, green, blue) tuple
     """
     m = color_pat.match(color)
+
     if not m:
         raise ThumbnailParseError(
             f'padding_color must be a hex color like #fff or #ffffff, not {color!r}'
         )
+
     digits = m.group('hex')
+
     if len(digits) == 3:
         digits = ''.join(digit * 2 for digit in digits)
+
     return tuple(bytes.fromhex(digits))

@@ -32,6 +32,9 @@ THUMBNAIL_IDENTIFY = 'identify'
 # Seconds a convert or identify call may run, None for no limit
 THUMBNAIL_COMMAND_TIMEOUT = 60
 
+# Operations the vips engine keeps in the libvips cache, for the whole process
+THUMBNAIL_VIPS_CACHE_MAX = 0
+
 # Storage for the generated thumbnails, as an alias of the Django STORAGES setting.
 THUMBNAIL_STORAGE = 'default'
 

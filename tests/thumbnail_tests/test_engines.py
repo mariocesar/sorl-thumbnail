@@ -95,6 +95,16 @@ class SimpleTestCase(BaseTestCase):
 
     @unittest.skipIf(
         'vips_engine' not in settings.THUMBNAIL_ENGINE,
+        'only the vips engine uses libvips',
+    )
+    def test_vips_cache_max(self):
+        import pyvips
+
+        # THUMBNAIL_VIPS_CACHE_MAX defaults to 0
+        self.assertEqual(pyvips.cache_get_max(), 0)
+
+    @unittest.skipIf(
+        'vips_engine' not in settings.THUMBNAIL_ENGINE,
         'Pillow has its own limit, DecompressionBombError',
     )
     def test_pixel_limit(self):

@@ -182,10 +182,10 @@ from your system and plain ``pyvips`` if you need them.
 The engine needs libvips 8.15 or later. Ubuntu 24.04 and Debian 13 ship it,
 Debian 12 does not.
 
-For long running workers on glibc Linux, libvips recommends jemalloc and
-turning its operation cache off with ``pyvips.cache_set_max(0)``, see the
+For long running workers on glibc Linux, libvips recommends jemalloc, see the
 `libvips developer checklist
-<https://www.libvips.org/API/current/developer-checklist.html>`_.
+<https://www.libvips.org/API/current/developer-checklist.html>`_. Its operation
+cache is off, see ``THUMBNAIL_VIPS_CACHE_MAX``.
 
 It differs from the PIL engine in a few ways:
 
@@ -232,6 +232,23 @@ legitimately take longer. ``None`` lets a call run as long as it takes, so a
 malformed or hostile image can keep a worker busy indefinitely. Only applicable
 for the convert Engine. The vips engine runs libvips inside the Django process,
 so it has no timeout.
+
+
+``THUMBNAIL_VIPS_CACHE_MAX``
+============================
+
+- Default ``0``
+
+How many operations the vips engine keeps in the libvips operation cache. The
+cache helps a program that repeats the same operation on the same image, which
+sorl-thumbnail doesn't do: every thumbnail reads its source again. With the
+cache on, a worker used more memory and was not faster. libvips' own default
+is ``100``.
+
+The engine sets it when it makes the first thumbnail, with
+``pyvips.cache_set_max()``. The cache belongs to the whole process, so any
+other pyvips code in your site gets the same limit. Only applicable for the
+vips engine.
 
 
 ``THUMBNAIL_FLATTEN``

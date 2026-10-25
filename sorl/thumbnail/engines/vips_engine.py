@@ -11,6 +11,9 @@ from sorl.thumbnail.parsers import parse_color
 # Pillow raises DecompressionBombError above this
 MAX_PIXELS = 2 * 89478485
 
+# This module is imported with the first thumbnail, see THUMBNAIL_VIPS_CACHE_MAX
+pyvips.cache_set_max(settings.THUMBNAIL_VIPS_CACHE_MAX)
+
 
 def background(color, image):
     """Band values of a padding_color for the image, without alpha"""
