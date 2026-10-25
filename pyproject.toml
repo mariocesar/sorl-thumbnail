@@ -36,7 +36,8 @@ classifiers=[
 ]
 
 [project.urls]
-Homepage = "https://sorl-thumbnail.readthedocs.io/en/latest/"
+Homepage = "https://mariocesar.github.io/sorl-thumbnail/"
+Documentation = "https://sorl-thumbnail.readthedocs.io/en/latest/"
 Repository = "https://github.com/mariocesar/sorl-thumbnail"
 
 [project.optional-dependencies]
