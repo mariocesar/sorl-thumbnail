@@ -5,6 +5,16 @@ Changes
 Unreleased
 ==========
 
+* A source is downloaded once per request, with every engine. ``is_portrait``
+  before the tag, or several sizes of one image, read the original once
+  instead of once per use. Before, every filter and tag opened the source
+  again, on S3 a full download each time. sorl-thumbnail now keeps the bytes
+  of the last source it read, the source cache, until the request ends; a
+  ``FieldFile`` you have open is not touched. Nothing to do on WSGI or on
+  Django 6.1. On ASGI with Django 5.2 or 6.0 add
+  ``sorl.thumbnail.middleware.SourceCacheMiddleware`` to ``MIDDLEWARE``. In a
+  management command or a job wrap the work in ``with source_cache():``
+  (`#471 <https://github.com/mariocesar/sorl-thumbnail/issues/471>`__)
 * Rounded corners work with JPEG in the PIL engine. Asking for ``rounded=10``
   crashed with ``OSError: cannot write mode RGBA as JPEG`` whenever the
   thumbnail was saved as JPEG, which is the default format. JPEG can't store
@@ -81,16 +91,6 @@ Unreleased
   setting is not part of the thumbnail name, so thumbnails created before the
   upgrade keep their black background until you delete them, for example with
   ``manage.py thumbnail clear_delete_all``
-* A source is downloaded once per request, with every engine. ``is_portrait``
-  before the tag, or several sizes of one image, read the original once
-  instead of once per use. Before, every filter and tag opened the source
-  again, on S3 a full download each time. sorl-thumbnail now keeps the bytes
-  of the last source it read, the source cache, until the request ends; a
-  ``FieldFile`` you have open is not touched. Nothing to do on WSGI or on
-  Django 6.1. On ASGI with Django 5.2 or 6.0 add
-  ``sorl.thumbnail.middleware.SourceCacheMiddleware`` to ``MIDDLEWARE``. In a
-  management command or a job wrap the work in ``with source_cache():``
-  (`#471 <https://github.com/mariocesar/sorl-thumbnail/issues/471>`__)
 * The cached DB key-value store writes every entry with a single upsert
   instead of a lookup followed by an insert or update, so creating a thumbnail
   runs six statements instead of nine. Oracle has no upsert in Django and keeps
