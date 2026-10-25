@@ -425,7 +425,9 @@ class SimpleTestCase(BaseTestCase):
         r, g, b, a = img.getpixel((18, 50))
         self.assertTrue(0 < a < 255 and min(r, g, b) > 245, img.getpixel((18, 50)))
 
-    @unittest.skipIf('pil_engine' not in settings.THUMBNAIL_ENGINE, 'remove_border is only in PIL')
+    @unittest.skipUnless('pil_engine' in settings.THUMBNAIL_ENGINE
+                         or 'vips_engine' in settings.THUMBNAIL_ENGINE,
+                         'only the PIL and vips engines implement remove_border')
     def test_transparent_remove_border(self):
         # A 20px transparent border, first over noise, then around a black logo drawn by its alpha
         noise = Image.effect_noise((100, 100), 64)

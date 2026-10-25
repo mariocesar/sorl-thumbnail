@@ -76,11 +76,20 @@ class Engine(EngineBase):
         return image
 
     def _remove_border(self, image, image_width, image_height):
-        # The top left pixel is the border color
-        left, top, width, height = image.find_trim(background=image.getpoint(0, 0))
-        if not width or not height:  # the image is plain
+        layers = [image]
+        if image.hasalpha():
+            # A border is plain on black and on white, whatever color is under transparent pixels
+            layers = [image.flatten(background=0), image.flatten(background=255)]
+        left, top, right, bottom = image_width, image_height, 0, 0
+        for layer in layers:
+            # The top left pixel is the border color
+            x, y, width, height = layer.find_trim(background=layer.getpoint(0, 0))
+            if width and height:  # else the layer is plain
+                left, top = min(left, x), min(top, y)
+                right, bottom = max(right, x + width), max(bottom, y + height)
+        if left >= right or top >= bottom:  # the image is plain
             return image
-        return image.crop(left, top, width, height)
+        return image.crop(left, top, right - left, bottom - top)
 
     def _entropy_crop(self, image, geometry_width, geometry_height, image_width, image_height):
         width = min(geometry_width, image_width)
