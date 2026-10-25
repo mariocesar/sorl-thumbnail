@@ -107,8 +107,12 @@ class Engine(EngineBase):
     def is_valid_image(self, raw_data):
         buffer = BytesIO(raw_data)
         try:
-            trial_image = Image.open(buffer)
-            trial_image.verify()
+            # verify() checks the file structure, load() decodes the pixels to catch truncated files
+            with Image.open(buffer) as trial_image:
+                trial_image.verify()
+            buffer.seek(0)
+            with Image.open(buffer) as trial_image:
+                trial_image.load()
         except Exception:
             return False
         return True

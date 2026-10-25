@@ -48,6 +48,13 @@ Unreleased
   affected every engine. If you use ``orientation=False``, delete thumbnails
   made before the upgrade with ``manage.py thumbnail clear_delete_all``
   (`#843 <https://github.com/mariocesar/sorl-thumbnail/issues/843>`__)
+* sorl-thumbnail's ``ImageField`` rejects a truncated upload, such as a JPEG
+  cut off by a dropped connection, with "Upload a valid image". The PIL engine
+  only read the file's headers, so the upload was saved and the thumbnail
+  failed later with ``OSError: image file is truncated``. It now decodes the
+  whole image. The other engines accept these files on purpose: ImageMagick,
+  GraphicsMagick and wand make the thumbnail and fill the missing part with
+  grey (`#427 <https://github.com/mariocesar/sorl-thumbnail/issues/427>`__)
 
 13.3.0
 ======

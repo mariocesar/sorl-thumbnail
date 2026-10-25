@@ -972,25 +972,31 @@ class ImageValidationTestCase(unittest.TestCase):
     def setUp(self):
         self.BACKEND = get_module_class(settings.THUMBNAIL_BACKEND)()
 
-    @unittest.skip("See issue #427")
     def test_truncated_validation(self):
         """
         Test that is_valid_image returns false for a truncated image.
         """
-        name = 'data/broken.jpeg'
-        with open(name, 'rb') as broken_jpeg:
-            data = broken_jpeg.read()
+        buffer = BytesIO()
+        Image.effect_noise((400, 300), 64).convert('RGB').save(buffer, 'JPEG')
+        data = buffer.getvalue()
+        with open(os.path.join(settings.DATA_ROOT, 'broken.jpeg'), 'rb') as broken_jpeg:
+            broken = broken_jpeg.read()
 
         engine = PILEngine()
 
-        self.assertFalse(engine.is_valid_image(data))
+        self.assertTrue(engine.is_valid_image(data))
+        self.assertFalse(engine.is_valid_image(data[:-400]))
+        self.assertFalse(engine.is_valid_image(broken))
 
-    @unittest.skip("See issue #427. This seems to not-fail with wand")
+    @unittest.skipIf(
+        'pil_engine' not in settings.THUMBNAIL_ENGINE,
+        'ImageMagick and wand fill the missing part of a truncated image with grey',
+    )
     def test_truncated_generation_failure(self):
         """
         Confirm that generating a thumbnail for our "broken" image fails.
         """
-        name = 'data/broken.jpeg'
+        name = os.path.join(settings.DATA_ROOT, 'broken.jpeg')
         with open(name, 'rb') as broken_jpeg:
 
             with self.assertRaises((OSError, IOError,)):
