@@ -192,9 +192,9 @@ It differs from the PIL engine in a few ways:
   the gray values come from the libvips color model.
 * ``crop="smart"`` picks the area with the libvips entropy measure, so it may
   keep a different part of the image. It always returns the requested size.
-* ``remove_border`` trims the rows and columns of the top left pixel's color,
-  where PIL trims in steps of up to 10 pixels. The result can be a few pixels
-  smaller.
+* ``remove_border`` cuts the rows and columns that match the top left pixel's
+  color, where PIL cuts the strips with almost no detail. The two can differ by
+  a few pixels.
 * A truncated source raises an error when the thumbnail is made, and
   ``is_valid_image`` decodes the whole file, so a form rejects a truncated
   upload.

@@ -120,6 +120,21 @@ class SimpleTestCase(BaseTestCase):
     @unittest.skipIf(
         'pil_engine' not in settings.THUMBNAIL_ENGINE
         and 'vips_engine' not in settings.THUMBNAIL_ENGINE,
+        'only the PIL and vips engines implement remove_border',
+    )
+    def test_remove_border_limit(self):
+        # A dot on a white page, at most 28% is cut from each side
+        im = Image.new('RGB', (100, 100), 'white')
+        im.paste((0, 0, 0), (45, 45, 55, 55))
+        im.save(os.path.join(settings.MEDIA_ROOT, 'dot.png'))
+
+        t = self.BACKEND.get_thumbnail('dot.png', '100x100', remove_border=True, upscale=False)
+
+        self.assertEqual((t.x, t.y), (44, 44))
+
+    @unittest.skipIf(
+        'pil_engine' not in settings.THUMBNAIL_ENGINE
+        and 'vips_engine' not in settings.THUMBNAIL_ENGINE,
         'only the PIL and vips engines implement blur',
     )
     def test_crop_and_blur(self):

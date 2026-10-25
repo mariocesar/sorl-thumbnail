@@ -89,6 +89,10 @@ class Engine(EngineBase):
                 right, bottom = max(right, x + width), max(bottom, y + height)
         if left >= right or top >= bottom:  # the image is plain
             return image
+        # Don't remove too much, like PIL
+        max_x, max_y = int(image_width / 3.5), int(image_height / 3.5)
+        left, top = min(left, max_x), min(top, max_y)
+        right, bottom = max(right, image_width - max_x), max(bottom, image_height - max_y)
         return image.crop(left, top, right - left, bottom - top)
 
     def _entropy_crop(self, image, geometry_width, geometry_height, image_width, image_height):

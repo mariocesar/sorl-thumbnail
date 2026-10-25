@@ -168,8 +168,10 @@ It walks in from each edge and cuts the strips that have almost no detail,
 stopping where the picture starts. On a transparent image a strip counts as
 plain when it looks plain on both a black and a white background. It cuts at
 most 28% of the width or height from each side, so an image that is plain all
-over is kept. Default value is ``False``. Only the PIL engine supports it; the
-other engines raise ``NotImplementedError``.
+over is kept. Default value is ``False``. The PIL and vips engines support it.
+The vips engine cuts the rows and columns that match the top left pixel's
+color, so the two can differ by a few pixels. The other engines raise
+``NotImplementedError``.
 
 ``upscale``
 ^^^^^^^^^^^
