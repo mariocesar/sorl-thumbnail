@@ -1114,20 +1114,29 @@ class ImageValidationTestCase(unittest.TestCase):
             self.assertFalse(default.engine.is_valid_image(broken_jpeg.read()))
 
     @unittest.skipIf(
-        'pil_engine' not in settings.THUMBNAIL_ENGINE,
+        'pil_engine' not in settings.THUMBNAIL_ENGINE
+        and 'vips_engine' not in settings.THUMBNAIL_ENGINE,
         'ImageMagick and wand fill the missing part of a truncated image with grey',
     )
     def test_truncated_generation_failure(self):
         """
         Confirm that generating a thumbnail for our "broken" image fails.
         """
+        errors = (OSError,)
+        if 'vips_engine' in settings.THUMBNAIL_ENGINE:
+            import pyvips
+
+            # vips reads lazily, so it fails when the thumbnail is written
+            errors = (pyvips.Error,)
+
         name = os.path.join(settings.DATA_ROOT, 'broken.jpeg')
         with open(name, 'rb') as broken_jpeg:
 
-            with self.assertRaises((OSError, IOError,)):
+            with self.assertRaises(errors):
                 im = default.engine.get_image(broken_jpeg)
 
                 options = ThumbnailBackend.default_options
                 ratio = default.engine.get_image_ratio(im, options)
                 geometry = parse_geometry('120x120', ratio)
-                default.engine.create(im, geometry, options)
+                image = default.engine.create(im, geometry, options)
+                default.engine._get_raw_data(image, 'JPEG', 95)
