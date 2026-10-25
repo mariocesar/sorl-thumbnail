@@ -6,6 +6,7 @@ from django.core.management.base import BaseCommand
 from django.template.loader import render_to_string
 
 from demo.views import gallery_context, home_context
+from sorl.thumbnail import get_thumbnail
 
 
 class FailOnError(logging.Handler):
@@ -34,6 +35,9 @@ class Command(BaseCommand):
         (site / ('demo-%s.html' % engine)).write_text(page)
         if engine == 'pil':
             (site / 'index.html').write_text(render_to_string('index.html', home_context()))
+            # The link preview image, made by sorl like everything else on the site
+            im = get_thumbnail('images/earth-apollo-11.png', '1200x630', crop='top', quality=85)
+            shutil.copyfile(im.storage.path(im.name), site / 'social.jpg')
 
         shutil.copytree(settings.MEDIA_ROOT / 'images', site / 'media' / 'images',
                         dirs_exist_ok=True, ignore=shutil.ignore_patterns('README.md'))

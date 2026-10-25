@@ -34,6 +34,7 @@ class Command(BaseCommand):
 
         shutil.rmtree(settings.SITE_DIR, ignore_errors=True)
         settings.SITE_DIR.mkdir()
+        built = []
         for key in ENGINES:
             if key not in selected:
                 reason = 'Not included in this build'
@@ -53,5 +54,10 @@ class Command(BaseCommand):
                        '--settings=demo.settings.%s' % key]
             if subprocess.run(command, timeout=300).returncode:
                 raise CommandError('Rendering %s failed, see the error above' % key)
+            built.append(key)
 
+        # Pages without results are left out, they are marked noindex
+        paths = [''] + ['demo-%s.html' % key for key in built]
+        sitemap = render_to_string('sitemap.xml', {'site_url': settings.SITE_URL, 'paths': paths})
+        (settings.SITE_DIR / 'sitemap.xml').write_text(sitemap)
         call_command('checksite')

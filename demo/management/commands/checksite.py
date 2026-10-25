@@ -49,6 +49,28 @@ def check_image(site, img):
     return errors
 
 
+def check_sitemap(site, pages):
+    """Every sitemap URL is an indexable page, and the link preview image exists."""
+    errors = []
+    sitemap = site / 'sitemap.xml'
+    urls = re.findall(r'<loc>([^<]+)</loc>', sitemap.read_text()) if sitemap.exists() else []
+    if not urls:
+        errors.append('sitemap.xml is missing or empty')
+    for url in urls:
+        name = url.removeprefix(settings.SITE_URL) or 'index.html'
+        if name not in pages:
+            errors.append('sitemap.xml lists %s, which is not a page in the site' % url)
+        elif 'name="robots" content="noindex"' in (site / name).read_text():
+            errors.append('sitemap.xml lists %s, which is marked noindex' % url)
+    social = site / 'social.jpg'
+    if not social.is_file():
+        return errors + ['social.jpg, the link preview image, is missing']
+    with Image.open(social) as im:
+        if im.size != (1200, 630):
+            errors.append('social.jpg is %dx%d, not 1200x630' % im.size)
+    return errors
+
+
 class Command(BaseCommand):
     help = 'Check site/: links, anchors and images resolve, and images are what the page says'
 
@@ -78,6 +100,7 @@ class Command(BaseCommand):
         pil = (site / 'demo-pil.html').read_text()
         if 'class="notice"' in pil or 'class="skipped"' in pil:
             errors.append('demo-pil.html: Pillow skipped examples')
+        errors += check_sitemap(site, pages)
 
         for error in errors:
             self.stderr.write(error)

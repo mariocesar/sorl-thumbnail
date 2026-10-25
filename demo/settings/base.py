@@ -2,6 +2,8 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SITE_DIR = BASE_DIR.parent / 'site'
+# Where the export is published, for canonical links, the sitemap and link previews
+SITE_URL = 'https://mariocesar.github.io/sorl-thumbnail/'
 
 SECRET_KEY = 'demo-only'
 DEBUG = True

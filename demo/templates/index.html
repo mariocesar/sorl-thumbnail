@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% block title %}sorl-thumbnail: thumbnails for Django{% endblock %}
 {% block style %}
   .wrap { max-width: 48rem; }
   .facts { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: .1rem 1.25rem; color: #555; }
@@ -57,7 +56,8 @@
   <li>The <code>{% templatetag openblock %} thumbnail {% templatetag closeblock %}</code> tag, the <code>is_portrait</code>
     and <code>margin</code> filters, and <code>get_thumbnail()</code> for Python code.
     See the <a href="https://sorl-thumbnail.readthedocs.io/en/latest/template.html">template reference</a>.</li>
-  <li>Reads and writes through any Django storage. Thumbnail sizes are cached in a key-value store:
+  <li>Reads and writes through any Django storage, including Amazon S3 with
+    <a href="https://django-storages.readthedocs.io/">django-storages</a>. Thumbnail sizes are cached in a key-value store:
     the cached database or Redis.
     See the <a href="https://sorl-thumbnail.readthedocs.io/en/latest/reference/settings.html">settings</a>.</li>
   <li>An <code>ImageField</code> that validates uploads, and an admin mixin that shows a preview.

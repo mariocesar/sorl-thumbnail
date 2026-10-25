@@ -3,9 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}sorl-thumbnail{% endblock %}</title>
-<link rel="icon" href="data:,">
-<meta name="description" content="sorl-thumbnail: thumbnails for Django, made in your templates.">
+<title>{{ title }}</title>
+<meta name="description" content="{{ description }}">
+<link rel="canonical" href="{{ site_url }}{{ path }}">
+{% block head %}{% endblock %}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="sorl-thumbnail">
+<meta property="og:title" content="{{ title }}">
+<meta property="og:description" content="{{ description }}">
+<meta property="og:url" content="{{ site_url }}{{ path }}">
+<meta property="og:image" content="{{ site_url }}social.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Earth from Apollo 11, cropped by sorl-thumbnail">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23111'/><path d='M10 5v17h17M5 10h17v17' fill='none' stroke='%23fff' stroke-width='3'/></svg>">
 <style>
   @media (min-width: 48rem) { html { font-size: 93.75%; } }
   body { margin: 0; background: #fff; color: #222; font: 1rem/1.55 Inter, "Inter Variable", "Helvetica Neue", Helvetica, Arial, sans-serif; letter-spacing: -.011em; }

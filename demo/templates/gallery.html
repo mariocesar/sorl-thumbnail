@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ engine.label }} examples · sorl-thumbnail{% endblock %}
+{% block head %}{% if reason %}<meta name="robots" content="noindex">{% endif %}{% endblock %}
 {% block style %}
   .engines { margin: .75rem 0 1rem; }
   .engines a[aria-current], .compare a[aria-current] { color: #222; font-weight: 600; text-decoration: none; }

@@ -96,6 +96,7 @@ def site_context():
         'release': release,
         'release_date': release and run(['git', '-C', root, 'log', '-1', '--format=%as', release]),
         'built': date.today().isoformat(),
+        'site_url': settings.SITE_URL,
     }
 
 
@@ -107,13 +108,24 @@ def gallery_context(engine, built=True, reason=''):
                 for key, title, intro in SECTIONS]
     info = dict(ENGINES[engine], key=engine)
     version = run(info['version']) if built else ''
-    return site_context() | {'page': 'gallery', 'engine': info, 'reason': reason,
+    title = 'Django thumbnail examples with %s · sorl-thumbnail' % info['label']
+    description = ('Every sorl-thumbnail option made with the %s engine, next to the Django '
+                   'template that made it: crop, padding, formats, quality, effects, animation '
+                   'and EXIF orientation.' % info['label'])
+    return site_context() | {'page': 'gallery', 'path': 'demo-%s.html' % engine,
+                             'title': title, 'description': description,
+                             'engine': info, 'reason': reason,
                              'engine_version': version, 'sections': sections}
 
 
 def home_context():
     engine = settings.DEMO_ENGINE
     return site_context() | {
+        'path': '',
+        'title': 'sorl-thumbnail: thumbnails for Django',
+        'description': 'Make thumbnails in Django templates and Python code. Resize, crop and '
+                       'convert images with Pillow, libvips or ImageMagick, on any Django '
+                       'storage including Amazon S3.',
         'engine': dict(ENGINES[engine], key=engine),
         'hero': render_example(HOME_HERO, engine, True),
         'engine_table': [dict(e, key=key, gaps=[GAPS.get(name, name) for name in e['unsupported']])
