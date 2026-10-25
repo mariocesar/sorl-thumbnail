@@ -1,0 +1,2 @@
+{% load thumbnail %}{% if item.image|is_portrait %}portrait{% else %}landscape{% endif %}
+{% thumbnail item.image "100x100" as im %}<img src="{{ im.url }}">{% endthumbnail %}

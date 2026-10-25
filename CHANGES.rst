@@ -69,6 +69,10 @@ Unreleased
   setting is not part of the thumbnail name, so thumbnails created before the
   upgrade keep their black background until you delete them, for example with
   ``manage.py thumbnail clear_delete_all``
+* Sources that are model fields are downloaded once per request. A filter such
+  as ``is_portrait`` before the tag, or several thumbnails of one image, no
+  longer read the original again. The file stays open until the request ends
+  or another image is read (`#471 <https://github.com/mariocesar/sorl-thumbnail/issues/471>`__)
 * The cached DB key-value store writes every entry with a single upsert
   instead of a lookup followed by an insert or update, so creating a thumbnail
   runs six statements instead of nine. Oracle has no upsert in Django and keeps
