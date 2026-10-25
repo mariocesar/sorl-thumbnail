@@ -4,8 +4,9 @@ Template tags and filters
 
 .. highlight:: html+django
 
-Sorl-thumbnail comes with one template tag `thumbnail`_ and three filters:
-`is_portrait`_, `margin`_ and `resolution`_. To use any of them in you
+Sorl-thumbnail comes with one template tag, `thumbnail`_, and six filters:
+`is_portrait`_, `margin`_, `resolution`_, ``background_margin``,
+``html_thumbnails`` and ``markdown_thumbnails``. To use any of them in your
 templates you first need to load them::
 
     {% load thumbnail %}
@@ -127,9 +128,8 @@ This option is used to crop to a specific set of coordinates. ``cropbox`` takes
 Note that ``cropbox`` is applied before ``crop``.
 
 .. code-block:: python
-    
-    img = get_thumbnail(sorl_img, cropbox="{0},{1},{2},{3}".format(
-                        x, y, x2, y2))
+
+    im = get_thumbnail(item.image, '100x100', cropbox='10,10,200,200')
 
 ``crop``
 ^^^^^^^^
@@ -291,24 +291,24 @@ is_portrait
 This filter returns True if the image height is larger than the image width.
 Examples::
 
-    {% thumbnail item.image "100x100" %}
-    {% if item.image|is_portrait %}
-        <div class="portrait">
-            <img src="{{ im.url }}">
-        </div>
-    {% else %}
-        <div class="landscape">
-            <img src="{{ im.url }}">
-        </div>
-    {% endif %}
+    {% thumbnail item.image "100x100" as im %}
+        {% if item.image|is_portrait %}
+            <div class="portrait">
+                <img src="{{ im.url }}">
+            </div>
+        {% else %}
+            <div class="landscape">
+                <img src="{{ im.url }}">
+            </div>
+        {% endif %}
     {% endthumbnail %}
 
     {% if item.image|is_portrait %}
-        {% thumbnail item.image "100x200" crop="center" %}
+        {% thumbnail item.image "100x200" crop="center" as im %}
             <img src="{{ im.url }}">
         {% endthumbnail %}
     {% else %}
-        {% thumbnail item.image "200x100" crop="center" %}
+        {% thumbnail item.image "200x100" crop="center" as im %}
             <img src="{{ im.url }}">
         {% endthumbnail %}
     {% endif %}
@@ -338,7 +338,7 @@ boxes of images of a certain size but you do not want to crop them::
             <img src="ghost100x100.jpg">
         {% endthumbnail %}
     </div>
-    {% enfor %}
+    {% endfor %}
 
 The more problematic is to get the top margin, however the margin filter
 outputs all values.
@@ -347,13 +347,22 @@ outputs all values.
 
 resolution
 ==========
-Resolution is a filter for obtaining alternative resolution versions of the
-thumbnail.  Your provided resolution must be one of the
-``THUMBNAIL_ALTERNATIVE_RESOLUTIONS`` settings values (default: no alternative resolutions)
+Resolution is a filter for obtaining alternative resolution versions of a
+thumbnail. It takes the thumbnail URL and returns the URL of the version made
+for that resolution: ``.../abc.jpg`` becomes ``.../abc@2x.jpg``. That file
+exists only when the resolution is listed in
+``THUMBNAIL_ALTERNATIVE_RESOLUTIONS`` (default: no alternative resolutions),
+which makes the extra versions every time a thumbnail is made.
 
-For example, let's say you have an image ``item.image`` and you want to
-get the 2x DPI version of it.  You would simply write::
+.. code-block:: python
 
-    <div class="millxmill">
-        <img src="{{ item.image.url|resolution:"2x" }}">
-    </div>
+    THUMBNAIL_ALTERNATIVE_RESOLUTIONS = [1.5, 2]
+
+With that setting the alternative versions go in a ``srcset``::
+
+    {% thumbnail item.image "100x100" as im %}
+        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"
+             srcset="{{ im.url|resolution:"1.5x" }} 1.5x, {{ im.url|resolution:"2x" }} 2x">
+    {% endthumbnail %}
+
+Apply the filter to the thumbnail URL, not to the source image.

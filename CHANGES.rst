@@ -31,7 +31,7 @@ Unreleased
   channel made every strip look detailed, so nothing was ever cut. A strip now
   counts as flat when it looks flat on both a black and a white background, so
   the color a file happens to store under its transparent pixels makes no
-  difference. Only the PIL engine supports ``remove_border``
+  difference. The PIL and vips engines support ``remove_border``
 * ``remove_border=True`` now cuts the border exactly. Borders thinner than
   10 px were kept, thicker ones were cut short, and wide or tall images lost
   too much. Delete old thumbnails with ``manage.py thumbnail clear_delete_all``

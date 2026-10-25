@@ -118,16 +118,15 @@ because it is what most people have installed already. Features:
 * Easy to install
 * Produces good quality images but not the best
 * It is fast
-* Can not handle CMYK sources
 
 Pgmagick
 --------
 ``'sorl.thumbnail.engines.pgmagick_engine.Engine'``. Pgmagick uses `Graphics
-<http://www.graphicsmagick.org/>`_. Fatures:
+<http://www.graphicsmagick.org/>`_. Features:
 
 * Not easy to install unless on linux, very slow to compile
 * Produces high quality images
-* It is a tad slow?
+* It is a tad slow
 * Can handle CMYK sources
 
 ImageMagick / GraphicsMagick
@@ -150,7 +149,6 @@ Features:
 * Easy to install
 * Produces high quality images
 * Can handle CMYK sources
-* Works on Python 2.6, 2.7, 3.2, 3.3, and PyPy
 
 libvips
 -------
@@ -346,7 +344,7 @@ created. This can be an absolute path.
 ``THUMBNAIL_DBM_MODE``
 ======================
 
-- Default: ``0x644``
+- Default: ``0o644``
 
 Permission bits to use when creating new DBM files
 
@@ -475,11 +473,10 @@ missing input source.
 
 - Default ``https://dummyimage.com/%(width)sx%(height)s``
 
-This is the generated thumbnail whensource of the presented thumbnail. Width and
-Height is passed to the string for formatting.  Other options are for example:
+The URL of the placeholder image. ``%(width)s`` and ``%(height)s`` are
+replaced with the thumbnail size. Another service that works the same way:
 
-- ``https://via.placeholder.com/%(width)sx%(height)s``
-- ``http://placekitten.com/%(width)s/%(height)s`` 
+- ``https://placehold.co/%(width)sx%(height)s``
 
 
 ``THUMBNAIL_DUMMY_RATIO``

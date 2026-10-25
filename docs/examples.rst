@@ -27,7 +27,7 @@ Crop using margin filter, x, y aliases::
 
 Using external images and advanced cropping::
 
-    {% thumbnail "http://www.aino.se/media/i/logo.png" "40x40" crop="80% top" as im %}
+    {% thumbnail "https://example.com/logo.png" "40x40" crop="80% top" as im %}
         <img src="{{ im.url }}">
     {% endthumbnail %}
 

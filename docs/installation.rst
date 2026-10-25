@@ -9,13 +9,14 @@ sorl-thumbnail::
 
     pip install sorl-thumbnail
 
-Depending of the chosen image backend, you may also use one of::
+Depending on the image library you choose, you may install one of these
+instead. The quotes keep the shell from reading the brackets::
 
-    pip install sorl-thumbnail[pil]
-    pip install sorl-thumbnail[pil, avif]
-    pip install sorl-thumbnail[wand]
-    pip install sorl-thumbnail[pgmagick]
-    pip install sorl-thumbnail[vips]
+    pip install "sorl-thumbnail[pil]"
+    pip install "sorl-thumbnail[pil,avif]"
+    pip install "sorl-thumbnail[wand]"
+    pip install "sorl-thumbnail[pgmagick]"
+    pip install "sorl-thumbnail[vips]"
 
 Setup
 =====
