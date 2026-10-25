@@ -179,3 +179,23 @@ Store::
 
     delete(my_file)
 
+
+.. _source-cache-in-a-job:
+
+Reading a source once in a job
+------------------------------
+Within a request sorl-thumbnail downloads a source once however many
+thumbnails and filters use it (see :ref:`source-cache`). A management command
+or a background job has no request, so wrap the work for each image in
+``source_cache``::
+
+    from sorl.thumbnail import get_thumbnail, source_cache
+
+    for item in Item.objects.all():
+        with source_cache():
+            for geometry in ('100x100', '400x400', '800x800'):
+                get_thumbnail(item.image, geometry)
+
+The block keeps the last source read and drops it when the block ends, also
+when it raises.
+

@@ -28,3 +28,12 @@ Setup
 
     python manage.py migrate
 
+4. If you serve with ASGI on Django 5.2 or 6.0, add the middleware so a source
+   is downloaded once per request. WSGI, and ASGI from Django 6.1, need
+   nothing, see :ref:`source-cache`::
+
+    MIDDLEWARE = [
+        ...
+        'sorl.thumbnail.middleware.SourceCacheMiddleware',
+    ]
+

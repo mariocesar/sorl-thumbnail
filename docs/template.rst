@@ -295,9 +295,8 @@ Examples::
         {% endthumbnail %}
     {% endif %}
 
-When the source is a model field, sorl-thumbnail downloads it once and keeps
-it open until the request ends or it reads another image. The filter and the
-tag share that download, so their order does not matter.
+The filter and the tag share one download of the source, so their order does
+not matter. See :ref:`source-cache`.
 
 
 margin

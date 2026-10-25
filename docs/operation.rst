@@ -40,8 +40,9 @@ the ``delete`` method of the ``ThumbnailBackend`` class or subclass::
 
 
 The ``sorl.thumbnail.delete`` method always deletes the input files thumbnail
-Key Value Store references as well as thumbnail files. You can use this method
-on thumbnails as well as source files. Alternatively if you have **deleted** a
+Key Value Store references as well as thumbnail files, and drops the file from
+the source cache (see :ref:`source-cache`). You can use this method on
+thumbnails as well as source files. Alternatively if you have **deleted** a
 file you can use the management command :ref:`thumbnail-cleanup`.
 
 **Why you ask?** Why go through all the trouble with a |kvstore| and risk
@@ -62,5 +63,32 @@ consists only of the image size but this could be expanded to for example EXIF
 data. The other bonus is that we can keep track of what thumbnails has been
 generated from a particular source and deleting them too when the source is
 deleted.
+
+.. _source-cache:
+
+Reading the source once
+=======================
+
+The thumbnail tag reads the source file when it has to make a thumbnail, and
+``is_portrait`` and the margin filters read it when the |kvstore| has no size
+for it yet. A template that runs a filter and then the tag, or makes three
+sizes of one image, used to download the original once per use. Now
+sorl-thumbnail keeps the bytes of the last source it read until the request
+ends, and every use in between is served from that copy. This is the source
+cache. It holds one file at a time and takes no more memory than making one
+thumbnail already does. It works with every engine and needs no setting.
+
+The cache reads through the storage, never through your file object, so a
+``FieldFile`` you have open keeps its position and stays open.
+
+If you replace a source during a request that already read it, the cache
+still holds the old bytes. Call ``delete(my_file, delete_file=False)`` as
+above and the next read fetches the new file.
+
+Outside a request nothing is cached. In a management command or a background
+job wrap the work in ``source_cache``, see :ref:`source-cache-in-a-job`.
+
+Under ASGI the request scope needs Django 6.1. On Django 5.2 or 6.0 add the
+middleware from :doc:`installation`.
 
 .. |kvstore| replace:: Key Value Store

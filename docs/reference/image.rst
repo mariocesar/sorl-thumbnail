@@ -81,7 +81,14 @@ Sets the size of the image, takes an optional size tuple (x, y) as argument.
 
 ``read``
 --------
-Reads the file as done from the underlying storage.
+Reads the file from the underlying storage. Within a request or a
+``source_cache`` block the last file read is kept in the source cache, so
+reading it again does not go back to the storage. See :ref:`source-cache`.
+
+``forget``
+----------
+Drops this file from the source cache, so the next ``read`` goes to the
+storage. ``write`` and ``delete`` call it for you.
 
 ``write``
 ---------
