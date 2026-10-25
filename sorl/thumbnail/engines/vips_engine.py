@@ -2,6 +2,14 @@ import pyvips
 
 from sorl.thumbnail.base import EXTENSIONS
 from sorl.thumbnail.engines.base import EngineBase
+from sorl.thumbnail.parsers import parse_color
+
+
+def background(color, image):
+    """Band values of a padding_color for the image, without alpha"""
+    rgb = list(parse_color(color))
+    bands = image.bands - 1 if image.hasalpha() else image.bands
+    return rgb if bands >= 3 else [sum(rgb) / 3]
 
 
 class Engine(EngineBase):
@@ -87,13 +95,11 @@ class Engine(EngineBase):
         return image.gaussblur(radius)
 
     def _padding(self, image, geometry, options):
-        background = list(bytes.fromhex(options['padding_color'].lstrip('#')))
-        if image.bands < 3:
-            background = [sum(background) / 3]
+        color = background(options['padding_color'], image)
         if image.hasalpha():
-            background.append(255)
+            color.append(255)
         return image.gravity('centre', geometry[0], geometry[1],
-                             extend='background', background=background)
+                             extend='background', background=color)
 
     def _get_raw_data(self, image, format_, quality, image_info=None, progressive=False):
         options = {'keep': 'icc'}  # drop EXIF and XMP, keep the color profile

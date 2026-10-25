@@ -18,7 +18,7 @@ from sorl.thumbnail.engines.convert_engine import EngineError
 from sorl.thumbnail.engines.pil_engine import Engine as PILEngine
 from sorl.thumbnail.helpers import get_module_class, run, tokey
 from sorl.thumbnail.images import ImageFile, deserialize_image_file
-from sorl.thumbnail.parsers import parse_geometry
+from sorl.thumbnail.parsers import ThumbnailParseError, parse_geometry
 from sorl.thumbnail.templatetags.thumbnail import is_portrait, margin
 
 from .models import Item
@@ -85,10 +85,21 @@ class SimpleTestCase(BaseTestCase):
     def test_padding_color(self):
         item = Item.objects.get(image='200x100.jpg')
 
-        t = self.BACKEND.get_thumbnail(item.image, '300x300', padding=True, padding_color='#ff0000')
+        for color in ('#ff0000', '#f00'):
+            t = self.BACKEND.get_thumbnail(item.image, '300x300', padding=True, padding_color=color)
 
-        red, green, blue = Image.open(t.storage.path(t.name)).convert('RGB').getpixel((150, 10))
-        self.assertTrue(red > 250 and green < 5 and blue < 5, (red, green, blue))
+            red, green, blue = Image.open(t.storage.path(t.name)).convert('RGB').getpixel((150, 10))
+            self.assertTrue(red > 250 and green < 5 and blue < 5, (red, green, blue))
+
+    @unittest.skipIf(
+        'vips_engine' not in settings.THUMBNAIL_ENGINE,
+        'the other engines accept color names',
+    )
+    def test_padding_color_name(self):
+        item = Item.objects.get(image='200x100.jpg')
+        message = "padding_color must be a hex color like #fff or #ffffff, not 'red'"
+        with self.assertRaisesMessage(ThumbnailParseError, message):
+            self.BACKEND.get_thumbnail(item.image, '300x300', padding=True, padding_color='red')
 
     @unittest.skipIf(
         'pil_engine' not in settings.THUMBNAIL_ENGINE

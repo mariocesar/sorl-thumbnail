@@ -185,8 +185,8 @@ turning its operation cache off with ``pyvips.cache_set_max(0)``, see the
 
 It differs from the PIL engine in a few ways:
 
-* ``padding_color`` must be a hex color such as ``#ff0000``. Color names are
-  not accepted.
+* ``padding_color`` must be a hex color such as ``#f00`` or ``#ff0000``. A
+  color name such as ``red`` raises ``ThumbnailParseError``.
 * Resizing uses the libvips resampler, so pixels differ slightly.
 * ``colorspace="GRAY"`` keeps the alpha channel of a transparent source, and
   the gray values come from the libvips color model.

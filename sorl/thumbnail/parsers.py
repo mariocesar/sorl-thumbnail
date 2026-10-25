@@ -4,6 +4,7 @@ from sorl.thumbnail.helpers import ThumbnailError, toint
 
 bgpos_pat = re.compile(r'^(?P<value>\d+)(?P<unit>%|px)$')
 geometry_pat = re.compile(r'^(?P<x>\d+)?(?:x(?P<y>\d+))?$')
+color_pat = re.compile(r'^#?(?P<hex>[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$')
 
 
 class ThumbnailParseError(ThumbnailError):
@@ -100,3 +101,18 @@ def parse_cropbox(cropbox):
         return tuple([int(x.strip()) for x in cropbox.split(',')])
     else:
         return tuple(cropbox)
+
+
+def parse_color(color):
+    """
+    Parses a #rgb or #rrggbb color and returns a (red, green, blue) tuple
+    """
+    m = color_pat.match(color)
+    if not m:
+        raise ThumbnailParseError(
+            f'padding_color must be a hex color like #fff or #ffffff, not {color!r}'
+        )
+    digits = m.group('hex')
+    if len(digits) == 3:
+        digits = ''.join(digit * 2 for digit in digits)
+    return tuple(bytes.fromhex(digits))
