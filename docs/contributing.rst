@@ -122,9 +122,9 @@ Adding an example is one template in ``demo/examples/`` and one line in
 Sending pull requests
 =====================
 
-1. Fork the repo::
+1. Fork the repo on GitHub and clone your fork::
 
-    git@github.com:mariocesar/sorl-thumbnail.git
+    git clone git@github.com:<your-user>/sorl-thumbnail.git
 
 2. Create a branch for your specific changes::
 

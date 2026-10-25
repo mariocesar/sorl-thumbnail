@@ -9,14 +9,14 @@ Features at a glance
 
 - Support for Django 5.2, 6.0, and 6.1 following the `Django supported versions policy`_
 - Storage support
-- Pluggable Engine support for `Pillow`_, `ImageMagick`_, `PIL`_, `Wand`_, `pgmagick`_, and `libvips`_
+- Pluggable engine support for `Pillow`_, `libvips`_, `ImageMagick`_, `GraphicsMagick`_, `Wand`_ and `pgmagick`_
 - Pluggable Key Value Store support (cached db and redis)
 - Pluggable Backend support
 - Admin integration with possibility to delete
 - Dummy generation (placeholders)
 - Flexible, simple syntax, generates no html
 - CSS style cropping options
-- Back smart cropping, and remove borders from the images when cropping
+- Smart cropping, and removing plain borders before cropping
 - Margin calculation for vertical positioning
 - Alternative resolutions versions of a thumbnail
 
@@ -175,7 +175,7 @@ making one ``HEAD`` request for the file that is already there. See
 
 .. _`Pillow`: https://pillow.readthedocs.io/
 .. _`ImageMagick`: https://imagemagick.org/
-.. _`PIL`: https://python-pillow.org/
+.. _`GraphicsMagick`: http://www.graphicsmagick.org/
 .. _`Wand`: https://docs.wand-py.org/
 .. _`pgmagick`: https://pgmagick.readthedocs.io/
 .. _`libvips`: https://www.libvips.org/

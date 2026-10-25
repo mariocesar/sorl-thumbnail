@@ -57,7 +57,7 @@ Alias of ``url``
 
 ``size``
 --------
-Returns the image size in pixels as a (x, y) tuple
+Returns the image size in pixels as an ``[x, y]`` list
 
 ``key``
 -------
