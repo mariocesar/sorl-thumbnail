@@ -157,6 +157,20 @@ cropping options if you don't want to generate unnecessary thumbnails. In case
 you are wondering, sorl-thumbnail sorts the options so the order does not
 matter, same options but in different order will generate only one thumbnail.
 
+``remove_border``
+^^^^^^^^^^^^^^^^^
+Cuts away a plain border before the image is scaled, like the white margin of
+a scanned page or the empty space around a logo::
+
+    {% thumbnail item.image "100x100" remove_border=True as im %}
+
+It walks in from each edge and cuts the strips that have almost no detail,
+stopping where the picture starts. On a transparent image a strip counts as
+plain when it looks plain on both a black and a white background. It cuts at
+most 28% of the width or height from each side, so an image that is plain all
+over is kept. Default value is ``False``. Only the PIL engine supports it; the
+other engines raise ``NotImplementedError``.
+
 ``upscale``
 ^^^^^^^^^^^
 Upscale is a boolean and controls if the image can be upscaled or not. For
