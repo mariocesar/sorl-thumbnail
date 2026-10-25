@@ -140,7 +140,7 @@ class ImageFile(BaseImageFile):
         elif hasattr(file_, 'storage'):
             self.storage = file_.storage
         elif url_pat.match(self.name):
-            self.storage = UrlStorage()
+            self.storage = url_storage
         else:
             self.storage = default_storage
 
@@ -311,6 +311,9 @@ class UrlStorage(Storage):
 
     def delete(self, name):
         pass
+
+
+url_storage = UrlStorage()
 
 
 def delete_all_thumbnails():
