@@ -2,8 +2,8 @@
 Changes
 =======
 
-Unreleased
-==========
+13.4.0
+======
 
 * A project homepage with example galleries for each image engine, built from
   ``demo/`` and published to https://mariocesar.github.io/sorl-thumbnail/
@@ -92,6 +92,10 @@ Unreleased
   instead (`#833 <https://github.com/mariocesar/sorl-thumbnail/issues/833>`__)
 * Removed the ``THUMBNAIL_LAZY_FILL_EMPTY`` setting. Nothing read it, so
   setting it never did anything
+* The docs have a quickstart, a guide for Amazon S3, a troubleshooting page
+  and a page on choosing a thumbnail library. Every option, filter and setting
+  is documented, and the examples run as written:
+  https://sorl-thumbnail.readthedocs.io/
 
 13.3.0
 ======
