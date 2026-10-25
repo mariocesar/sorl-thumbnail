@@ -1,9 +1,15 @@
+from io import BytesIO
+
 import pyvips
 
 from sorl.thumbnail.base import EXTENSIONS
 from sorl.thumbnail.conf import settings
 from sorl.thumbnail.engines.base import EngineBase
+from sorl.thumbnail.helpers import EngineError
 from sorl.thumbnail.parsers import parse_color
+
+# Pillow raises DecompressionBombError above this
+MAX_PIXELS = 2 * 89478485
 
 
 def background(color, image):
@@ -35,6 +41,10 @@ class Engine(EngineBase):
         data = source.read()
         # Raise on a truncated source like PIL instead of filling it with grey
         image = pyvips.Image.new_from_buffer(data, '', fail_on='truncated')
+        # Only the header is read so far, check the size before decoding, per frame like Pillow
+        pixels = image.width * image.height
+        if pixels > MAX_PIXELS:
+            raise EngineError(f'The image has {pixels} pixels, more than the limit of {MAX_PIXELS}')
         if image.get('vips-loader') == 'gifload_buffer':
             # Every frame stacked top to bottom, see create()
             image = pyvips.Image.new_from_buffer(data, '', fail_on='truncated', n=-1)
@@ -46,8 +56,8 @@ class Engine(EngineBase):
     def is_valid_image(self, raw_data):
         try:
             # Decode every pixel, a truncated file only fails there
-            pyvips.Image.new_from_buffer(raw_data, '', fail_on='truncated').avg()
-        except pyvips.Error:
+            self.get_image(BytesIO(raw_data)).avg()
+        except (pyvips.Error, EngineError):
             return False
         return True
 

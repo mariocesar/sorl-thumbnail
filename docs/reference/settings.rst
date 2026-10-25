@@ -169,9 +169,11 @@ Features:
 * Keeps animated GIFs animated when the thumbnail format is ``GIF``
 
 libvips runs inside the Django process, like Pillow. A crash on a broken or
-hostile image takes the worker down with it. libvips starts its threads with
-the first image it processes, so make no thumbnails in a gunicorn master
-started with ``--preload`` before it forks the workers, or they will hang.
+hostile image takes the worker down with it. Like Pillow, it refuses sources
+over 178,956,970 pixels, so a small upload that unpacks into a huge image can't
+use up the memory. libvips starts its threads with the first image it
+processes, so make no thumbnails in a gunicorn master started with
+``--preload`` before it forks the workers, or they will hang.
 
 The binary wheel has no PDF, ImageMagick or OpenSlide loaders. Install libvips
 from your system and plain ``pyvips`` if you need them.

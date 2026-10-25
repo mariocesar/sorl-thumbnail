@@ -93,6 +93,19 @@ class SimpleTestCase(BaseTestCase):
 
     @unittest.skipIf(
         'vips_engine' not in settings.THUMBNAIL_ENGINE,
+        'Pillow has its own limit, DecompressionBombError',
+    )
+    def test_pixel_limit(self):
+        # 200 million pixels in a small file, more than Pillow allows
+        data = BytesIO()
+        Image.new('1', (20000, 10000)).save(data, 'PNG')
+        message = 'The image has 200000000 pixels, more than the limit of 178956970'
+        with self.assertRaisesMessage(EngineError, message):
+            self.ENGINE.get_image(BytesIO(data.getvalue()))
+        self.assertFalse(self.ENGINE.is_valid_image(data.getvalue()))
+
+    @unittest.skipIf(
+        'vips_engine' not in settings.THUMBNAIL_ENGINE,
         'the other engines accept color names',
     )
     def test_padding_color_name(self):
