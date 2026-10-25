@@ -109,9 +109,6 @@ THUMBNAIL_DUMMY_RATIO = 1.5
 # We don't create retina images by default to optimize performance.
 THUMBNAIL_ALTERNATIVE_RESOLUTIONS = []
 
-# Lazy fill empty thumbnail like THUMBNAIL_DUMMY
-THUMBNAIL_LAZY_FILL_EMPTY = False
-
 # Timeout, in seconds, to use when retrieving images with urllib2
 THUMBNAIL_URL_TIMEOUT = None
 

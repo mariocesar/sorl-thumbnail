@@ -90,6 +90,8 @@ Unreleased
   ``THUMBNAIL_VIPSHEADER`` settings. It has failed on every thumbnail with the
   default settings since 12.6.3. Use ``sorl.thumbnail.engines.vips_engine.Engine``
   instead (`#833 <https://github.com/mariocesar/sorl-thumbnail/issues/833>`__)
+* Removed the ``THUMBNAIL_LAZY_FILL_EMPTY`` setting. Nothing read it, so
+  setting it never did anything
 
 13.3.0
 ======
