@@ -16,6 +16,11 @@ jobs:
     steps:
     - uses: actions/checkout@v7
 
+    - name: Install Graphviz for the docs drawing
+      run: |
+        sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 update
+        sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Dpkg::Options::=--force-unsafe-io install --no-install-recommends graphviz
+
     - name: Set up uv
       uses: astral-sh/setup-uv@v10.3.2
       with:

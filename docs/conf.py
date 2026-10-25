@@ -44,7 +44,11 @@ copyright = '2010, Mikko Hellsing'
 # built documents.
 #
 # The short X.Y version.
-version = importlib.metadata.version("sorl-thumbnail")
+try:
+    version = importlib.metadata.version("sorl-thumbnail")
+except importlib.metadata.PackageNotFoundError:
+    # tox builds the docs without installing the package
+    version = ''
 # The full version, including alpha/beta/rc tags.
 release = version
 
