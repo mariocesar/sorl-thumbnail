@@ -31,10 +31,15 @@
   .muted, figcaption, .details { color: #555; }
   .small, figcaption, .details { font-size: .85rem; letter-spacing: -.003em; font-variant-numeric: tabular-nums; }
   header.site { border-bottom: 1px solid #ddd; }
-  header.site .wrap { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem 1.25rem; padding-top: .6rem; padding-bottom: .6rem; }
-  header.site strong a { color: #111; font-weight: 700; letter-spacing: -.02em; text-decoration: none; }
-  header.site nav { display: flex; flex-wrap: wrap; gap: .25rem 1rem; }
-  header.site nav a[aria-current] { color: #222; font-weight: 600; text-decoration: none; }
+  header.site .wrap { display: flex; flex-wrap: wrap; align-items: center; column-gap: 1.5rem; }
+  header.site nav { display: flex; flex-wrap: wrap; column-gap: 1.25rem; }
+  header.site strong a, header.site .pages a { display: block; padding: .75rem 0; color: #111; text-decoration: none; box-shadow: inset 0 -2px 0 transparent; }
+  header.site strong a { font-weight: 700; letter-spacing: -.02em; }
+  header.site .pages a { font-weight: 500; }
+  header.site .pages a:hover { box-shadow: inset 0 -2px 0 #bbb; }
+  header.site .pages a[aria-current] { font-weight: 600; box-shadow: inset 0 -2px 0 #111; }
+  header.site .links { margin-left: auto; padding: .5rem 0; font-size: .875rem; }
+  header.site .links a::after { content: "\2197" / ""; margin-left: .15em; }
   .result { background-color: #fff; background-image: conic-gradient(#eee 25%, #fff 0 50%, #eee 0 75%, #fff 0); background-size: 16px 16px; border: 1px solid #ddd; padding: .75rem; display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; justify-content: center; min-height: 5rem; }
   .result img { max-width: 100%; height: auto; }
   footer.site { margin-top: 3rem; border-top: 1px solid #ddd; padding: 1rem 0 2rem; }
@@ -46,8 +51,10 @@
 <header class="site">
   <div class="wrap">
     <strong><a href="index.html">sorl-thumbnail</a></strong>
-    <nav aria-label="Main">
+    <nav class="pages" aria-label="Site">
       <a href="demo-pil.html"{% if page == "gallery" %} aria-current="page"{% endif %}>Examples</a>
+    </nav>
+    <nav class="links" aria-label="Project">
       <a href="https://sorl-thumbnail.readthedocs.io/en/latest/">Documentation</a>
       <a href="https://github.com/mariocesar/sorl-thumbnail/blob/main/CHANGES.rst">Changelog</a>
       <a href="https://github.com/mariocesar/sorl-thumbnail">Source</a>
