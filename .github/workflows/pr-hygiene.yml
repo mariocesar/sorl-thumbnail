@@ -33,7 +33,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
         with:
           persist-credentials: false
-      - uses: mariocesar/pr-hygiene@a8288d82d34396e3ef1aeab9333a448928dd1af9  # v1.0.0
+      - uses: mariocesar/pr-hygiene@41989205ad041e2f589de96aaa572f59049af79b  # v1.1.0
         with:
           rules: .github/pr-hygiene.yml
           pr-number: ${{ inputs.pr }}

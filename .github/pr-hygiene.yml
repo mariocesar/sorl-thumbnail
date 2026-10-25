@@ -33,3 +33,10 @@ rules:
     severity: cleanup
     paths: ["/.gitignore"]
     message: Leave .gitignore as it is unless the change needs it, and say why in the description.
+
+  - name: ignored-files
+    severity: block
+    paths: ["*"]
+    ignored: true
+    message: >-
+      A file this repository's .gitignore ignores, added anyway. Closed.
