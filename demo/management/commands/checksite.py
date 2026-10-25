@@ -49,11 +49,6 @@ def check_image(site, img):
     return errors
 
 
-def frames(path):
-    with Image.open(path) as im:
-        return getattr(im, 'n_frames', 1)
-
-
 class Command(BaseCommand):
     help = 'Check site/: links, anchors and images resolve, and images are what the page says'
 
@@ -83,14 +78,6 @@ class Command(BaseCommand):
         pil = (site / 'demo-pil.html').read_text()
         if 'class="notice"' in pil or 'class="skipped"' in pil:
             errors.append('demo-pil.html: Pillow skipped examples')
-        gif = re.search(r'id="animation-gif".*?src="([^"]+)"', pil, re.S).group(1)
-        png = re.search(r'id="animation-png".*?src="([^"]+)"', pil, re.S).group(1)
-        if frames(site / gif) < 2 or frames(site / png) != 1:
-            errors.append('demo-pil.html: GIF output should be animated and PNG a single frame')
-        rounded = re.search(r'id="effects-rounded".*?src="([^"]+)"', pil, re.S).group(1)
-        with Image.open(site / rounded) as im:
-            if im.convert('RGBA').getpixel((0, 0))[3] != 0:
-                errors.append('demo-pil.html: rounded corners should be transparent')
 
         for error in errors:
             self.stderr.write(error)

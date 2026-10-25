@@ -15,6 +15,9 @@ NO_PADDING = {'padding': 'this engine does not implement padding'}
 BAD_PADDING = {'padding': 'with padding this engine reports the unpadded size, see '
                           'https://github.com/mariocesar/sorl-thumbnail/issues/835'}
 
+# ImageMagick 7 has magick, 6 has convert and identify
+MAGICK = 'magick' if shutil.which('magick') else 'convert'
+
 # Settings live in demo/settings/<key>.py. install is for people, modules and tools for missing().
 ENGINES = {
     'pil': {
@@ -29,8 +32,8 @@ ENGINES = {
         'install': 'the ImageMagick commands',
         'label': 'ImageMagick',
         'modules': [],
-        'tools': ['magick' if shutil.which('magick') else 'convert'],
-        'version': ['magick' if shutil.which('magick') else 'convert', '-version'],
+        'tools': [MAGICK],
+        'version': [MAGICK, '-version'],
         'unsupported': EFFECTS | BAD_PADDING,
     },
     'graphicsmagick': {
