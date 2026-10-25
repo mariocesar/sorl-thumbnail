@@ -66,3 +66,12 @@ thumbnail_kvstore.lock
 htmlcov/
 coverage.xml
 dump.rdb
+
+# AI assistant files are personal to each developer, not tools of the project.
+AGENTS*.md
+CLAUDE*.md
+.codex/
+.claude/
+.cursor/
+.cursorrules
+.aider*
