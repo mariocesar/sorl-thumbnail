@@ -7,6 +7,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   quickstart
    examples
    installation
    requirements
@@ -14,7 +15,9 @@ Contents:
    management
    logging
    operation
+   s3
    reference/index
+   choosing
    contributing
 
 

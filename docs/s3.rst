@@ -1,0 +1,164 @@
+.. meta::
+   :description: Django thumbnails on Amazon S3 with django-storages: why they are slow, which requests sorl-thumbnail makes, the settings that avoid them and the errors to expect.
+
+***********************
+Thumbnails on Amazon S3
+***********************
+
+This page is for sites that keep their media on Amazon S3 with
+`django-storages`_. The same applies to any remote storage, Google Cloud
+Storage and Azure included: every call to the storage is a network request.
+
+What costs a request
+====================
+
+On a local disk, asking whether a file exists or reading it costs nothing.
+On S3 each one is an HTTP request, so what sorl-thumbnail asks the storage
+decides how fast a page is.
+
+A thumbnail that is in the key-value store costs no request. Its URL comes
+from the store, and the storage is never asked whether the source or the
+thumbnail still exist (see :doc:`operation`). This is the normal case: a
+thumbnail enters the store the first time it is made, and stays there until
+you delete it.
+
+A thumbnail that is not in the store costs:
+
+- One ``HEAD`` request, to see whether the file is already in the bucket.
+  It is there after ``manage.py thumbnail clear``, or on a new site sharing
+  a bucket with an old one. Then the thumbnail and its source are read once
+  to put their sizes back in the store.
+- If it is not there, one ``GET`` of the source, the resize in your worker,
+  and one ``PUT`` for the thumbnail, plus one ``PUT`` per entry of
+  ``THUMBNAIL_ALTERNATIVE_RESOLUTIONS``.
+
+The ``is_portrait`` and ``margin`` filters read the source when the store
+has no size for it yet. Within a request the source is read once however
+many tags and filters use it, see :ref:`source-cache`.
+
+Settings
+========
+
+Write the storage the way the django-storages docs write it, and let
+sorl-thumbnail keep its defaults::
+
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "bucket_name": "my-media",
+                "file_overwrite": True,
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": "redis://cache:6379/1",
+        },
+    }
+
+Each line matters for S3:
+
+``file_overwrite``
+    ``True``, the django-storages default. When sorl-thumbnail regenerates a
+    thumbnail it saves it under the same name. With ``False`` the storage
+    picks a new name and the old file stays in the bucket.
+
+``CACHES``
+    The key-value store is a database table read through the cache named by
+    ``THUMBNAIL_CACHE``, ``default`` unless you say otherwise. Use a cache
+    that every worker shares, Redis or memcached. The local memory cache is
+    one per process, so each process asks the database once per thumbnail.
+    The dummy cache asks it on every render.
+
+``THUMBNAIL_FORCE_OVERWRITE``
+    Leave it ``False``. Older advice set it to ``True`` for S3, from boto 2
+    days when ``exists()`` was slow. With boto3 ``exists()`` is one ``HEAD``
+    request, while ``True`` skips the check and regenerates the thumbnail on
+    every store miss: a ``GET`` of the full-size source, the resize and a
+    ``PUT``. See :ref:`THUMBNAIL_FORCE_OVERWRITE <force-overwrite>`.
+
+``THUMBNAIL_STORAGE``
+    ``default``, so thumbnails go to the same bucket under ``cache/``. To
+    put them somewhere else, add an alias to ``STORAGES`` with its own
+    ``bucket_name`` or ``location`` and name it here. The alias and its
+    ``OPTIONS`` are kept with the cached thumbnail, so the URL is the same on
+    every request.
+
+Signed URLs work. The thumbnail URL is asked from the storage on every
+render, so ``querystring_auth`` signs it like any other file. When the
+source itself is a signed URL, ``THUMBNAIL_REMOVE_URL_ARGS`` strips the
+query before the thumbnail is named, so a new signature does not make a new
+thumbnail.
+
+Making thumbnails ahead of the visitor
+======================================
+
+The first render of a page pays the ``GET``, the resize and the ``PUT`` for
+each of its thumbnails. A management command can pay it instead, after an
+import or a deploy. Wrap the work for each image in ``source_cache`` so the
+source is downloaded once for all its sizes::
+
+    from django.core.management.base import BaseCommand
+
+    from sorl.thumbnail import get_thumbnail, source_cache
+
+    from myapp.models import Item
+
+
+    class Command(BaseCommand):
+        def handle(self, *args, **options):
+            for item in Item.objects.exclude(image=''):
+                with source_cache():
+                    get_thumbnail(item.image, '200x200', crop='center')
+                    get_thumbnail(item.image, '800x600')
+
+Use the same geometry and options as the templates. Any difference names a
+different thumbnail: ``crop="center"`` and ``crop="50%"`` mean the same and
+still make two files.
+
+Cleaning up
+===========
+
+The management commands in :doc:`management` work on S3, with a request per
+file:
+
+- ``thumbnail clear`` touches no file. Use it when the store is wrong; the
+  next render of each thumbnail costs one ``HEAD`` and two reads.
+- ``thumbnail cleanup`` asks ``exists()`` for every source and thumbnail in
+  the store, a ``HEAD`` each, so it is a long run on a big bucket.
+- ``thumbnail clear_delete_referenced`` deletes every thumbnail file the
+  store knows, a ``DELETE`` each, and ``--timeout=P90D`` limits it to files
+  older than 90 days.
+- ``thumbnail clear_delete_all`` lists everything under ``cache/`` and
+  deletes it, whether the store knew it or not.
+
+When you replace a source image, call ``delete(item.image, delete_file=False)``
+so its thumbnails are made again from the new file, see :doc:`operation`.
+
+What can go wrong
+=================
+
+The tag renders nothing and the log says ``Remote file [...] does not exist``
+    The source is not in the bucket, or the credentials cannot read it.
+    Set ``THUMBNAIL_DEBUG = True`` in development to get the exception from
+    the storage instead.
+
+The thumbnail URL changes between the first and the second request
+    The storage alias was not found when the thumbnail was cached, so the
+    second request built a storage without your ``OPTIONS``. This happened
+    when ``BACKEND`` was written as Django's short path and is fixed in the
+    next release. After upgrading run ``manage.py thumbnail clear`` once.
+
+Every page is slow, all the time
+    Thumbnails are being made on every request, or the store is being lost.
+    Check that ``THUMBNAIL_FORCE_OVERWRITE`` is off, that the
+    ``thumbnail_kvstore`` table is not emptied on deploy, and that
+    ``THUMBNAIL_CACHE`` names a shared cache.
+
+.. _django-storages: https://django-storages.readthedocs.io/

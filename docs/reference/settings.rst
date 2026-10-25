@@ -517,6 +517,8 @@ that regex replaces references to images with thumbnails.
 This value sets the timeout value in seconds when retrieving a source image from a URL. 
 If no timeout value is specified, it will wait indefinitely for a response.
 
+.. _force-overwrite:
+
 ``THUMBNAIL_FORCE_OVERWRITE``
 =============================
 
