@@ -190,6 +190,18 @@ class Engine(EngineBase):
         return image
 
     def _remove_border(self, image, image_width, image_height):
+        def entropy(box):
+            section = image.crop(box)
+            if section.mode not in ('RGBA', 'LA'):
+                return self._get_image_entropy(section)
+            # A border is plain on black and on white, whatever color is under transparent pixels
+            values = []
+            for color in ('black', 'white'):
+                background = Image.new(section.mode[:-1], section.size, color)
+                background.paste(section, mask=section)
+                values.append(self._get_image_entropy(background))
+            return max(values)
+
         borders = {
             'top': lambda iy, dy, y: (dy, dy + y),
             'right': lambda ix, dx, x: (ix - dx - x, ix - dx),
@@ -204,9 +216,9 @@ class Engine(EngineBase):
             while offset[border] < image_height / 3.5:
                 slice_size = min(image_width / 20, 10)
                 y_range = borders[border](image_height, offset[border], slice_size)
-                section = image.crop((0, y_range[0], image_width, y_range[1]))
+                box = (0, y_range[0], image_width, y_range[1])
                 # If this section is below the threshold; remove it
-                if self._get_image_entropy(section) < 2.0:
+                if entropy(box) < 2.0:
                     offset[border] += slice_size
                 else:
                     break
@@ -215,8 +227,8 @@ class Engine(EngineBase):
             while offset[border] < image_width / 3.5:
                 slice_size = min(image_height / 20, 10)
                 x_range = borders[border](image_width, offset[border], slice_size)
-                section = image.crop((x_range[0], 0, x_range[1], image_height))
-                if self._get_image_entropy(section) < 2.0:
+                box = (x_range[0], 0, x_range[1], image_height)
+                if entropy(box) < 2.0:
                     offset[border] += slice_size
                 else:
                     break
@@ -269,6 +281,10 @@ class Engine(EngineBase):
         return image
 
     def _blur(self, image, radius):
+        if image.mode in ('RGBA', 'LA'):
+            # Premultiplied, so the color under transparent pixels doesn't darken the edges
+            premultiplied = image.mode[:-1] + 'a'
+            return image.convert(premultiplied).filter(GaussianBlur(radius)).convert(image.mode)
         return image.filter(GaussianBlur(radius))
 
     def _padding(self, image, geometry, options):

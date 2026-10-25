@@ -5,10 +5,27 @@ Changes
 Unreleased
 ==========
 
-* The PIL engine writes ``rounded`` thumbnails as JPEG instead of raising
-  ``OSError: cannot write mode RGBA as JPEG``. JPEG has no transparency, so the
-  corners get the ``THUMBNAIL_FLATTEN`` background, white or the padding color
-  when the thumbnail is padded, with the setting on or off (`#849 <https://github.com/mariocesar/sorl-thumbnail/issues/849>`__)
+* Rounded corners work with JPEG in the PIL engine. Asking for ``rounded=10``
+  crashed with ``OSError: cannot write mode RGBA as JPEG`` whenever the
+  thumbnail was saved as JPEG, which is the default format. JPEG can't store
+  transparency, so the corners are now filled with white, or with the padding
+  color when the thumbnail is padded. That is the same background
+  ``THUMBNAIL_FLATTEN`` uses, and it applies whether the setting is on or not.
+  For transparent corners, ask for ``format='PNG'`` or ``format='WEBP'``
+  (`#849 <https://github.com/mariocesar/sorl-thumbnail/issues/849>`__)
+* ``remove_border=True`` now trims the empty margins of transparent images,
+  like a logo saved as PNG with space around it. It works by walking in from
+  each edge and cutting strips that are a single flat color. The transparency
+  channel made every strip look detailed, so nothing was ever cut. A strip now
+  counts as flat when it looks flat on both a black and a white background, so
+  the color a file happens to store under its transparent pixels makes no
+  difference. Only the PIL engine supports ``remove_border``
+* Blurring a transparent image no longer leaves a dark outline. ``blur`` mixed
+  in the color stored under the transparent pixels, usually black, so a white
+  shape on a transparent background came out with grey edges. The PIL engine
+  now blurs with premultiplied alpha, which weighs each pixel by how visible it
+  is. Thumbnails made before the upgrade keep the outline until you delete
+  them, for example with ``manage.py thumbnail clear_delete_all``
 
 13.3.0
 ======

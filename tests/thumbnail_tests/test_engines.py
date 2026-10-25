@@ -338,6 +338,36 @@ class SimpleTestCase(BaseTestCase):
             img = Image.open(th.storage.path(th.name)).convert('L')
             self.assertTrue(ImageStat.Stat(img.crop((0, 0, 100, 5))).mean[0] < 200)
 
+    @unittest.skipIf('pil_engine' not in settings.THUMBNAIL_ENGINE, 'blur is only supported in PIL')
+    def test_transparent_blur(self):
+        rgba = Image.new('RGBA', (100, 100), (0, 0, 0, 0))
+        rgba.paste((255, 255, 255, 255), (20, 20, 80, 80))
+        rgba.save(os.path.join(settings.MEDIA_ROOT, 'rgba_white.png'))
+        th = self.BACKEND.get_thumbnail('rgba_white.png', '100x100', format='PNG', blur=3)
+        img = Image.open(th.storage.path(th.name))
+        # The edge fades out, but stays white instead of mixing with the black under it
+        r, g, b, a = img.getpixel((18, 50))
+        self.assertTrue(0 < a < 255 and min(r, g, b) > 245, img.getpixel((18, 50)))
+
+    @unittest.skipIf('pil_engine' not in settings.THUMBNAIL_ENGINE, 'remove_border is only in PIL')
+    def test_transparent_remove_border(self):
+        # A 20px transparent border, first over noise, then around a black logo drawn by its alpha
+        noise = Image.effect_noise((100, 100), 64)
+        border = Image.new('L', (100, 100), 0)
+        border.paste(255, (20, 20, 80, 80))
+        logo = Image.new('L', (100, 100), 0)
+        logo.paste(noise.crop((20, 20, 80, 80)), (20, 20))
+        sources = {'rgba_noise_border.png': (noise, border),
+                   'rgba_black_logo.png': (Image.new('L', (100, 100)), logo)}
+        for name, (rgb, alpha) in sources.items():
+            rgba = rgb.convert('RGBA')
+            rgba.putalpha(alpha)
+            rgba.save(os.path.join(settings.MEDIA_ROOT, name))
+            th = self.BACKEND.get_thumbnail(
+                name, '500x500', format='PNG', remove_border=True, upscale=False
+            )
+            self.assertEqual((th.width, th.height), (60, 60), name)
+
     @unittest.skipIf(
         settings.THUMBNAIL_CONVERT.startswith('gm ')
         or 'pgmagick_engine' in settings.THUMBNAIL_ENGINE,
