@@ -5,6 +5,8 @@ on:
     branches:
       - main
   pull_request:
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:
@@ -39,7 +41,8 @@ jobs:
 
   deploy:
     needs: build
-    if: github.repository == 'mariocesar/sorl-thumbnail' && github.ref == 'refs/heads/main'
+    # Build everywhere to catch errors, publish only the released version
+    if: github.repository == 'mariocesar/sorl-thumbnail' && github.event_name == 'release'
     runs-on: ubuntu-26.04
     permissions:
       pages: write
