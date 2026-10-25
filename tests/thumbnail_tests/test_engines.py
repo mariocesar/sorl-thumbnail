@@ -8,7 +8,7 @@ from unittest import mock
 from django.core.files.storage import default_storage, storages
 from django.template.loader import render_to_string
 from django.test.utils import override_settings
-from PIL import Image, ImageSequence
+from PIL import Image, ImageSequence, ImageStat
 
 from sorl.thumbnail import default
 from sorl.thumbnail.base import EXTENSIONS, ThumbnailBackend
@@ -292,6 +292,51 @@ class SimpleTestCase(BaseTestCase):
         for xy in ((25, 2), (25, 25)):
             r, g, b = img.getpixel(xy)
             self.assertTrue(r > 250 and g < 5 and b < 5, img.getpixel(xy))
+
+    @unittest.skipIf('pil_engine' not in settings.THUMBNAIL_ENGINE, 'rounded is only in PIL')
+    def test_rounded(self):
+        Image.new('RGB', (50, 25)).save(os.path.join(settings.MEDIA_ROOT, 'black_wide.png'))
+
+        th = self.BACKEND.get_thumbnail('black_wide.png', '50x25', rounded=10, format='PNG')
+        img = Image.open(th.storage.path(th.name))
+        self.assertEqual(img.getpixel((0, 0))[3], 0)
+
+        # JPEG has no alpha, so the corners get white like THUMBNAIL_FLATTEN
+        for colorspace in ('RGB', 'GRAY'):
+            th = self.BACKEND.get_thumbnail(
+                'black_wide.png', '50x25', rounded=10, format='JPEG', colorspace=colorspace
+            )
+            img = Image.open(th.storage.path(th.name)).convert('RGB')
+            self.assertTrue(min(img.getpixel((0, 0))) > 250, img.getpixel((0, 0)))
+            self.assertTrue(max(img.getpixel((25, 12))) < 5, img.getpixel((25, 12)))
+
+        th = self.BACKEND.get_thumbnail(
+            'black_wide.png', '50x50', rounded=10, format='JPEG', padding=True,
+            padding_color='#ff0000'
+        )
+        img = Image.open(th.storage.path(th.name)).convert('RGB')
+        r, g, b = img.getpixel((0, 12))
+        self.assertTrue(r > 250 and g < 5 and b < 5, img.getpixel((0, 12)))
+
+    @unittest.skipIf('pil_engine' not in settings.THUMBNAIL_ENGINE, 'blur is only supported in PIL')
+    def test_flatten_blur_and_remove_border(self):
+        # A white and a noise square inside a 20px transparent border whose stored color is black
+        rgba = Image.new('RGBA', (100, 100), (0, 0, 0, 0))
+        rgba.paste((255, 255, 255, 255), (20, 20, 80, 80))
+        rgba.save(os.path.join(settings.MEDIA_ROOT, 'rgba_white.png'))
+        rgba.paste(Image.effect_noise((60, 60), 64).convert('RGB'), (20, 20))
+        rgba.save(os.path.join(settings.MEDIA_ROOT, 'rgba_border.png'))
+        with override_settings(THUMBNAIL_FLATTEN=True):
+            # Flattened onto white it is all white, the black doesn't bleed in with blur
+            th = self.BACKEND.get_thumbnail('rgba_white.png', '100x100', format='JPEG', blur=3)
+            img = Image.open(th.storage.path(th.name)).convert('L')
+            self.assertTrue(img.getextrema()[0] > 245, img.getextrema())
+
+            th = self.BACKEND.get_thumbnail(
+                'rgba_border.png', '100x100', format='JPEG', remove_border=True
+            )
+            img = Image.open(th.storage.path(th.name)).convert('L')
+            self.assertTrue(ImageStat.Stat(img.crop((0, 0, 100, 5))).mean[0] < 200)
 
     @unittest.skipIf(
         settings.THUMBNAIL_CONVERT.startswith('gm ')

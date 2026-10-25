@@ -125,7 +125,7 @@ class Engine(EngineBase):
         if flatten and transparent and format == 'JPEG':
             # Composite onto a background before JPEG drops the alpha channel, like convert -flatten
             color = options.get('padding_color') if options.get('padding') else '#ffffff'
-            rgba = image.convert('RGBA')
+            rgba = image if image.mode == 'RGBA' else image.convert('RGBA')
             image = Image.new('RGB', image.size, color)
             image.paste(rgba, mask=rgba)
 
@@ -279,6 +279,16 @@ class Engine(EngineBase):
         im = Image.new(image.mode, geometry, color)
         im.paste(image, (left, top))
         return im
+
+    def write(self, image, options, thumbnail):
+        if options['format'] == 'JPEG' and image.mode in ('RGBA', 'LA'):
+            # rounded adds alpha after colorspace, so composite it like flatten
+            color = options.get('padding_color') if options.get('padding') else '#ffffff'
+            background = Image.new(image.mode[:-1], image.size, color)
+            background.paste(image, mask=image)
+            image = background
+
+        super().write(image, options, thumbnail)
 
     def _get_raw_data(self, image, format_, quality, image_info=None, progressive=False):
         frames = image if isinstance(image, list) else [image]  # see create()

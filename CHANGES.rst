@@ -2,6 +2,14 @@
 Changes
 =======
 
+Unreleased
+==========
+
+* The PIL engine writes ``rounded`` thumbnails as JPEG instead of raising
+  ``OSError: cannot write mode RGBA as JPEG``. JPEG has no transparency, so the
+  corners get the ``THUMBNAIL_FLATTEN`` background, white or the padding color
+  when the thumbnail is padded, with the setting on or off (`#849 <https://github.com/mariocesar/sorl-thumbnail/issues/849>`__)
+
 13.3.0
 ======
 
