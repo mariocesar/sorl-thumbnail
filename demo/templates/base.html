@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }}</title>
+<meta name="description" content="{{ description }}">
+<link rel="canonical" href="{{ site_url }}{{ path }}">
+{% block head %}{% endblock %}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="sorl-thumbnail">
+<meta property="og:title" content="{{ title }}">
+<meta property="og:description" content="{{ description }}">
+<meta property="og:url" content="{{ site_url }}{{ path }}">
+<meta property="og:image" content="{{ site_url }}social.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Earth from Apollo 11, cropped by sorl-thumbnail">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23111'/><path d='M10 5v17h17M5 10h17v17' fill='none' stroke='%23fff' stroke-width='3'/></svg>">
+<style>
+  @media (min-width: 48rem) { html { font-size: 93.75%; } }
+  body { margin: 0; background: #fff; color: #222; font: 1rem/1.55 Inter, "Inter Variable", "Helvetica Neue", Helvetica, Arial, sans-serif; letter-spacing: -.011em; }
+  a { color: #0645ad; }
+  a:visited { color: #0b0080; }
+  a:focus-visible { outline: 2px solid #0645ad; outline-offset: 2px; }
+  h1, h2, h3 { color: #111; line-height: 1.15; font-weight: 700; }
+  h1 { font-size: 2.5rem; margin: 2rem 0 .75rem; letter-spacing: -.035em; }
+  h2 { font-size: 1.5rem; margin: 3.5rem 0 .75rem; padding-top: .75rem; border-top: 2px solid #111; letter-spacing: -.022em; }
+  h3 { font-size: 1rem; font-weight: 600; margin: 0 0 .5rem; letter-spacing: -.011em; }
+  .lede { font-size: 1.2rem; line-height: 1.45; letter-spacing: -.017em; color: #333; }
+  .label, th { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #555; }
+  .label { margin-right: .5rem; }
+  code, pre { font-family: ui-monospace, Menlo, Consolas, "Liberation Mono", monospace; font-size: .875rem; letter-spacing: 0; }
+  pre { background: #f6f6f6; border: 1px solid #e3e3e3; padding: .6rem .8rem; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  pre .line { display: inline-block; padding-left: calc(var(--indent) + 4ch); text-indent: calc(-4ch - var(--indent)); }
+  p code, li code, td code { background: #f3f3f3; padding: 0 .2em; }
+  table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+  th, td { text-align: left; vertical-align: top; padding: .4rem .6rem .4rem 0; border-bottom: 1px solid #e3e3e3; }
+  th { border-bottom-color: #bbb; }
+  .scroll { overflow-x: auto; }
+  .wrap { max-width: 64rem; margin: 0 auto; padding: 0 16px; }
+  .muted, figcaption, .details { color: #555; }
+  .small, figcaption, .details { font-size: .85rem; letter-spacing: -.003em; font-variant-numeric: tabular-nums; }
+  header.site { border-bottom: 1px solid #ddd; }
+  header.site .wrap { display: flex; flex-wrap: wrap; align-items: center; column-gap: 1.5rem; }
+  header.site nav { display: flex; flex-wrap: wrap; column-gap: 1.25rem; }
+  header.site strong a, header.site .pages a { display: block; padding: .75rem 0; color: #111; text-decoration: none; box-shadow: inset 0 -2px 0 transparent; }
+  header.site strong a { font-weight: 700; letter-spacing: -.02em; }
+  header.site .pages a { font-weight: 500; }
+  header.site .pages a:hover { box-shadow: inset 0 -2px 0 #bbb; }
+  header.site .pages a[aria-current] { font-weight: 600; box-shadow: inset 0 -2px 0 #111; }
+  header.site .links { margin-left: auto; padding: .5rem 0; font-size: .875rem; }
+  header.site .links a::after { content: "\2197" / ""; margin-left: .15em; }
+  .result { background-color: #fff; background-image: conic-gradient(#eee 25%, #fff 0 50%, #eee 0 75%, #fff 0); background-size: 16px 16px; border: 1px solid #ddd; padding: .75rem; display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; justify-content: center; min-height: 5rem; }
+  .result img { max-width: 100%; height: auto; }
+  footer.site { margin-top: 3rem; border-top: 1px solid #ddd; padding: 1rem 0 2rem; }
+  footer.site p { margin: .3rem 0; }
+  {% block style %}{% endblock %}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <strong><a href="index.html">sorl-thumbnail</a></strong>
+    <nav class="pages" aria-label="Site">
+      <a href="demo-pil.html"{% if page == "gallery" %} aria-current="page"{% endif %}>Examples</a>
+    </nav>
+    <nav class="links" aria-label="Project">
+      <a href="https://sorl-thumbnail.readthedocs.io/en/latest/">Documentation</a>
+      <a href="https://github.com/mariocesar/sorl-thumbnail/blob/main/CHANGES.rst">Changelog</a>
+      <a href="https://github.com/mariocesar/sorl-thumbnail">Source</a>
+      <a href="https://pypi.org/project/sorl-thumbnail/">PyPI</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap">
+{% block content %}{% endblock %}
+</main>
+<footer class="site small muted">
+  <div class="wrap">
+    <p>sorl-thumbnail is free software under the
+      <a href="https://github.com/mariocesar/sorl-thumbnail/blob/main/LICENSE">BSD 3-Clause license</a>.
+      Started by Mikko Hellsing in 2010, maintained by Mario-César and
+      <a href="https://github.com/mariocesar/sorl-thumbnail/graphs/contributors">contributors</a>.</p>
+    <p>These pages were generated on {{ built }} with sorl-thumbnail {{ version }}{% if commit %}
+      (<a href="https://github.com/mariocesar/sorl-thumbnail/commit/{{ commit }}">{{ commit }}</a>){% endif %}.
+      Example images: <a href="demo-pil.html#sources">credits</a>.</p>
+  </div>
+</footer>
+</body>
+</html>

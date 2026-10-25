@@ -103,6 +103,22 @@ Run all CI targets in sequence::
 .. _uv: https://docs.astral.sh/uv/
 .. _Install Docker: https://docs.docker.com/get-docker/
 
+Examples site
+=============
+
+The project homepage and the example galleries are a small Django project in ``demo/``,
+exported to static files and published to GitHub Pages from ``main``. To work on it::
+
+    uv run --group demo demo/manage.py runserver
+    uv run --group demo demo/manage.py runserver --settings=demo.settings.wand
+
+To export the site to ``site/`` and check it, as CI does::
+
+    uv run --group demo demo/manage.py build
+
+Adding an example is one template in ``demo/examples/`` and one line in
+``demo/examples.py``, see ``demo/README.md``.
+
 Sending pull requests
 =====================
 

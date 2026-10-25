@@ -1,0 +1,6 @@
+{% load thumbnail %}
+{% thumbnail "images/mona-lisa.jpg" "300x300" cropbox="300,200,800,700" as im %}
+  <img src="{{ im.url }}" loading="lazy"
+       width="{{ im.width }}" height="{{ im.height }}"
+       alt="The face of the Mona Lisa, cut out before scaling">
+{% endthumbnail %}

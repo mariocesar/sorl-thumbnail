@@ -36,7 +36,8 @@ classifiers=[
 ]
 
 [project.urls]
-Homepage = "https://sorl-thumbnail.readthedocs.io/en/latest/"
+Homepage = "https://mariocesar.github.io/sorl-thumbnail/"
+Documentation = "https://sorl-thumbnail.readthedocs.io/en/latest/"
 Repository = "https://github.com/mariocesar/sorl-thumbnail"
 
 [project.optional-dependencies]
@@ -46,6 +47,10 @@ wand = ["wand"]
 vips = ["pyvips[binary]"]
 avif = ["pillow-avif-plugin"]
 docs = ["sphinx"]
+
+[dependency-groups]
+# The examples site in demo/: uv run --group demo demo/manage.py runserver
+demo = ["django>=5.2", "pillow", "pyvips[binary]", "wand"]
 
 [tool.coverage.run]
  source = ["sorl"]
@@ -65,6 +70,9 @@ docs = ["sphinx"]
 # below line is required to generating versions with setuptools_scm
 [tool.setuptools_scm]
 
+[tool.setuptools.packages.find]
+include = ["sorl", "sorl.*"]
+
 [tool.ruff]
 exclude = [
     ".tox",
@@ -79,6 +87,9 @@ line-length = 100
 [tool.ruff.lint]
 select = ["B", "C901", "E", "F", "I", "W"]
 ignore = ["B904", "B017"]
+
+[tool.ruff.lint.per-file-ignores]
+"demo/settings/*" = ["F403", "F405"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 15

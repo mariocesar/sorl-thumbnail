@@ -5,6 +5,8 @@ Changes
 Unreleased
 ==========
 
+* A project homepage with example galleries for each image engine, built from
+  ``demo/`` and published to https://mariocesar.github.io/sorl-thumbnail/
 * A source is downloaded once per request, with every engine. ``is_portrait``
   before the tag, or several sizes of one image, read the original once
   instead of once per use. Before, every filter and tag opened the source

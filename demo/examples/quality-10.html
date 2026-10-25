@@ -1,0 +1,6 @@
+{% load thumbnail %}
+{% thumbnail "images/mona-lisa.jpg" "240" quality=10 as im %}
+  <img src="{{ im.url }}" loading="lazy"
+       width="{{ im.width }}" height="{{ im.height }}"
+       alt="Mona Lisa at JPEG quality 10">
+{% endthumbnail %}

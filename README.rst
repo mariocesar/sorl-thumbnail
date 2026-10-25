@@ -2,6 +2,8 @@
 
 Thumbnails for Django.
 
+Website, with examples for every image engine: https://mariocesar.github.io/sorl-thumbnail/
+
 Features at a glance
 ====================
 

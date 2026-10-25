@@ -1,0 +1,6 @@
+{% load thumbnail %}
+{% thumbnail "images/caritas-romana.webp" "300x300" crop="40px 0px" as im %}
+  <img src="{{ im.url }}" loading="lazy"
+       width="{{ im.width }}" height="{{ im.height }}"
+       alt="Caritas Romana cropped 40 pixels in from the left">
+{% endthumbnail %}

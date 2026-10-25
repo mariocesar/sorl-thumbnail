@@ -1,0 +1,14 @@
+{% load thumbnail %}
+{% if "images/kimono.avif"|is_portrait %}
+  {% thumbnail "images/kimono.avif" "x200" as im %}
+    <img src="{{ im.url }}" loading="lazy"
+         width="{{ im.width }}" height="{{ im.height }}"
+         alt="Portrait kimono, limited by height">
+  {% endthumbnail %}
+{% else %}
+  {% thumbnail "images/kimono.avif" "200" as im %}
+    <img src="{{ im.url }}" loading="lazy"
+         width="{{ im.width }}" height="{{ im.height }}"
+         alt="Landscape kimono, limited by width">
+  {% endthumbnail %}
+{% endif %}

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block style %}
+  .wrap { max-width: 48rem; }
+  .facts { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: .1rem 1.25rem; color: #555; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: .75rem; }
+  .pair figure { margin: 0; }
+  .pair .result { height: 16rem; }
+  .pair .result img { max-height: 100%; width: auto; }
+  ul.features li { margin: .3rem 0; }
+{% endblock %}
+{% block content %}
+<h1>sorl-thumbnail</h1>
+<p class="lede">Thumbnails for Django. Resize, crop and convert images from your templates.
+  sorl-thumbnail makes each thumbnail once, saves it through your Django storage,
+  and gives you its URL.</p>
+<ul class="facts small">
+  {% if release %}<li>Version {{ release }}{% if release_date %}, released {{ release_date }}{% endif %}</li>{% endif %}
+  <li>Django {{ django_versions|join:", " }}</li>
+  <li>Python {{ python_versions|first }} to {{ python_versions|last }}</li>
+  <li>BSD 3-Clause</li>
+  <li>Since 2010</li>
+</ul>
+
+<h2 id="install">Install</h2>
+<pre><code>pip install sorl-thumbnail[pil]</code></pre>
+<p>Add <code>"sorl.thumbnail"</code> to <code>INSTALLED_APPS</code>. The
+  <a href="https://sorl-thumbnail.readthedocs.io/en/latest/installation.html">installation guide</a>
+  covers the settings, the key-value store and what each image engine needs.</p>
+
+<h2 id="example">Example</h2>
+<div class="pair">
+  <figure>
+    <div class="result"><img src="{{ sources.0.file }}" width="{{ sources.0.size.0 }}" height="{{ sources.0.size.1 }}" alt="Mona Lisa, original"></div>
+    <figcaption><span class="label">Original</span>{{ sources.0.details }}</figcaption>
+  </figure>
+  <figure>
+    <div class="result">{{ hero.html }}</div>
+    <figcaption><span class="label">Thumbnail</span>{{ hero.details.0 }}</figcaption>
+  </figure>
+</div>
+<pre><code>{% for indent, line in hero.lines %}<span class="line" style="--indent: {{ indent }}ch">{{ line }}</span>
+{% endfor %}</code></pre>
+<p>More in the <a href="demo-pil.html">examples</a>, one page per image engine.</p>
+
+<h2 id="features">Features</h2>
+<ul class="features">
+  <li>Resize to a box, a width or a height. Crop by position, percentage, pixels or a crop box.
+    See <a href="demo-pil.html#geometry">geometry</a> and <a href="demo-pil.html#crop">crop</a>.</li>
+  <li>Output JPEG, PNG, WEBP, GIF or AVIF, with quality and progressive JPEG options.
+    See <a href="demo-pil.html#formats">formats</a> and <a href="demo-pil.html#quality">quality</a>.</li>
+  <li>Grayscale, padding, rounded corners, blur, border removal and smart crop, depending on the engine.
+    See <a href="demo-pil.html#colorspace">colorspace</a>, <a href="demo-pil.html#padding">padding</a>
+    and <a href="demo-pil.html#effects">effects</a>.</li>
+  <li>Follows EXIF orientation. Keeps GIF animation with Wand and libvips, and with Pillow after 13.2.0.
+    See <a href="demo-pil.html#orientation">orientation</a> and <a href="demo-pil.html#animation">animation</a>.</li>
+  <li>The <code>{% templatetag openblock %} thumbnail {% templatetag closeblock %}</code> tag, the <code>is_portrait</code>
+    and <code>margin</code> filters, and <code>get_thumbnail()</code> for Python code.
+    See the <a href="https://sorl-thumbnail.readthedocs.io/en/latest/template.html">template reference</a>.</li>
+  <li>Reads and writes through any Django storage, including Amazon S3 with
+    <a href="https://django-storages.readthedocs.io/">django-storages</a>. Thumbnail sizes are cached in a key-value store:
+    the cached database or Redis.
+    See the <a href="https://sorl-thumbnail.readthedocs.io/en/latest/reference/settings.html">settings</a>.</li>
+  <li>An <code>ImageField</code> that validates uploads, and an admin mixin that shows a preview.
+    See the <a href="https://sorl-thumbnail.readthedocs.io/en/latest/examples.html#model-examples">model examples</a>.</li>
+</ul>
+
+<h2 id="engines">Engines</h2>
+<p>Set the engine with <code>THUMBNAIL_ENGINE</code>. Pillow is the default. Each name links to its examples.</p>
+<div class="scroll"><table>
+  <thead><tr><th>Engine and what it needs</th><th>Doesn't support</th></tr></thead>
+  <tbody>
+  {% for e in engine_table %}
+  <tr>
+    <td><a href="demo-{{ e.key }}.html">{{ e.label }}</a><br><span class="small muted">{{ e.install }}</span></td>
+    <td>{{ e.gaps|join:", "|default:"—" }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+
+<h2 id="community">Help and contributing</h2>
+<ul>
+  <li>Questions and ideas: <a href="https://github.com/mariocesar/sorl-thumbnail/discussions">GitHub Discussions</a></li>
+  <li>Bug reports: <a href="https://github.com/mariocesar/sorl-thumbnail/issues">GitHub Issues</a></li>
+  <li>Security issues: follow the <a href="https://github.com/mariocesar/sorl-thumbnail/blob/main/SECURITY.md">security policy</a>, not a public issue</li>
+  <li>Pull requests: read the <a href="https://sorl-thumbnail.readthedocs.io/en/latest/contributing.html">contributing guide</a></li>
+</ul>
+
+<h2 id="history">History</h2>
+<p>Mikko Hellsing wrote sorl-thumbnail in 2010. Mario-César started contributing in 2013
+  and maintains it today. From 2017 to 2026 it was part of
+  <a href="https://jazzband.co/">Jazzband</a>, and it now lives at
+  <a href="https://github.com/mariocesar/sorl-thumbnail">github.com/mariocesar/sorl-thumbnail</a>.
+  Every release is listed in the <a href="https://github.com/mariocesar/sorl-thumbnail/blob/main/CHANGES.rst">changelog</a>.</p>
+{% endblock %}

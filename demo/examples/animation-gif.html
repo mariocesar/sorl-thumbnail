@@ -1,0 +1,6 @@
+{% load thumbnail %}
+{% thumbnail "images/bouncing-ball.gif" "160x160" format="GIF" as im %}
+  <img src="{{ im.url }}" loading="lazy"
+       width="{{ im.width }}" height="{{ im.height }}"
+       alt="Animated bouncing ball">
+{% endthumbnail %}

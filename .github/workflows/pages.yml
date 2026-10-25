@@ -1,0 +1,58 @@
+name: Pages
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-26.04
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+
+    - name: Install image tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install imagemagick graphicsmagick libheif-plugin-aomenc
+
+    - uses: astral-sh/setup-uv@v10.3.0
+      with:
+        python-version: '3.14'
+
+    - name: Build site
+      run: uv run --locked --group demo demo/manage.py build --require pil,vips,imagemagick,graphicsmagick,wand
+
+    - uses: actions/upload-pages-artifact@v5
+      with:
+        path: site/
+
+  deploy:
+    needs: build
+    # Build everywhere to catch errors, publish only the released version
+    if: github.repository == 'mariocesar/sorl-thumbnail' && github.event_name == 'release'
+    runs-on: ubuntu-26.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
+    steps:
+    - id: deployment
+      uses: actions/deploy-pages@v5
