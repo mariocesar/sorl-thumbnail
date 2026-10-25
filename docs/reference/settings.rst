@@ -108,7 +108,7 @@ something else using this setting.
 
 This is the processing class for sorl-thumbnail. It does all the resizing,
 cropping or whatever processing you want to perform. sorl-thumbnail ships with
-four engines:
+five engines:
 
 PIL
 ---
@@ -152,6 +152,63 @@ Features:
 * Can handle CMYK sources
 * Works on Python 2.6, 2.7, 3.2, 3.3, and PyPy
 
+libvips
+-------
+``'sorl.thumbnail.engines.vips_engine.Engine'``. This engine uses `libvips
+<https://www.libvips.org/>`__ through `pyvips
+<https://libvips.github.io/pyvips/>`_. ``pip install sorl-thumbnail[vips]``
+installs pyvips with libvips as a binary wheel for Linux, macOS and Windows,
+or run ``pip install pyvips`` to use the libvips from your system packages.
+Features:
+
+* Easy to install
+* Produces high quality images
+* It is fast
+* Can handle CMYK sources
+* Reads JPEG, PNG, GIF, WebP, TIFF and AVIF sources
+* Keeps animated GIFs animated when the thumbnail format is ``GIF``
+
+libvips runs inside the Django process, like Pillow. A crash on a broken or
+hostile image takes the worker down with it. Like Pillow, it refuses sources
+over 178,956,970 pixels, so a small upload that unpacks into a huge image can't
+use up the memory.
+
+sorl-thumbnail loads pyvips with the first thumbnail, not when Django starts,
+and libvips starts its threads then. With gunicorn's ``--preload``, make no
+thumbnails in the master before it forks the workers, or the workers will hang.
+
+The engine blocks the loaders libvips doesn't test against hostile files. On
+libvips 8.18 they include PDF, SVG, ImageMagick and MATLAB, so those sources
+are refused and ``is_valid_image`` returns ``False`` for them. The block applies
+to the whole process, so other pyvips code in your site can't use those
+loaders either. For PDF and SVG sources use the convert engine, which runs
+ImageMagick in a separate process and stops it after
+``THUMBNAIL_COMMAND_TIMEOUT``.
+
+The engine needs libvips 8.15 or later. Ubuntu 24.04 and Debian 13 ship it,
+Debian 12 does not.
+
+For long running workers on glibc Linux, libvips recommends jemalloc, see the
+`libvips developer checklist
+<https://www.libvips.org/API/current/developer-checklist.html>`_. Its operation
+cache is off, see ``THUMBNAIL_VIPS_CACHE_MAX``.
+
+It differs from the PIL engine in a few ways:
+
+* ``padding_color`` must be a hex color such as ``#f00`` or ``#ff0000``. A
+  color name such as ``red`` raises ``ThumbnailParseError``.
+* Resizing uses the libvips resampler, so pixels differ slightly.
+* ``colorspace="GRAY"`` keeps the alpha channel of a transparent source, and
+  the gray values come from the libvips color model.
+* ``crop="smart"`` picks the area with the libvips entropy measure, so it may
+  keep a different part of the image. It always returns the requested size.
+* ``remove_border`` cuts the rows and columns that match the top left pixel's
+  color, where PIL cuts the strips with almost no detail. The two can differ by
+  a few pixels.
+* A truncated source raises an error when the thumbnail is made, and
+  ``is_valid_image`` decodes the whole file, so a form rejects a truncated
+  upload.
+
 ``THUMBNAIL_CONVERT``
 =====================
 
@@ -175,11 +232,29 @@ Only applicable for the convert Engine.
 
 - Default ``60``
 
-Seconds a ``convert``, ``identify``, ``vipsthumbnail`` or ``vipsheader`` call
-may run before it is killed and ``EngineError`` is raised. Raise it if large
-sources or high ``density`` values legitimately take longer. ``None`` lets a
-call run as long as it takes, so a malformed or hostile image can keep a worker
-busy indefinitely. Only applicable for the convert and vipsthumbnail Engines.
+Seconds a ``convert`` or ``identify`` call may run before it is killed and
+``EngineError`` is raised. Raise it if large sources or high ``density`` values
+legitimately take longer. ``None`` lets a call run as long as it takes, so a
+malformed or hostile image can keep a worker busy indefinitely. Only applicable
+for the convert Engine. The vips engine runs libvips inside the Django process,
+so it has no timeout.
+
+
+``THUMBNAIL_VIPS_CACHE_MAX``
+============================
+
+- Default ``0``
+
+How many operations the vips engine keeps in the libvips operation cache. The
+cache helps a program that repeats the same operation on the same image, which
+sorl-thumbnail doesn't do: every thumbnail reads its source again. With the
+cache on, a worker used more memory and was not faster. libvips' own default
+is ``100``.
+
+The engine sets it when it makes the first thumbnail, with
+``pyvips.cache_set_max()``. The cache belongs to the whole process, so any
+other pyvips code in your site gets the same limit. Only applicable for the
+vips engine.
 
 
 ``THUMBNAIL_FLATTEN``
@@ -192,11 +267,11 @@ instead of the color stored under its transparent pixels, which is usually
 black. The background is white, or the padding color when the thumbnail is
 padded.
 
-The PIL and wand engines only flatten thumbnails written as JPEG. The convert
-engine adds ``-flatten`` to the convert command whatever the format, so PNG,
-GIF and WEBP thumbnails lose their transparency too. Every other engine ignores
-this setting. Pass ``flatten=False`` or ``flatten="off"`` as a thumbnail option
-to turn it off for one thumbnail.
+The PIL, wand and vips engines only flatten thumbnails written as JPEG. The
+convert engine adds ``-flatten`` to the convert command whatever the format, so
+PNG, GIF and WEBP thumbnails lose their transparency too. Every other engine
+ignores this setting. Pass ``flatten=False`` or ``flatten="off"`` as a
+thumbnail option to turn it off for one thumbnail.
 
 
 ``THUMBNAIL_STORAGE``

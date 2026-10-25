@@ -54,7 +54,7 @@ body:
         - Wand
         - pgmagick
         - convert (ImageMagick / GraphicsMagick)
-        - vipsthumbnail (libvips)
+        - vips (pyvips)
         - Custom engine
     validations:
       required: true
@@ -63,7 +63,7 @@ body:
     id: engine-version
     attributes:
       label: Engine library version
-      description: "Pillow, Wand, ImageMagick (`convert -version`), GraphicsMagick (`gm version`) or libvips (`vips --version`). Mention pillow-avif-plugin if you use it."
+      description: "Pillow, Wand, ImageMagick (`convert -version`), GraphicsMagick (`gm version`) libvips (`vips --version`) or pyvips (`pip show pyvips pyvips-binary`). Mention pillow-avif-plugin if you use it."
       placeholder: "Pillow 11.3.0"
     validations:
       required: true

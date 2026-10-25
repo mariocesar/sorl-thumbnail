@@ -21,6 +21,7 @@ THUMBNAIL_KEY_DBCOLUMN = 'key'
 # sorl.thumbnail.engines.convert_engine.Engine
 # sorl.thumbnail.engines.pil_engine.Engine
 # sorl.thumbnail.engines.pgmagick_engine.Engine
+# sorl.thumbnail.engines.vips_engine.Engine
 # convert is preferred but requires imagemagick or graphicsmagick, se docs
 THUMBNAIL_ENGINE = 'sorl.thumbnail.engines.pil_engine.Engine'
 
@@ -28,12 +29,11 @@ THUMBNAIL_ENGINE = 'sorl.thumbnail.engines.pil_engine.Engine'
 THUMBNAIL_CONVERT = 'convert'
 THUMBNAIL_IDENTIFY = 'identify'
 
-# Path to ``vipsthumbnail`` and ``vipsheader``
-THUMBNAIL_VIPSTHUMBNAIL = 'vipsthumbnail'
-THUMBNAIL_VIPSHEADER = 'vipsheader'
-
-# Seconds a convert, identify, vipsthumbnail or vipsheader call may run, None for no limit
+# Seconds a convert or identify call may run, None for no limit
 THUMBNAIL_COMMAND_TIMEOUT = 60
+
+# Operations the vips engine keeps in the libvips cache, for the whole process
+THUMBNAIL_VIPS_CACHE_MAX = 0
 
 # Storage for the generated thumbnails, as an alias of the Django STORAGES setting.
 THUMBNAIL_STORAGE = 'default'

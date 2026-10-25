@@ -15,6 +15,7 @@ Depending of the chosen image backend, you may also use one of::
     pip install sorl-thumbnail[pil, avif]
     pip install sorl-thumbnail[wand]
     pip install sorl-thumbnail[pgmagick]
+    pip install sorl-thumbnail[vips]
 
 Setup
 =====

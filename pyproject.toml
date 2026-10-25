@@ -43,6 +43,7 @@ Repository = "https://github.com/mariocesar/sorl-thumbnail"
 pgmagick = ["pgmagick"]
 pil = ["pillow"]
 wand = ["wand"]
+vips = ["pyvips[binary]"]
 avif = ["pillow-avif-plugin"]
 docs = ["sphinx"]
 

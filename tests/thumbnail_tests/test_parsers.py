@@ -1,7 +1,7 @@
 import unittest
 
 from sorl.thumbnail.helpers import ThumbnailError
-from sorl.thumbnail.parsers import parse_crop, parse_geometry
+from sorl.thumbnail.parsers import parse_color, parse_crop, parse_geometry
 
 
 class CropParserTestCase(unittest.TestCase):
@@ -33,3 +33,12 @@ class GeometryParserTestCase(unittest.TestCase):
         self.assertEqual(g, (222, None))
         g = parse_geometry('x999')
         self.assertEqual(g, (None, 999))
+
+
+class ColorParserTestCase(unittest.TestCase):
+    def test_color(self):
+        self.assertEqual(parse_color('#ff0000'), (255, 0, 0))
+        self.assertEqual(parse_color('#F00'), (255, 0, 0))
+        self.assertEqual(parse_color('0080ff'), (0, 128, 255))
+        for color in ('red', '#ff00', '#ff00000', ''):
+            self.assertRaises(ThumbnailError, parse_color, color)

@@ -144,8 +144,10 @@ some differences to the `css background-position`_:
   cropping after the initial rescaling to minimum of width and height.
 - ``smart`` crops away the parts of the image with the least detail instead of
   cropping at a fixed position. It trims whichever side has less entropy, 10px
-  at a time, until the image has the requested aspect ratio. Only the PIL
-  engine supports it; the other engines raise ``NotImplementedError``.
+  at a time, until the image has the requested aspect ratio. The PIL and vips
+  engines support it, vips with its own entropy measure, so it may keep a
+  different part of the image. The other engines raise
+  ``NotImplementedError``.
 
 There are many overlapping options here for example ``center`` is equivalent to
 ``50%``. There is not a problem with that in it self but it is a bit of a
@@ -168,8 +170,10 @@ It walks in from each edge and cuts the strips that have almost no detail,
 stopping where the picture starts. On a transparent image a strip counts as
 plain when it looks plain on both a black and a white background. It cuts at
 most 28% of the width or height from each side, so an image that is plain all
-over is kept. Default value is ``False``. Only the PIL engine supports it; the
-other engines raise ``NotImplementedError``.
+over is kept. Default value is ``False``. The PIL and vips engines support it.
+The vips engine cuts the rows and columns that match the top left pixel's
+color, so the two can differ by a few pixels. The other engines raise
+``NotImplementedError``.
 
 ``upscale``
 ^^^^^^^^^^^
@@ -239,8 +243,8 @@ Pass ``flatten=False`` to write one thumbnail without the background that
 
     {% thumbnail item.image "100x100" flatten=False as im %}
 
-``flatten="off"`` does the same. The PIL, wand and convert engines honour it,
-every other engine ignores it.
+``flatten="off"`` does the same. The PIL, wand, convert and vips engines honour
+it, every other engine ignores it.
 
 ``density``
 ^^^^^^^^^^^

@@ -76,6 +76,18 @@ Unreleased
   use the default Cached DB store, and point ``THUMBNAIL_CACHE`` at any Django
   cache alias, a DynamoDB one included
   (`#838 <https://github.com/mariocesar/sorl-thumbnail/issues/838>`__)
+* Added a libvips engine on pyvips, ``sorl.thumbnail.engines.vips_engine.Engine``.
+  Install it with ``pip install sorl-thumbnail[vips]``. It implements every
+  thumbnail option, including blur, padding, rounded corners, smart crop and
+  ``remove_border``, keeps the ICC profile, and rejects truncated sources. It
+  refuses PDF and SVG sources, use the convert engine for those
+  (`#833 <https://github.com/mariocesar/sorl-thumbnail/issues/833>`__)
+* The vips engine keeps animated GIFs animated when the thumbnail format is
+  ``GIF``, like the PIL engine. Other formats take the first frame (`#833 <https://github.com/mariocesar/sorl-thumbnail/issues/833>`__)
+* Removed the vipsthumbnail engine and its ``THUMBNAIL_VIPSTHUMBNAIL`` and
+  ``THUMBNAIL_VIPSHEADER`` settings. It has failed on every thumbnail with the
+  default settings since 12.6.3. Use ``sorl.thumbnail.engines.vips_engine.Engine``
+  instead (`#833 <https://github.com/mariocesar/sorl-thumbnail/issues/833>`__)
 
 13.3.0
 ======
