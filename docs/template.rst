@@ -239,8 +239,8 @@ Pass ``flatten=False`` to write one thumbnail without the background that
 
     {% thumbnail item.image "100x100" flatten=False as im %}
 
-``flatten="off"`` does the same. The PIL, wand and convert engines honour it,
-every other engine ignores it.
+``flatten="off"`` does the same. The PIL, wand, convert and vips engines honour
+it, every other engine ignores it.
 
 ``density``
 ^^^^^^^^^^^

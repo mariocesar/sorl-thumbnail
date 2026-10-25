@@ -195,7 +195,6 @@ It differs from the PIL engine in a few ways:
 * ``remove_border`` trims the rows and columns of the top left pixel's color,
   where PIL trims in steps of up to 10 pixels. The result can be a few pixels
   smaller.
-* Transparent areas turn black when the thumbnail is a JPEG.
 * A truncated source raises an error when the thumbnail is made, and
   ``is_valid_image`` decodes the whole file, so a form rejects a truncated
   upload.
@@ -240,11 +239,11 @@ instead of the color stored under its transparent pixels, which is usually
 black. The background is white, or the padding color when the thumbnail is
 padded.
 
-The PIL and wand engines only flatten thumbnails written as JPEG. The convert
-engine adds ``-flatten`` to the convert command whatever the format, so PNG,
-GIF and WEBP thumbnails lose their transparency too. Every other engine ignores
-this setting. Pass ``flatten=False`` or ``flatten="off"`` as a thumbnail option
-to turn it off for one thumbnail.
+The PIL, wand and vips engines only flatten thumbnails written as JPEG. The
+convert engine adds ``-flatten`` to the convert command whatever the format, so
+PNG, GIF and WEBP thumbnails lose their transparency too. Every other engine
+ignores this setting. Pass ``flatten=False`` or ``flatten="off"`` as a
+thumbnail option to turn it off for one thumbnail.
 
 
 ``THUMBNAIL_STORAGE``

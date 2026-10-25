@@ -1,6 +1,7 @@
 import pyvips
 
 from sorl.thumbnail.base import EXTENSIONS
+from sorl.thumbnail.conf import settings
 from sorl.thumbnail.engines.base import EngineBase
 from sorl.thumbnail.parsers import parse_color
 
@@ -56,6 +57,17 @@ class Engine(EngineBase):
     def _flip_dimensions(self, image):
         return image.get_typeof('orientation') and image.get('orientation') in (5, 6, 7, 8)
 
+    def colorspace(self, image, geometry, options):
+        if options['format'] == 'JPEG' and image.hasalpha():
+            if settings.THUMBNAIL_FLATTEN and options.get('flatten') not in ('off', False):
+                # Composite onto a background before JPEG drops the alpha channel, like PIL
+                color = options['padding_color'] if options.get('padding') else '#ffffff'
+                image = image.flatten(background=background(color, image))
+            else:
+                # Show the color stored under transparent pixels, like PIL
+                image = image.extract_band(0, n=image.bands - 1)
+        return super().colorspace(image, geometry, options)
+
     def _colorspace(self, image, colorspace):
         if colorspace == 'RGB':
             return image.colourspace('srgb')
@@ -100,6 +112,13 @@ class Engine(EngineBase):
             color.append(255)
         return image.gravity('centre', geometry[0], geometry[1],
                              extend='background', background=color)
+
+    def write(self, image, options, thumbnail):
+        if options['format'] == 'JPEG' and image.hasalpha():
+            # rounded adds alpha after colorspace, so composite it like flatten
+            color = options['padding_color'] if options.get('padding') else '#ffffff'
+            image = image.flatten(background=background(color, image))
+        super().write(image, options, thumbnail)
 
     def _get_raw_data(self, image, format_, quality, image_info=None, progressive=False):
         options = {'keep': 'icc'}  # drop EXIF and XMP, keep the color profile

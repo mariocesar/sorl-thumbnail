@@ -314,8 +314,9 @@ class SimpleTestCase(BaseTestCase):
 
     @unittest.skipUnless('pil_engine' in settings.THUMBNAIL_ENGINE
                          or 'wand_engine' in settings.THUMBNAIL_ENGINE
-                         or 'convert_engine' in settings.THUMBNAIL_ENGINE,
-                         'not checked on the pgmagick and vips engines')
+                         or 'convert_engine' in settings.THUMBNAIL_ENGINE
+                         or 'vips_engine' in settings.THUMBNAIL_ENGINE,
+                         'not checked on the pgmagick engine')
     def test_transparency_la_to_jpeg(self):
         Image.new('LA', (50, 50)).save(os.path.join(settings.MEDIA_ROOT, 'la.png'))
         th = self.BACKEND.get_thumbnail('la.png', '11x11', format='JPEG')
@@ -324,8 +325,9 @@ class SimpleTestCase(BaseTestCase):
 
     @unittest.skipUnless('pil_engine' in settings.THUMBNAIL_ENGINE
                          or 'wand_engine' in settings.THUMBNAIL_ENGINE
-                         or 'convert_engine' in settings.THUMBNAIL_ENGINE,
-                         'only the PIL, wand and convert engines honour THUMBNAIL_FLATTEN')
+                         or 'convert_engine' in settings.THUMBNAIL_ENGINE
+                         or 'vips_engine' in settings.THUMBNAIL_ENGINE,
+                         'only the PIL, wand, convert and vips engines honour THUMBNAIL_FLATTEN')
     def test_flatten(self):
         # Grey diagonals on a transparent background whose stored color is black
         self.create_image('50x50_transparent.png', (50, 50), transparent=True)
@@ -344,8 +346,9 @@ class SimpleTestCase(BaseTestCase):
                     self.assertEqual(img.getpixel((25, 2)), (0, 0, 0))
 
     @unittest.skipUnless('pil_engine' in settings.THUMBNAIL_ENGINE
-                         or 'convert_engine' in settings.THUMBNAIL_ENGINE,
-                         'only the PIL and convert engines pad and flatten')
+                         or 'convert_engine' in settings.THUMBNAIL_ENGINE
+                         or 'vips_engine' in settings.THUMBNAIL_ENGINE,
+                         'only the PIL, convert and vips engines pad and flatten')
     def test_flatten_padding_color(self):
         rgba = Image.new('RGBA', (50, 25), (0, 0, 0, 0))
         rgba.save(os.path.join(settings.MEDIA_ROOT, 'rgba_wide.png'))
@@ -359,7 +362,9 @@ class SimpleTestCase(BaseTestCase):
             r, g, b = img.getpixel(xy)
             self.assertTrue(r > 250 and g < 5 and b < 5, img.getpixel(xy))
 
-    @unittest.skipIf('pil_engine' not in settings.THUMBNAIL_ENGINE, 'rounded is only in PIL')
+    @unittest.skipUnless('pil_engine' in settings.THUMBNAIL_ENGINE
+                         or 'vips_engine' in settings.THUMBNAIL_ENGINE,
+                         'only the PIL and vips engines implement rounded')
     def test_rounded(self):
         Image.new('RGB', (50, 25)).save(os.path.join(settings.MEDIA_ROOT, 'black_wide.png'))
 
@@ -382,7 +387,8 @@ class SimpleTestCase(BaseTestCase):
         )
         img = Image.open(th.storage.path(th.name)).convert('RGB')
         r, g, b = img.getpixel((0, 12))
-        self.assertTrue(r > 250 and g < 5 and b < 5, img.getpixel((0, 12)))
+        # Next to the black corner, so allow some JPEG noise
+        self.assertTrue(r > 245 and g < 10 and b < 10, img.getpixel((0, 12)))
 
     @unittest.skipIf('pil_engine' not in settings.THUMBNAIL_ENGINE, 'blur is only supported in PIL')
     def test_flatten_blur_and_remove_border(self):
