@@ -1,18 +1,20 @@
 import io
 import logging
 from collections import Counter
+from contextlib import contextmanager
 from unittest import skipIf
 from unittest.mock import patch
 
 import django
 from django.core.cache import cache
 from django.core.files.storage import Storage
+from django.core.signals import request_finished, request_started
 from django.template import Context, Template
-from django.test import AsyncClient, Client
+from django.test import AsyncClient, Client, override_settings
 from PIL import Image
 
 from sorl.thumbnail import delete, get_thumbnail, source_cache
-from sorl.thumbnail.images import ImageFile, sources
+from sorl.thumbnail.images import ImageFile, close_source_cache, open_source_cache, sources
 from sorl.thumbnail.templatetags.thumbnail import is_portrait
 
 from .models import Item
@@ -70,6 +72,19 @@ class RemoteStorage(Storage):
 
     def exists(self, name):
         return name in self.files
+
+
+@contextmanager
+def middleware_only():
+    """Leave the request scope to the middleware, as under ASGI before Django 6.1."""
+    request_started.disconnect(open_source_cache)
+    request_finished.disconnect(close_source_cache)
+    try:
+        with override_settings(MIDDLEWARE=['sorl.thumbnail.middleware.SourceCacheMiddleware']):
+            yield
+    finally:
+        request_started.connect(open_source_cache)
+        request_finished.connect(close_source_cache)
 
 
 class SourceCacheTestCase(BaseTestCase):
@@ -243,6 +258,20 @@ class SourceCacheTestCase(BaseTestCase):
     @skipIf(django.VERSION < (6, 1), 'request_started reaches an ASGI request from Django 6.1')
     async def test_async_request_reads_once_and_releases(self):
         response = await AsyncClient().get('/items/%d/async/' % self.item.pk)
+        self.assertContains(response, 'landscape')
+        self.assertEqual(self.opens(), 1)
+        self.assertIsNone(sources.get())
+
+    def test_middleware_sync(self):
+        with middleware_only():
+            response = Client().get('/items/%d/' % self.item.pk)
+        self.assertContains(response, 'landscape')
+        self.assertEqual(self.opens(), 1)
+        self.assertIsNone(sources.get())
+
+    async def test_middleware_async(self):
+        with middleware_only():
+            response = await AsyncClient().get('/items/%d/async/' % self.item.pk)
         self.assertContains(response, 'landscape')
         self.assertEqual(self.opens(), 1)
         self.assertIsNone(sources.get())
