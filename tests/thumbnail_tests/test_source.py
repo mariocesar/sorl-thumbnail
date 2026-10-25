@@ -255,6 +255,14 @@ class SourceCacheTestCase(BaseTestCase):
         self.assertEqual(self.opens(), 1)
         self.assertIsNone(sources.get())
 
+    def test_streaming_body_is_inside_the_request(self):
+        response = Client().get('/items/%d/stream/' % self.item.pk)
+        self.assertIsNotNone(sources.get())
+        body = b''.join(response.streaming_content)
+        self.assertEqual(len(body.splitlines()), 2)
+        self.assertEqual(self.opens(), 1)
+        self.assertIsNone(sources.get())
+
     @skipIf(django.VERSION < (6, 1), 'request_started reaches an ASGI request from Django 6.1')
     async def test_async_request_reads_once_and_releases(self):
         response = await AsyncClient().get('/items/%d/async/' % self.item.pk)
