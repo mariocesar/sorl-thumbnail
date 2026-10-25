@@ -21,8 +21,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
 STORAGES = {
     'default': {
-        # The full class path: the short one loses OPTIONS in cached thumbnails (#834)
-        'BACKEND': 'django.core.files.storage.filesystem.FileSystemStorage',
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
         # Relative URLs, so the exported pages work under any path
         'OPTIONS': {'location': MEDIA_ROOT, 'base_url': 'media/'},
     },
