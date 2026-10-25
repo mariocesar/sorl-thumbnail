@@ -12,8 +12,6 @@ EFFECTS = {
     'remove_border': 'border removal is only implemented by Pillow and libvips',
 }
 NO_PADDING = {'padding': 'this engine does not implement padding'}
-BAD_PADDING = {'padding': 'with padding this engine reports the unpadded size, see '
-                          'https://github.com/mariocesar/sorl-thumbnail/issues/835'}
 
 # ImageMagick 7 has magick, 6 has convert and identify
 MAGICK = 'magick' if shutil.which('magick') else 'convert'
@@ -43,7 +41,7 @@ ENGINES = {
         'modules': [],
         'tools': [MAGICK],
         'version': [MAGICK, '-version'],
-        'unsupported': EFFECTS | BAD_PADDING,
+        'unsupported': EFFECTS,
     },
     'graphicsmagick': {
         'install': 'the gm command from GraphicsMagick',
@@ -51,7 +49,7 @@ ENGINES = {
         'modules': [],
         'tools': ['gm'],
         'version': ['gm', 'version'],
-        'unsupported': EFFECTS | BAD_PADDING | {'avif': 'GraphicsMagick has no AVIF encoder'},
+        'unsupported': EFFECTS | {'avif': 'GraphicsMagick has no AVIF encoder'},
     },
     'wand': {
         'install': 'pip install wand, and ImageMagick',
