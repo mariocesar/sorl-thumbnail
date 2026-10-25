@@ -129,11 +129,14 @@ Installing `pyvips`_ with libvips as a binary wheel, no system package needed::
 
     pip install sorl-thumbnail[vips]
 
-The binary wheel has no PDF, ImageMagick or OpenSlide loaders. To use the
-libvips from your system instead, which may have them::
+To use the libvips from your system instead::
 
     sudo apt-get install libvips-dev
     pip install pyvips
+
+Either way the engine refuses PDF and SVG sources, because it blocks the
+loaders libvips doesn't test against hostile files. Use the convert engine for
+those.
 
 The engine needs libvips 8.15 or later. Ubuntu 24.04 and Debian 13 ship it,
 Debian 12 does not.

@@ -105,6 +105,19 @@ class SimpleTestCase(BaseTestCase):
 
     @unittest.skipIf(
         'vips_engine' not in settings.THUMBNAIL_ENGINE,
+        'only the vips engine uses libvips',
+    )
+    def test_vips_untrusted_loaders(self):
+        # Loaders libvips doesn't fuzz are blocked: SVG, PDF, and BMP that only ImageMagick reads
+        svg = b'<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect/></svg>'
+        pdf, bmp = BytesIO(), BytesIO()
+        Image.new('RGB', (10, 10)).save(pdf, 'PDF')
+        Image.new('RGB', (10, 10)).save(bmp, 'BMP')
+        for data in (svg, pdf.getvalue(), bmp.getvalue()):
+            self.assertFalse(self.ENGINE.is_valid_image(data), data[:4])
+
+    @unittest.skipIf(
+        'vips_engine' not in settings.THUMBNAIL_ENGINE,
         'Pillow has its own limit, DecompressionBombError',
     )
     def test_pixel_limit(self):

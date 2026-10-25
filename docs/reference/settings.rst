@@ -165,7 +165,7 @@ Features:
 * Produces high quality images
 * It is fast
 * Can handle CMYK sources
-* Reads JPEG, PNG, GIF, WebP, TIFF, AVIF and SVG sources
+* Reads JPEG, PNG, GIF, WebP, TIFF and AVIF sources
 * Keeps animated GIFs animated when the thumbnail format is ``GIF``
 
 libvips runs inside the Django process, like Pillow. A crash on a broken or
@@ -177,8 +177,14 @@ sorl-thumbnail loads pyvips with the first thumbnail, not when Django starts,
 and libvips starts its threads then. With gunicorn's ``--preload``, make no
 thumbnails in the master before it forks the workers, or the workers will hang.
 
-The binary wheel has no PDF, ImageMagick or OpenSlide loaders. Install libvips
-from your system and plain ``pyvips`` if you need them.
+The engine blocks the loaders libvips doesn't test against hostile files. On
+libvips 8.18 they include PDF, SVG, ImageMagick and MATLAB, so those sources
+are refused and ``is_valid_image`` returns ``False`` for them. The block applies
+to the whole process, so other pyvips code in your site can't use those
+loaders either. For PDF and SVG sources use the convert engine, which runs
+ImageMagick in a separate process and stops it after
+``THUMBNAIL_COMMAND_TIMEOUT``.
+
 The engine needs libvips 8.15 or later. Ubuntu 24.04 and Debian 13 ship it,
 Debian 12 does not.
 

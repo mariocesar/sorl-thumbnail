@@ -79,7 +79,8 @@ Unreleased
 * Added a libvips engine on pyvips, ``sorl.thumbnail.engines.vips_engine.Engine``.
   Install it with ``pip install sorl-thumbnail[vips]``. It implements every
   thumbnail option, including blur, padding, rounded corners, smart crop and
-  ``remove_border``, keeps the ICC profile, and rejects truncated sources
+  ``remove_border``, keeps the ICC profile, and rejects truncated sources. It
+  refuses PDF and SVG sources, use the convert engine for those
   (`#833 <https://github.com/mariocesar/sorl-thumbnail/issues/833>`__)
 * The vips engine keeps animated GIFs animated when the thumbnail format is
   ``GIF``, like the PIL engine. Other formats take the first frame (`#833 <https://github.com/mariocesar/sorl-thumbnail/issues/833>`__)
