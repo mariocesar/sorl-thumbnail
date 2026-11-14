@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import warnings
 
 from sorl.thumbnail import default
 from sorl.thumbnail.conf import defaults as default_settings
@@ -78,6 +79,9 @@ class ThumbnailBackend:
         else:
             raise ValueError('falsey file_ argument in get_thumbnail()')
 
+        # Not a thumbnail option, keep it out of the filename
+        raise_errors = options.pop('raise_errors', None)
+
         # preserve image filetype
         if settings.THUMBNAIL_PRESERVE_FORMAT:
             options.setdefault('format', self._get_format(source))
@@ -108,6 +112,8 @@ class ThumbnailBackend:
             except Exception as e:
                 if settings.THUMBNAIL_DUMMY:
                     return DummyImageFile(geometry_string)
+                elif raise_errors:
+                    raise
                 else:
                     # if storage backend says file doesn't exist remotely,
                     # don't try to create it and exit early.
@@ -117,6 +123,15 @@ class ThumbnailBackend:
                         'Remote file [%s] at [%s] does not exist',
                         file_, geometry_string,
                     )
+                    if raise_errors is None:
+                        warnings.warn(
+                            'get_thumbnail() could not read the source and returned a '
+                            'thumbnail that was never written. sorl-thumbnail 14.0 will '
+                            'raise the error instead. Pass raise_errors=True to raise it '
+                            'now, or raise_errors=False to keep this behaviour.',
+                            FutureWarning,
+                            stacklevel=3,
+                        )
                     return thumbnail
 
             source_image = default.engine.prepare(source_image, options)

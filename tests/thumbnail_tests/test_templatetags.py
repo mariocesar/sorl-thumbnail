@@ -1,6 +1,6 @@
 import os
 
-from django.template import Template, TemplateSyntaxError
+from django.template import Context, Template, TemplateSyntaxError
 from django.template.loader import render_to_string
 from django.test import Client, TestCase
 from django.test.utils import override_settings
@@ -141,6 +141,16 @@ class TemplateTestCaseB(BaseTestCase):
     def test_empty(self):
         val = render_to_string('thumbnail5.html', {}).strip()
         self.assertEqual(val, '<p>empty</p>')
+
+    def test_raise_errors_renders_empty(self):
+        template = Template(
+            '{% load thumbnail %}'
+            '{% thumbnail "644-tag.jpg" "30x30" raise_errors=True as im %}{{ im.url }}'
+            '{% empty %}empty{% endthumbnail %}'
+        )
+
+        with override_settings(THUMBNAIL_DEBUG=False):
+            self.assertEqual(template.render(Context()), 'empty')
 
 
 class TemplateTestCaseClient(TestCase):

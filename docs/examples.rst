@@ -184,6 +184,41 @@ Store::
     delete(my_file)
 
 
+.. _raise-errors:
+
+Catching a source that can't be read
+------------------------------------
+When the source is missing from the storage, or the engine can't open it as an
+image, ``get_thumbnail`` logs the error and returns a thumbnail that was never
+written: its ``url`` points to a file that isn't there. Pass
+``raise_errors=True`` to get the exception and show your own fallback::
+
+    from django.templatetags.static import static
+    from sorl.thumbnail import get_thumbnail
+
+    try:
+        url = get_thumbnail(user.photo, '135x135', crop='center', raise_errors=True).url
+    except OSError:
+        url = static('img/person-outline.png')
+
+The exception is the one the storage or the engine raised. A missing file is
+the storage's error: ``FileNotFoundError`` for files on disk, a remote storage
+may raise its own. A file that is not an image is the engine's error: with PIL
+``UnidentifiedImageError``, also an ``OSError``. The convert engine only finds
+that out when it runs ImageMagick, so it raises ``EngineError`` with or
+without this option. With ``THUMBNAIL_DUMMY`` on you still get the dummy
+image.
+
+The source is only read when the thumbnail has to be made. A thumbnail that is
+already in the key-value store is returned as it is, also when its source was
+deleted since, see :doc:`operation`.
+
+sorl-thumbnail 14.0 will raise by default. Until then a source that can't be
+read emits a ``FutureWarning`` when ``raise_errors`` is not given. Pass
+``raise_errors=False`` to keep the thumbnail that was never written, without
+the warning.
+
+
 .. _source-cache-in-a-job:
 
 Reading a source once in a job

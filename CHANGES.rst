@@ -11,6 +11,17 @@ Unreleased
   12.3.0, the last version for Python 3.10, does not have those fixes. On
   Python 3.10 ``pip`` keeps installing sorl-thumbnail 13.4.0, which still
   works there. Upgrade Python to get new releases and the patched Pillow
+* ``get_thumbnail(..., raise_errors=True)`` raises when the source can't be
+  read, usually an ``OSError``, so Python code can catch it and show its own
+  fallback. Before, a missing file was only logged and you got back a
+  thumbnail that was never written. In the ``thumbnail`` tag the option
+  renders the ``{% empty %}`` block. It works with every engine
+  (`#644 <https://github.com/mariocesar/sorl-thumbnail/issues/644>`__)
+* **Changing in 14.0:** raising becomes the default, and the ``thumbnail``
+  tag renders ``{% empty %}`` for such a source. Until then you get a
+  ``FutureWarning`` when it happens. Pass ``raise_errors=True`` to switch
+  now, or ``raise_errors=False`` to keep today's behaviour without the warning
+  (`#644 <https://github.com/mariocesar/sorl-thumbnail/issues/644>`__)
 
 13.4.0
 ======

@@ -371,6 +371,24 @@ Only the convert engine with ImageMagick honours this option. GraphicsMagick's
 line and the tool's output, so the password never appears in them. Like every
 thumbnail option it is still written to the ``sorl.thumbnail`` debug log.
 
+``raise_errors``
+^^^^^^^^^^^^^^^^
+What the tag does with a source that can't be read, for example a file that
+is missing from the storage. Without this option the tag gets a thumbnail that
+was never written: ``im.url`` is a broken image, and ``im.width`` or
+``im.height`` fail with ``TypeError: 'NoneType' object is not subscriptable``.
+With ``raise_errors=True`` the tag renders the ``{% empty %}`` block, or
+raises the real error when ``THUMBNAIL_DEBUG`` is on::
+
+    {% thumbnail item.image "100x100" raise_errors=True as im %}
+        <img src="{{ im.url }}">
+    {% empty %}
+        <img src="{% static 'img/placeholder.png' %}">
+    {% endthumbnail %}
+
+It works with every engine and is not part of the thumbnail filename.
+sorl-thumbnail 14.0 will do this by default, see :ref:`raise-errors`.
+
 ``options``
 ^^^^^^^^^^^
 Yes this option is called ``options``. This needs to be a context variable that

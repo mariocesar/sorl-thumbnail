@@ -28,7 +28,7 @@ class AdminImageWidget(AdminFileWidget):
             except Exception:
                 pass
             try:
-                mini = get_thumbnail(value, 'x80', upscale=False, format=ext)
+                mini = get_thumbnail(value, 'x80', upscale=False, format=ext, raise_errors=False)
             except Exception as e:
                 logger.warning("Unable to get the thumbnail", exc_info=e)
             else:
