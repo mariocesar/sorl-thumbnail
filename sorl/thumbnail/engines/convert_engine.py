@@ -112,8 +112,13 @@ class Engine(EngineBase):
         # Read first, a source that can't be read must not leave a temp file
         data = source.read()
 
-        with NamedTemporaryFile(mode='wb', delete=False, suffix=suffix) as fp:
-            fp.write(data)
+        fp = NamedTemporaryFile(mode='wb', delete=False, suffix=suffix)
+        try:
+            with fp:
+                fp.write(data)
+        except Exception:
+            os.remove(fp.name)
+            raise
         return {
             'source': fp.name,
             'options': OrderedDict(),

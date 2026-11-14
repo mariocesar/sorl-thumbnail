@@ -137,6 +137,19 @@ class TestDescriptors(unittest.TestCase):
 
             self.assertEqual(os.listdir(tmp), [])
 
+    @unittest.skipUnless('convert_engine' in settings.THUMBNAIL_ENGINE,
+                         'Only the convert engine copies the source to a temp file')
+    def test_failed_write_leaves_no_temp_file(self):
+        source = mock.Mock()
+        source.name = 'text.jpeg'
+        source.read.return_value = 'not bytes'
+
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(tempfile, 'tempdir', tmp):
+            with self.assertRaises(TypeError):
+                self.ENGINE.get_image(source)
+
+            self.assertEqual(os.listdir(tmp), [])
+
     def test_is_valid_image(self):
         with same_open_fd_count(self):
             self.ENGINE.is_valid_image(b'invalidbinaryimage.jpg')
