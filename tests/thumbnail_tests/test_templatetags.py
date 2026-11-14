@@ -152,6 +152,10 @@ class TemplateTestCaseB(BaseTestCase):
         with override_settings(THUMBNAIL_DEBUG=False):
             self.assertEqual(template.render(Context()), 'empty')
 
+        with override_settings(THUMBNAIL_DEBUG=True):
+            with self.assertRaises(OSError):
+                template.render(Context())
+
 
 class TemplateTestCaseClient(TestCase):
     def test_empty_error(self):
