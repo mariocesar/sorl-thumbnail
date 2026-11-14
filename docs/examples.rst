@@ -206,8 +206,10 @@ the storage's error: ``FileNotFoundError`` for files on disk, a remote storage
 may raise its own. A file that is not an image is the engine's error: with PIL
 ``UnidentifiedImageError``, also an ``OSError``. The convert engine only finds
 that out when it runs ImageMagick, so it raises ``EngineError`` with or
-without this option. With ``THUMBNAIL_DUMMY`` on you still get the dummy
-image.
+without this option.
+
+With ``THUMBNAIL_DUMMY`` on you get the dummy image, also with
+``raise_errors=True``. Turn the setting off to see the error.
 
 The source is only read when the thumbnail has to be made. A thumbnail that is
 already in the key-value store is returned as it is, also when its source was
