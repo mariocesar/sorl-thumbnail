@@ -55,6 +55,10 @@ docs = ["sphinx"]
 # The examples site in demo/: uv run --group demo demo/manage.py runserver
 demo = ["django>=5.2", "pillow", "pyvips[binary]", "wand"]
 
+[tool.uv]
+# uv.lock skips Python 3.10: Pillow 13 needs 3.11 and Pillow 12 has no security fixes
+environments = ["python_version >= '3.11'"]
+
 [tool.coverage.run]
  source = ["sorl"]
  omit = [
