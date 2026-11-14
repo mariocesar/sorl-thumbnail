@@ -61,6 +61,7 @@ docs/_build/
 tests/thumbnail_kvstore
 tests/thumbnail_kvstore.db
 tests/thumbnail_kvstore.lock
+thumbnail_kvstore
 thumbnail_kvstore.db
 thumbnail_kvstore.lock
 
