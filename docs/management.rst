@@ -12,7 +12,10 @@ thumbnail cleanup
 
 This cleans up the Key Value Store from stale cache. It removes references to
 images that do not exist and thumbnail references and their actual files for
-images that do not exist. It removes thumbnails for unknown images.
+images that do not exist. It removes thumbnails for unknown images. It also
+removes references to images on a storage that is no longer in ``STORAGES`` or
+in your code, as those files can't be reached anymore. Thumbnails already made
+from them are left in place.
 
 
 .. _thumbnail-clear:

@@ -11,6 +11,15 @@ Unreleased
   12.3.0, the last version for Python 3.10, does not have those fixes. On
   Python 3.10 ``pip`` keeps installing sorl-thumbnail 13.4.0, which still
   works there. Upgrade Python to get new releases and the patched Pillow
+* ``manage.py thumbnail cleanup`` no longer stops when a storage was removed
+  or renamed. The Key Value Store remembers the storage of every image, and
+  a single record with a storage that no longer exists stopped the command
+  with ``ImproperlyConfigured: Error importing module``, or with
+  ``ValueError: not enough values to unpack`` when an alias was taken out of
+  ``STORAGES``. Those records are now removed, since their files can't be
+  reached anymore. Thumbnails already made from those images are left where
+  they are. Run ``cleanup`` again after upgrading
+  (`#423 <https://github.com/mariocesar/sorl-thumbnail/issues/423>`__)
 * ``get_thumbnail(..., raise_errors=True)`` raises when the source can't be
   read, usually an ``OSError``, so Python code can catch it and show its own
   fallback. Before, a missing file was only logged and you got back a

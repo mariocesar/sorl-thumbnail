@@ -11,9 +11,10 @@ from urllib.request import Request, urlopen
 
 from django.conf import DEFAULT_STORAGE_ALIAS
 from django.core.files.base import ContentFile, File
-from django.core.files.storage import InvalidStorageError, Storage, storages
+from django.core.files.storage import Storage, storages
 from django.utils.encoding import force_str
 from django.utils.functional import LazyObject, empty
+from django.utils.module_loading import import_string
 
 from sorl.thumbnail import default
 from sorl.thumbnail.conf import settings
@@ -53,10 +54,10 @@ def close_source_cache(**kwargs):
 
 @lru_cache
 def get_or_create_storage(storage):
-    try:
+    if storage in storages.backends:
         return storages[storage]
-    except InvalidStorageError:
-        return get_module_class(storage)()
+    # Not an alias: the class path, as saved before 13.0 or for a storage outside STORAGES
+    return import_string(storage)()
 
 
 def serialize_image_file(image_file):

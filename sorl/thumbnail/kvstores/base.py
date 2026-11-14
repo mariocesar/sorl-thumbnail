@@ -121,7 +121,10 @@ class KVStoreBase:
         for key in self._find_keys(identity='image'):
             image_file = self._get(key)
 
-            if image_file and not image_file.exists():
+            if image_file is None:
+                # Nothing to load: its storage is gone from the project, or it was just deleted
+                self._delete(key)
+            elif not image_file.exists():
                 self.delete(image_file)
 
         for key in self._find_keys(identity='thumbnails'):
@@ -170,7 +173,11 @@ class KVStoreBase:
             return None
 
         if identity == 'image':
-            return deserialize_image_file(value)
+            try:
+                return deserialize_image_file(value)
+            except ImportError:
+                # Saved with a storage the project no longer has, same as not found
+                return None
 
         return deserialize(value)
 

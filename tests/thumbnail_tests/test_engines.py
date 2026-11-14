@@ -1,3 +1,4 @@
+import json
 import os
 import platform
 import shutil
@@ -6,7 +7,7 @@ from io import BytesIO
 from subprocess import Popen
 from unittest import mock
 
-from django.core.files.storage import default_storage, storages
+from django.core.files.storage import InvalidStorageError, default_storage, storages
 from django.template.loader import render_to_string
 from django.test.utils import override_settings
 from PIL import Image, ImageSequence, ImageStat
@@ -18,6 +19,7 @@ from sorl.thumbnail.engines.convert_engine import EngineError
 from sorl.thumbnail.engines.pil_engine import Engine as PILEngine
 from sorl.thumbnail.helpers import get_module_class, run, tokey
 from sorl.thumbnail.images import ImageFile, deserialize_image_file
+from sorl.thumbnail.kvstores.base import add_prefix
 from sorl.thumbnail.parsers import ThumbnailParseError, parse_geometry
 from sorl.thumbnail.templatetags.thumbnail import is_portrait, margin
 
@@ -257,6 +259,76 @@ class SimpleTestCase(BaseTestCase):
         keys_test(1, 0, 0)
         self.KVSTORE.clear()
         keys_test(0, 0, 0)
+
+    def test_cleanup_storage_gone(self):
+        # Records saved with a storage the project no longer has (#423)
+        gone = [
+            'removed_alias',
+            'removed_app.storage.MediaStorage',
+            'tests.thumbnail_tests.storage.RenamedStorage',
+        ]
+        for storage in gone:
+            record = {'name': 'gone.jpg', 'storage': storage, 'size': [9, 9]}
+            self.KVSTORE._set_raw(add_prefix(tokey('gone.jpg', storage)), json.dumps(record))
+        im = ImageFile(Item.objects.get(image='500x500.jpg').image)
+        th = self.BACKEND.get_thumbnail(im, '9x9')
+
+        self.KVSTORE.cleanup()
+
+        for storage in gone:
+            self.assertIsNone(self.KVSTORE._get_raw(add_prefix(tokey('gone.jpg', storage))))
+        self.assertEqual(self.KVSTORE.get(th).size, [9, 9])
+
+    def test_cleanup_thumbnail_storage_gone(self):
+        # The source file was deleted and its thumbnail is on a storage that is gone
+        Image.new('L', (9, 9)).save(os.path.join(settings.MEDIA_ROOT, 'deleted.jpg'))
+        im = ImageFile('deleted.jpg')
+        self.KVSTORE.set(im)
+        key = tokey('thumbnail.jpg', 'removed_app.storage.ThumbnailStorage')
+        record = {
+            'name': 'thumbnail.jpg',
+            'storage': 'removed_app.storage.ThumbnailStorage',
+            'size': [3, 3],
+        }
+        self.KVSTORE._set_raw(add_prefix(key), json.dumps(record))
+        self.KVSTORE._set(im.key, [key], identity='thumbnails')
+        os.remove(os.path.join(settings.MEDIA_ROOT, 'deleted.jpg'))
+
+        self.KVSTORE.cleanup()
+
+        self.assertIsNone(self.KVSTORE.get(im))
+        self.assertIsNone(self.KVSTORE._get_raw(add_prefix(key)))
+        self.assertIsNone(self.KVSTORE._get(im.key, identity='thumbnails'))
+
+    def test_cleanup_storage_gone_keeps_thumbnails(self):
+        # Thumbnails already made from a source on a removed storage are left alone
+        Image.new('L', (20, 20)).save(os.path.join(settings.MEDIA_ROOT, 'kept.jpg'))
+        im = ImageFile('kept.jpg')
+        th = self.BACKEND.get_thumbnail(im, '5x5')
+        record = {
+            'name': 'kept.jpg',
+            'storage': 'removed_app.storage.MediaStorage',
+            'size': [20, 20],
+        }
+        self.KVSTORE._set_raw(add_prefix(im.key), json.dumps(record))
+
+        self.KVSTORE.cleanup()
+
+        self.assertIsNone(self.KVSTORE._get_raw(add_prefix(im.key)))
+        self.assertIsNone(self.KVSTORE._get(im.key, identity='thumbnails'))
+        self.assertEqual(self.KVSTORE.get(th).size, [5, 5])
+        self.assertTrue(th.exists())
+
+    def test_cleanup_storage_broken(self):
+        # A storage that is in STORAGES but can't be imported is an error, not a stale record
+        key = add_prefix(tokey('broken.jpg', 'broken'))
+        record = {'name': 'broken.jpg', 'storage': 'broken', 'size': [9, 9]}
+        self.KVSTORE._set_raw(key, json.dumps(record))
+        broken = {'BACKEND': 'removed_app.storage.MediaStorage'}
+        with mock.patch.dict(storages.backends, broken=broken):
+            with self.assertRaises(InvalidStorageError):
+                self.KVSTORE.cleanup()
+        self.assertIsNotNone(self.KVSTORE._get_raw(key))
 
     def test_clear_doesnt_regenerate(self):
         self.KVSTORE.clear()
