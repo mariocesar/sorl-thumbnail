@@ -109,9 +109,11 @@ class Engine(EngineBase):
         """
 
         _, suffix = os.path.splitext(source.name)
+        # Read first, a source that can't be read must not leave a temp file
+        data = source.read()
 
         with NamedTemporaryFile(mode='wb', delete=False, suffix=suffix) as fp:
-            fp.write(source.read())
+            fp.write(data)
         return {
             'source': fp.name,
             'options': OrderedDict(),

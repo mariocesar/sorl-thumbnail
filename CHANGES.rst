@@ -17,6 +17,8 @@ Unreleased
   thumbnail that was never written. In the ``thumbnail`` tag the option
   renders the ``{% empty %}`` block. It works with every engine
   (`#644 <https://github.com/mariocesar/sorl-thumbnail/issues/644>`__)
+* The convert engine no longer leaves an empty file in the temp directory
+  each time a source can't be read
 * **Changing in 14.0:** raising becomes the default, and the ``thumbnail``
   tag renders ``{% empty %}`` for such a source. Until then you get a
   ``FutureWarning`` when it happens. Pass ``raise_errors=True`` to switch

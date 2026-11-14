@@ -2,9 +2,11 @@ import os
 import platform
 import shutil
 import sys
+import tempfile
 import unittest
 import warnings
 from io import StringIO
+from unittest import mock
 
 from django.test import TestCase
 from django.test.utils import override_settings
@@ -125,6 +127,15 @@ class TestDescriptors(unittest.TestCase):
         with same_open_fd_count(self):
             with self.assertRaises(IOError):
                 self.ENGINE.get_image(source)
+
+    def test_no_source_leaves_no_temp_file(self):
+        source = ImageFile('nonexistent-tempfile.jpeg')
+
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(tempfile, 'tempdir', tmp):
+            with self.assertRaises(IOError):
+                self.ENGINE.get_image(source)
+
+            self.assertEqual(os.listdir(tmp), [])
 
     def test_is_valid_image(self):
         with same_open_fd_count(self):
