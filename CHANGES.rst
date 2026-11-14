@@ -2,6 +2,16 @@
 Changes
 =======
 
+Unreleased
+==========
+
+* Dropped support for Python 3.10; sorl-thumbnail now needs Python 3.11 or
+  later. Python 3.10 reached its end of life in October 2026, and Pillow
+  13.0.0, which fixes 43 security advisories, needs Python 3.11. Pillow
+  12.3.0, the last version for Python 3.10, does not have those fixes. On
+  Python 3.10 ``pip`` keeps installing sorl-thumbnail 13.4.0, which still
+  works there. Upgrade Python to get new releases and the patched Pillow
+
 13.4.0
 ======
 

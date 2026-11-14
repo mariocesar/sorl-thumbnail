@@ -14,7 +14,7 @@ RUN convert --version
 
 # tox runs on uv; uv also provides every Python in the tox envlist
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-RUN uv python install 3.10 3.11 3.12 3.13 3.14 \
+RUN uv python install 3.11 3.12 3.13 3.14 \
     && uv tool install tox --with tox-uv --with tox-gh-actions
 ENV PATH="/root/.local/bin:$PATH"
 

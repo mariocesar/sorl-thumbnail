@@ -58,7 +58,7 @@ when media lives on a remote storage, or when you need an engine other than
 Pillow, for PDF pages or CMYK sources for example. Less of a fit when you
 want ``<picture>`` and ``srcset`` markup generated for you:
 ``THUMBNAIL_ALTERNATIVE_RESOLUTIONS`` and the ``resolution`` filter give 2x
-versions, nothing more. Supports Django 5.2 to 6.1 and Python 3.10 and
+versions, nothing more. Supports Django 5.2 to 6.1 and Python 3.11 and
 later.
 
 easy-thumbnails

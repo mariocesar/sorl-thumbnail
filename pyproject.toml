@@ -16,14 +16,13 @@ authors = [
 maintainers = [
   {name = "Mario-César"}
 ]
-requires-python = ">= 3.10"
+requires-python = ">= 3.11"
 classifiers=[
     'Development Status :: 5 - Production/Stable',
     'Environment :: Web Environment',
     'Intended Audience :: Developers',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
     'Programming Language :: Python :: 3.13',
@@ -54,10 +53,6 @@ docs = ["sphinx"]
 [dependency-groups]
 # The examples site in demo/: uv run --group demo demo/manage.py runserver
 demo = ["django>=5.2", "pillow", "pyvips[binary]", "wand"]
-
-[tool.uv]
-# uv.lock skips Python 3.10: Pillow 13 needs 3.11 and Pillow 12 has no security fixes
-environments = ["python_version >= '3.11'"]
 
 [tool.coverage.run]
  source = ["sorl"]

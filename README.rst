@@ -68,7 +68,7 @@ Features
 - Alternative resolutions for high-density screens, and the ``is_portrait``
   and ``margin`` filters for layout.
 - Django 5.2, 6.0 and 6.1, following the `Django supported versions
-  policy`_, on Python 3.10 and later.
+  policy`_, on Python 3.11 and later.
 
 Engines
 =======

@@ -1,5 +1,5 @@
 .. meta::
-   :description: What sorl-thumbnail needs: Python 3.10+, Django 5.2 to 6.1, a key-value store with a shared cache, and one image library: Pillow, libvips, ImageMagick, GraphicsMagick, Wand or pgmagick.
+   :description: What sorl-thumbnail needs: Python 3.11+, Django 5.2 to 6.1, a key-value store with a shared cache, and one image library: Pillow, libvips, ImageMagick, GraphicsMagick, Wand or pgmagick.
 
 ************
 Requirements
@@ -7,7 +7,7 @@ Requirements
  
 Base requirements
 =================
-- `Python`_ 3.10+
+- `Python`_ 3.11+
 - `Django`_ 5.2, 6.0 or 6.1, following the `Django supported versions policy`_
 - :ref:`kvstore-requirements`
 - :ref:`image-library`
