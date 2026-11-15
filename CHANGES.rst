@@ -2,8 +2,8 @@
 Changes
 =======
 
-Unreleased
-==========
+13.5.0
+======
 
 * Dropped support for Python 3.10; sorl-thumbnail now needs Python 3.11 or
   later. Python 3.10 reached its end of life in October 2026, and Pillow
@@ -28,11 +28,11 @@ Unreleased
   (`#644 <https://github.com/mariocesar/sorl-thumbnail/issues/644>`__)
 * The convert engine no longer leaves an empty file in the temp directory
   each time a source can't be read
-* **Changing in 14.0:** raising becomes the default, and the ``thumbnail``
-  tag renders ``{% empty %}`` for such a source, or raises the error with
-  ``THUMBNAIL_DEBUG`` on. Until then you get a ``FutureWarning`` when it
-  happens. Pass ``raise_errors=True`` to switch now, or ``raise_errors=False``
-  to keep today's behaviour without the warning
+* **Changing in 14.0:** ``get_thumbnail`` will raise by default when the
+  source can't be read, and the ``thumbnail`` tag will render ``{% empty %}``,
+  or raise the error with ``THUMBNAIL_DEBUG`` on. Until then you get a
+  ``FutureWarning`` when it happens. Pass ``raise_errors=True`` to switch now,
+  or ``raise_errors=False`` to keep today's behaviour without the warning
   (`#644 <https://github.com/mariocesar/sorl-thumbnail/issues/644>`__)
 
 13.4.0
