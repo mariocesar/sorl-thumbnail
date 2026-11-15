@@ -21,6 +21,14 @@ Edit a template in `examples/` and refresh. Each engine has its own settings mod
 uv run --group demo demo/manage.py runserver --settings=demo.settings.imagemagick
 ```
 
+pgmagick is not in the `demo` group: it has no wheel and compiles against the Boost.Python
+and GraphicsMagick++ headers (`libboost-python-dev` and `libgraphicsmagick++1-dev` on Debian
+and Ubuntu). With those installed, add its extra:
+
+```sh
+uv run --group demo --extra pgmagick demo/manage.py runserver --settings=demo.settings.pgmagick
+```
+
 Thumbnails are cached in `media/cache/`. Delete it if you change a source image.
 
 ## Export it
@@ -33,7 +41,7 @@ uv run --group demo demo/manage.py checksite              # check what is in sit
 python -m http.server -d site                             # look at the export
 ```
 
-CI runs `uv run --locked --group demo demo/manage.py build --require pil,imagemagick,graphicsmagick,wand`.
+CI runs `uv run --locked --group demo demo/manage.py build --require pil,vips,imagemagick,graphicsmagick,wand`.
 To update Django, Pillow or Wand, run `uv lock --upgrade` and commit `uv.lock`.
 
 ## What's where

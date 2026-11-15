@@ -65,7 +65,7 @@ ENGINES = {
         'modules': ['pgmagick'],
         'tools': [],
         'version': [sys.executable, '-c', 'import pgmagick; print(pgmagick.gminfo().version)'],
-        'unsupported': EFFECTS | NO_PADDING,
+        'unsupported': EFFECTS | NO_PADDING | {'avif': 'GraphicsMagick has no AVIF encoder'},
     },
 }
 
